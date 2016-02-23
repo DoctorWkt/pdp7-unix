@@ -1,0 +1,395 @@
+#!/usr/bin/perl
+#
+# Read in files of PDP-7 assembly code in Ken Thompon's as format
+# and convert them into PDP-7 machine code
+#
+# (c) 2016 Warren Toomey, GPL3
+#
+use strict;
+use warnings;
+use Data::Dumper;
+
+### Global variables ###
+my %Var;       # Variables such as ., .., t
+my %Label;     # Labels that are defined once
+my %Rlabel;    # Relative labels, e.g. 1:, 2:
+               # with an array of locations for each label
+
+my @Mem;       # Actual PDP-7 memory locations
+
+my $stage = 1; # Pass one or pass two
+
+### Main program ###
+
+# Check the arguments
+die("Usage: $0 file1.s [file2.s ...]\n") if ( @ARGV < 1 );
+
+# Start with the location counter at zero
+$Var{'.'} = 0;
+
+# Parse all the files
+foreach my $file (@ARGV) {
+    parse_file($file);
+}
+
+# Now do it all again, pass two
+$Var{'.'} = 0;
+$stage = 2;
+foreach my $file (@ARGV) {
+    parse_file($file);
+}
+
+exit(0);
+
+# Open and parse the given file
+sub parse_file {
+    my $file = shift;
+    open( my $IN, "<", $file ) || die("Cannot read $file: $!\n");
+    while ( my $line = <$IN> ) {
+
+        # Lose the end of line and any leading/trailing whitespace
+        # Discard any comments and preceding comment whitespace
+        chomp($line);
+        $line =~ s{^\s+}{};
+        $line =~ s{\s+$}{};
+        $line =~ s{\s*\".*}{};
+        print("=>$line<=\n");
+
+        # Split into a section with possible labels and a
+        # section with definitely no labels. The ? makes the
+        # first pattern less greedy. Labels and statements.
+        $line =~ m{(.*?)([^:]*$)};
+        my $labelsect = $1;
+        my $stmntsect = $2;
+
+        #print(">$labelsect< >$stmntsect<\n");
+
+        # Split $labelsect into labels using the : character
+        my @labellist = split( /:\s*/, $labelsect );
+
+        # Split $stmntsect into statements using the ; character
+        # Trim any whitespace first
+        $stmntsect =~ s{^\s+}{};
+        my @stmntlist = split( /;\s*/, $stmntsect );
+
+        # First pass: parse the labels
+        if ( $stage == 1 ) {
+            foreach my $l (@labellist) { parse_label($l); }
+        }
+
+        # Parse the statements on both passes
+        foreach my $s (@stmntlist) {
+            parse_statement($s);
+        }
+        print("\n");
+    }
+    close($IN);
+}
+
+# Parse a label and set its value to the location counter
+sub parse_label {
+    my $label = shift;
+
+    # It's a relative label, save its current value in a list
+    if ( $label =~ m{\d+} ) {
+        push( @{ $Rlabel{$label} }, $Var{'.'} );
+        printf( "Pushing 0%o for relative label %s\n", $Var{'.'}, $label );
+        return;
+    }
+
+    # It's a textual label, check if it's been defined before
+    die("Label $label defined multiple times\n")
+      if ( defined( $Label{$label} ) );
+
+    # Otherwise, save its value
+    $Label{$label} = $Var{'.'};
+    printf( "Set absolute label %s to 0%o\n", $label, $Label{$label} );
+}
+
+sub parse_statement {
+    my $statement = shift;
+    my $location  = $Var{'.'};
+    printf( "Location: 0%o\n", $location );
+
+    # It's an assignment statement: lhs = rhs
+    if ( $statement =~ m{(\S+)\s*=\s*(\S+)} ) {
+        my $lhs = $1;
+        my $rhs = $2;
+        print("Assignment $statement\n");
+
+        # Save the expression's value into the variable
+        my $result = parse_expression($rhs);
+        die("expression $rhs has no value in assignment\n")
+          if ( !defined($result) );
+        printf( "Setting variable %s to 0%o\n", $lhs, $result );
+        $Var{$lhs} = $result;
+        return;
+    }
+
+    # It's an expression, not a statement
+    # Get its value on pass two and save to memory
+    if ( $stage == 2 ) {
+        my $val = parse_expression($statement);
+        $Mem[$location] = $val;
+        printf( "Saving 0%o into memory location 0%o\n", $val, $location );
+    }
+
+    # Move up to the next location in both passes
+    $Var{'.'}++;
+}
+
+# Parse an expression and return either:
+#  a single value which is a PDP-7 word
+#  a single value which is undef, as this was a statement
+sub parse_expression {
+    my $expression = shift;
+
+    # If it's a numeric literal, simply return it
+    if ( $expression =~ m{^-?\d+$} ) {
+        print("Returning numeric literal $expression\n");
+        return ( oct($expression) ) if ( $expression =~ m{^0} );
+        return ($expression);
+    }
+
+    # List of instruction names and machine code values
+    # These come from https://raw.githubusercontent.com/simh/
+    #   simtools/master/crossassemblers/macro7/macro7.c
+    my %inst = (
+        'cal'    => 0000000,
+        'dac'    => 0040000,
+        'jms'    => 0100000,
+        'dzm'    => 0140000,
+        'lac'    => 0200000,
+        'xor'    => 0240000,
+        'add'    => 0300000,
+        'tad'    => 0340000,
+        'xct'    => 0400000,
+        'isz'    => 0440000,
+        'and'    => 0500000,
+        'sad'    => 0540000,
+        'jmp'    => 0600000,
+        'i'      => 0020000,
+        'eae'    => 0640000,
+        'iot'    => 0700000,
+        'opr'    => 0740000,
+        'law'    => 0760000,
+        'lam'    => 0777777,
+        'osc'    => 0640001,
+        'lacs'   => 0641001,
+        'omq'    => 0640002,
+        'lacq'   => 0641002,
+        'cmq'    => 0640004,
+        'clq'    => 0650000,
+        'lmq'    => 0652000,
+        'abs'    => 0644000,
+        'gsm'    => 0664000,
+        'mul'    => 0653122,
+        'muls'   => 0657122,
+        'div'    => 0640323,
+        'divs'   => 0644323,
+        'idiv'   => 0653323,
+        'idivs'  => 0657323,
+        'frdiv'  => 0650323,
+        'frdivs' => 0654323,
+        'norm'   => 0640444,
+        'norms'  => 0660444,
+        'lrs'    => 0640500,
+        'lrss'   => 0660500,
+        'lls'    => 0640600,
+        'llss'   => 0660600,
+        'als'    => 0640700,
+        'alss'   => 0660700,
+        'nop'    => 0740000,
+        'cma'    => 0740001,
+        'cml'    => 0740002,
+        'oas'    => 0740004,
+        'las'    => 0750004,
+        'ral'    => 0740010,
+        'rcl'    => 0744010,
+        'rtl'    => 0742010,
+        'rar'    => 0740020,
+        'rcr'    => 0744020,
+        'rtr'    => 0742020,
+        'hlt'    => 0740040,
+        'xx'     => 0740040,
+        'sma'    => 0740100,
+        'sza'    => 0740200,
+        'snl'    => 0740400,
+        'skp'    => 0741000,
+        'spa'    => 0741100,
+        'sna'    => 0741200,
+        'szl'    => 0741400,
+        'cll'    => 0744000,
+        'stl'    => 0744002,
+        'cla'    => 0750000,
+        'clc'    => 0750001,
+        'glk'    => 0750010,
+        'clsf'   => 0700001,
+        'iof'    => 0700002,
+        'ion'    => 0700042,
+        'iton'   => 0700062,
+        'clof'   => 0700004,
+        'clon'   => 0700044,
+        'tts'    => 0703301,
+        'skp7'   => 0703341,
+        'caf'    => 0703302,
+        'sem'    => 0707701,
+        'eem'    => 0707702,
+        'emir'   => 0707742,
+        'lem'    => 0707704,
+        'rsf'    => 0700101,
+        'rrb'    => 0700112,
+        'rcf'    => 0700102,
+        'rsa'    => 0700104,
+        'rsb'    => 0700144,
+        'psf'    => 0700201,
+        'pcf'    => 0700202,
+        'psa'    => 0700204,
+        'pls'    => 0700204,
+        'psb'    => 0700244,
+        'ksf'    => 0700301,
+        'krb'    => 0700312,
+        'iors'   => 0700314,
+        'tsf'    => 0700401,
+        'tcf'    => 0700402,
+        'tls'    => 0700406,
+        'lpsf'   => 0706501,
+        'lpcb'   => 0706502,
+        'lpb1'   => 0706566,
+        'lpb2'   => 0706526,
+        'lpb3'   => 0706546,
+        'lpse'   => 0706601,
+        'lpcf'   => 0706602,
+        'lppb'   => 0706606,
+        'lpls'   => 0706626,
+        'lpps'   => 0706646,
+        'crsf'   => 0706701,
+        'crrb'   => 0706712,
+        'crsa'   => 0706704,
+        'crsb'   => 0706744,
+        'mmdf'   => 0707501,
+        'mmef'   => 0707541,
+        'mmrd'   => 0707512,
+        'mmwr'   => 0707504,
+        'mmbf'   => 0707601,
+        'mmrs'   => 0707612,
+        'mmlc'   => 0707604,
+        'mmse'   => 0707644,
+    );
+
+    # Split the expression into two words separated by whitespace
+    my ( $word1, $word2 ) = split( /\s+/, $expression );
+    printf( "o>%s<o o>%s<o\n", $word1 || "", $word2 || "" );
+
+    # This a defined instruction
+    if ( defined( $inst{$word1} ) ) {
+        printf( "Found the instruction %s: 0%o\n", $word1, $inst{$word1} );
+        my $instruction = $inst{$word1};
+
+        # We have an expression for this instruction
+        if ( ( $stage == 2 ) && defined($word2) ) {
+            print(" and I need to parse $word2\n");
+            my $val = parse_expression($word2);
+            die("Unable to parse $word2 on pass two\n") if ( !defined($val) );
+            $instruction |= $val;
+        }
+        return ($instruction);
+    }
+
+    # This is a defined label
+    if ( defined( $Label{$word1} ) ) {
+        printf( "Found the label %s: 0%o\n", $word1, $Label{$word1} );
+        return ( $Label{$word1} );
+    }
+
+    # This is a defined relative label: digits followed by f or b
+    if ( $word1 =~ m{^(\d+)([fb])} ) {
+        my $val = find_relative_label( $1, $2 );
+        print("Got location $val for relative label $1$2\n");
+        return ($val);
+    }
+
+    # This is an addition. Some operands may not yet be defined
+    if ( $word1 =~ m{(.*)\+(.*)} ) {
+        my $sum = add( $1, $2 );
+        if ( !defined($sum) ) {
+            die("Unable to add $word1 on pass two\n") if ( !defined($sum) );
+        }
+        print("Did an addition and got $sum\n");
+        return ($sum);
+    }
+
+    # This is a subtraction. Some operands may not yet be defined
+    if ( $word1 =~ m{(.*)-(.*)} ) {
+        my $diff = subtract( $1, $2 );
+        if ( !defined($diff) ) {
+            die("Unable to subtract $word1 on pass two\n")
+              if ( !defined($diff) );
+        }
+        print("Did a subtraction and got $diff\n");
+        return ($diff);
+    }
+
+    die("I have no idea what $expression is in pass two\n") if ( $stage == 2 );
+    return (1);    # Doesn't matter on pass one
+}
+
+# Add two expression together
+sub add {
+    my ( $a, $b ) = @_;
+
+    my $val1 = parse_expression($a);
+    my $val2 = parse_expression($b);
+    print("Adding $val1 + $val2\n");
+    return (undef) if ( !defined($val1) || !defined($val2) );
+    print( "  with a good value of ", $val1 + $val2, "\n" );
+    return ( $val1 + $val2 );
+}
+
+# Subtract two expression
+sub subtract {
+    my ( $a, $b ) = @_;
+
+    my $val1 = parse_expression($a);
+    my $val2 = parse_expression($b);
+    print("Subtracting $val1 - $val2\n");
+    return (undef) if ( !defined($val1) || !defined($val2) );
+    print( "  with a good value of ", $val1 - $val2, "\n" );
+    return ( $val1 - $val2 );
+}
+
+# Given a relative label number and a direction,
+# return the location of this relative label or
+# die if we don't have one
+sub find_relative_label {
+    my ( $label, $direction ) = @_;
+    my $curlocation = $Var{'.'};
+
+    # Error check: no labels at all
+    die("No relative labels\n") if ( !defined( $Rlabel{$label} ) );
+
+    # Get the list of possible locations for this label
+    my $locarray = $Rlabel{$label};
+
+    # Error check: no locations
+    die("No relative labels\n") if ( @{$locarray} == 0 );
+
+    # Error check: forward but no next location, or backward but no previous
+    die("No forward label\n")
+      if ( ( $direction eq 'f' ) && ( $curlocation > $locarray->[-1] ) );
+    die("No backward label\n")
+      if ( ( $direction eq 'b' ) && ( $curlocation < $locarray->[0] ) );
+
+    # Search forward for a location larger then the current one
+    if ( $direction eq 'f' ) {
+        foreach my $reflocation ( @{$locarray} ) {
+            return ($reflocation) if ( $reflocation > $curlocation );
+        }
+    }
+    else {
+        # Search backwards for a location smaller than the current one
+        foreach my $reflocation ( sort( { $b <=> $b } @{$locarray} ) ) {
+            return ($reflocation) if ( $reflocation < $curlocation );
+        }
+    }
+}
