@@ -1,0 +1,36 @@
+Basics of the Unix assembler syntax
+
+Lines starting with " are comment lines
+
+. is the location counter, where the next code or constant will be placed
+.. is the relocation counter
+
+t = 0		No idea on this yet
+
+orig:		is a label. It looks like labels can have dots in them.
+		Dots seem to separate structures and fields, e.g. u.base
+		but there are some symbols that start with dots, e.g. .seek
+
+jms copy; 10; u.rg+2; 6		Semicolons separate instructions and
+				word expressions that follow the instruction
+
+				Some expressions are 0:0, not sure about this
+
+jmp 1f		Jump back to the closest 1:	label
+jmp 1b		Jump forward to the closest 1:	label
+
+I'm not sure why some lines are indented differently to others e.g.
+
+	jms betwen; o10000; o17762
+	   jms error
+	dac .+1
+
+-1 occurs instead of instructions, so it looks like the assembler allows
+literal constants at any time.
+
+String literals seem to be two characters decorated with < > characters, e.g.
+"ab" is <a>b. I'm guessing these are placed as pairs in one word.
+
+Looks like a line can contain multiple labels, e.g. o12: d10: 10
+
+Numeric literals: 0xx are octal values, [1-9]xx are decimal values.
