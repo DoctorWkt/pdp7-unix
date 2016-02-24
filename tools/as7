@@ -39,6 +39,13 @@ foreach my $file (@ARGV) {
     parse_file($file);
 }
 
+# Now print out the contents of memory
+for my $i ( 0 .. $#Mem ) {
+  if (defined($Mem[$i])) {
+    printf("%06o: %06o\n", $i, $Mem[$i]);
+  }
+}
+
 exit(0);
 
 # Open and parse the given file
@@ -277,21 +284,25 @@ sub parse_expression {
         'mmse'   => 0707644,
     );
 
-    # Split the expression into two words separated by whitespace
-    my ( $word1, $word2 ) = split( /\s+/, $expression );
-    printf( "o>%s<o o>%s<o\n", $word1 || "", $word2 || "" );
+    # Split the expression into two or three words separated by whitespace
+    my ( $word1, $word2, $word3 ) = split( /\s+/, $expression );
+    printf( "o>%s<o o>%s<o o>%s<o\n",
+			$word1 || "", $word2 || "", $word3 || "" );
 
     # This a defined instruction
     if ( defined( $inst{$word1} ) ) {
         printf( "Found the instruction %s: 0%o\n", $word1, $inst{$word1} );
         my $instruction = $inst{$word1};
 
+	# Is this an indirect instruction?
+	my $indirect = defined($word3) && ($word3 eq "i") ? 020000 : 0;
+
         # We have an expression for this instruction
         if ( ( $stage == 2 ) && defined($word2) ) {
             print(" and I need to parse $word2\n");
             my $val = parse_expression($word2);
             die("Unable to parse $word2 on pass two\n") if ( !defined($val) );
-            $instruction |= $val;
+            $instruction |= $val | $indirect;
         }
         return ($instruction);
     }
