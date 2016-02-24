@@ -1,0 +1,9 @@
+This area contains the OCR'd version of the PDP-7 scans that are at
+http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/0*.pdf
+The files should be unaltered versions of the scanned pages.
+
+For modified versions of these files, look in src/cmds and src/sys.
+
+Details of the files:
+
+s1.s: pages 2-3 of 01-s1.pdf, incomplete and with some cruft at the end
