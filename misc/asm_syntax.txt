@@ -5,7 +5,8 @@ Lines starting with " are comment lines
 . is the location counter, where the next code or constant will be placed
 .. is the relocation counter
 
-t = 0		No idea on this yet
+t = 0		Sets a built-in variable to this value without generating any machine code.
+		Variables so far are . .. and t. Not sure what t's purpose is yet.
 
 orig:		is a label. It looks like labels can have dots in them.
 		Dots seem to separate structures and fields, e.g. u.base
@@ -14,22 +15,27 @@ orig:		is a label. It looks like labels can have dots in them.
 jms copy; 10; u.rg+2; 6		Semicolons separate instructions and
 				word expressions that follow the instruction
 
-				Some expressions are 0:0, not sure about this
+				Some expressions are 0:0, not sure about this.
+				Is it two 9-bit fields? No idea
 
 jmp 1f		Jump back to the closest 1:	label
 jmp 1b		Jump forward to the closest 1:	label
 
-I'm not sure why some lines are indented differently to others e.g.
+Some lines are indented differently to others e.g.
 
 	jms betwen; o10000; o17762
 	   jms error
 	dac .+1
 
+I think this is to indicate the skip logic, but it plays no part in the assembly syntax.
+
 -1 occurs instead of instructions, so it looks like the assembler allows
 literal constants at any time.
 
 String literals seem to be two characters decorated with < > characters, e.g.
-"ab" is <a>b. I'm guessing these are placed as pairs in one word.
+"ab" is <a>b. I'm guessing these are placed as pairs in one word. The syntax
+is confusing, because I've also seen <no> ; 040 ; <fi> ; <le>; <s 012 which
+appears to mean "no files\n".
 
 Looks like a line can contain multiple labels, e.g. o12: d10: 10
 
