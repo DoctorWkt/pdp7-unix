@@ -9,6 +9,9 @@ assembly code, write tools such as an assembler, a filesystem creation tool,
 and write from scratch missing things like a shell, ls etc.
 
 scans/	  holds the unmodified OCR versions of the scanned files
+
 src/cmd   holds the modified source code of the user-mode programs
+
 src/sys   holds the modified source code of the kernel
+
 tools/	  holds the source for the tools written to assist the project
