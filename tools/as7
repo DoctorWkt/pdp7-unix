@@ -16,6 +16,8 @@ my %Rlabel;    # Relative labels, e.g. 1:, 2:
                # with an array of locations for each label
 
 my @Mem;       # Actual PDP-7 memory locations
+my @Mline;     # Source lines associated with mem locations
+my $origline;  # The current input line of code
 
 my $stage = 1; # Pass one or pass two
 
@@ -42,7 +44,8 @@ foreach my $file (@ARGV) {
 # Now print out the contents of memory
 for my $i ( 0 .. $#Mem ) {
   if (defined($Mem[$i])) {
-    printf("%06o: %06o\n", $i, $Mem[$i]);
+    printf("%06o: %06o\t%s\n",
+	$i, $Mem[$i], $Mline[$i] || "");
   }
 }
 
@@ -57,10 +60,11 @@ sub parse_file {
         # Lose the end of line and any leading/trailing whitespace
         # Discard any comments and preceding comment whitespace
         chomp($line);
+	$origline= $line;
         $line =~ s{^\s+}{};
         $line =~ s{\s+$}{};
         $line =~ s{\s*\".*}{};
-        print("=>$line<=\n");
+        #print("=>$line<=\n");
 
         # Split into a section with possible labels and a
         # section with definitely no labels. The ? makes the
@@ -88,7 +92,7 @@ sub parse_file {
         foreach my $s (@stmntlist) {
             parse_statement($s);
         }
-        print("\n");
+        #print("\n");
     }
     close($IN);
 }
@@ -98,9 +102,9 @@ sub parse_label {
     my $label = shift;
 
     # It's a relative label, save its current value in a list
-    if ( $label =~ m{\d+} ) {
+    if ( $label =~ m{^\d+$} ) {
         push( @{ $Rlabel{$label} }, $Var{'.'} );
-        printf( "Pushing 0%o for relative label %s\n", $Var{'.'}, $label );
+        #printf( "Pushing 0%o for relative label %s\n", $Var{'.'}, $label );
         return;
     }
 
@@ -110,35 +114,37 @@ sub parse_label {
 
     # Otherwise, save its value
     $Label{$label} = $Var{'.'};
-    printf( "Set absolute label %s to 0%o\n", $label, $Label{$label} );
+    #printf( "Set absolute label %s to 0%o\n", $label, $Label{$label} );
 }
 
 sub parse_statement {
     my $statement = shift;
     my $location  = $Var{'.'};
-    printf( "Location: 0%o\n", $location );
+    #printf( "Location: 0%o\n", $location );
 
     # It's an assignment statement: lhs = rhs
     if ( $statement =~ m{(\S+)\s*=\s*(\S+)} ) {
         my $lhs = $1;
         my $rhs = $2;
-        print("Assignment $statement\n");
+        #print("Assignment $statement\n");
 
         # Save the expression's value into the variable
         my $result = parse_expression($rhs);
         die("expression $rhs has no value in assignment\n")
           if ( !defined($result) );
-        printf( "Setting variable %s to 0%o\n", $lhs, $result );
+        #printf( "Setting variable %s to 0%o\n", $lhs, $result );
         $Var{$lhs} = $result;
         return;
     }
 
     # It's an expression, not a statement
     # Get its value on pass two and save to memory
+    # Also save the input line that altered memory
     if ( $stage == 2 ) {
         my $val = parse_expression($statement);
-        $Mem[$location] = $val;
-        printf( "Saving 0%o into memory location 0%o\n", $val, $location );
+        $Mem[$location] = $val & 0777777;
+        $Mline[$location] = $origline;
+        #printf( "Saving 0%o into memory location 0%o\n", $val, $location );
     }
 
     # Move up to the next location in both passes
@@ -151,9 +157,14 @@ sub parse_statement {
 sub parse_expression {
     my $expression = shift;
 
+    # If it's a defined variable ( . , .. , etc.)
+    # return the value
+    return($Var{$expression})
+			if (defined($Var{$expression}));
+
     # If it's a numeric literal, simply return it
     if ( $expression =~ m{^-?\d+$} ) {
-        print("Returning numeric literal $expression\n");
+        #print("Returning numeric literal $expression\n");
         return ( oct($expression) ) if ( $expression =~ m{^0} );
         return ($expression);
     }
@@ -286,12 +297,12 @@ sub parse_expression {
 
     # Split the expression into two or three words separated by whitespace
     my ( $word1, $word2, $word3 ) = split( /\s+/, $expression );
-    printf( "o>%s<o o>%s<o o>%s<o\n",
-			$word1 || "", $word2 || "", $word3 || "" );
+    #printf( "o>%s<o o>%s<o o>%s<o\n",
+    #			$word1 || "", $word2 || "", $word3 || "" );
 
     # This a defined instruction
     if ( defined( $inst{$word1} ) ) {
-        printf( "Found the instruction %s: 0%o\n", $word1, $inst{$word1} );
+        #printf( "Found the instruction %s: 0%o\n", $word1, $inst{$word1} );
         my $instruction = $inst{$word1};
 
 	# Is this an indirect instruction?
@@ -299,7 +310,7 @@ sub parse_expression {
 
         # We have an expression for this instruction
         if ( ( $stage == 2 ) && defined($word2) ) {
-            print(" and I need to parse $word2\n");
+            #print(" and I need to parse $word2\n");
             my $val = parse_expression($word2);
             die("Unable to parse $word2 on pass two\n") if ( !defined($val) );
             $instruction |= $val | $indirect;
@@ -309,14 +320,14 @@ sub parse_expression {
 
     # This is a defined label
     if ( defined( $Label{$word1} ) ) {
-        printf( "Found the label %s: 0%o\n", $word1, $Label{$word1} );
+        #printf( "Found the label %s: 0%o\n", $word1, $Label{$word1} );
         return ( $Label{$word1} );
     }
 
     # This is a defined relative label: digits followed by f or b
     if ( $word1 =~ m{^(\d+)([fb])} ) {
         my $val = find_relative_label( $1, $2 );
-        print("Got location $val for relative label $1$2\n");
+        #print("Got location $val for relative label $1$2\n");
         return ($val);
     }
 
@@ -326,7 +337,7 @@ sub parse_expression {
         if ( !defined($sum) ) {
             die("Unable to add $word1 on pass two\n") if ( !defined($sum) );
         }
-        print("Did an addition and got $sum\n");
+        #print("Did an addition and got $sum\n");
         return ($sum);
     }
 
@@ -337,12 +348,11 @@ sub parse_expression {
             die("Unable to subtract $word1 on pass two\n")
               if ( !defined($diff) );
         }
-        print("Did a subtraction and got $diff\n");
+        #print("Did a subtraction and got $diff\n");
         return ($diff);
     }
 
     die("I have no idea what $expression is in pass two\n") if ( $stage == 2 );
-    return (1);    # Doesn't matter on pass one
 }
 
 # Add two expression together
@@ -351,9 +361,9 @@ sub add {
 
     my $val1 = parse_expression($a);
     my $val2 = parse_expression($b);
-    print("Adding $val1 + $val2\n");
+    #print("Adding $val1 + $val2\n");
     return (undef) if ( !defined($val1) || !defined($val2) );
-    print( "  with a good value of ", $val1 + $val2, "\n" );
+    #print( "  with a good value of ", $val1 + $val2, "\n" );
     return ( $val1 + $val2 );
 }
 
@@ -363,9 +373,9 @@ sub subtract {
 
     my $val1 = parse_expression($a);
     my $val2 = parse_expression($b);
-    print("Subtracting $val1 - $val2\n");
+    #print("Subtracting $val1 - $val2\n");
     return (undef) if ( !defined($val1) || !defined($val2) );
-    print( "  with a good value of ", $val1 - $val2, "\n" );
+    #print( "  with a good value of ", $val1 - $val2, "\n" );
     return ( $val1 - $val2 );
 }
 
