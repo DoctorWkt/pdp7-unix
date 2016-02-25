@@ -153,6 +153,7 @@ sub iot {
     # Syscalls that we can simulate
     my %Syscallist = (
         3  => \&sys_open,
+        4  => \&sys_read,
         5  => \&sys_write,
         9  => \&sys_close,
         14 => \&sys_exit,
@@ -224,6 +225,52 @@ sub sys_open {
     }
   }
   $AC=$fd; return;
+}
+
+# Read system call
+sub sys_read {
+  # Read seems to have arguments: AC is the file descriptor, PC+1 is
+  # the pointer to the buffer and PC+2 is the number of words to read.
+  # Return the number of words read in AC on success, or -1 on error.
+
+  # Get the file descriptor, start address and end address
+  my $fd= $AC;
+  my $start= $Mem[$PC+1];
+  my $count= $Mem[$PC+2];
+  my $end= $start + $count -1;
+  printf("read: %d words from %o from fd %d\n", $count, $start, $fd) if ($debug);
+
+  # Bump up the PC
+  $PC += 3;
+
+  # That filehandle is not open, set an error -1 in octal
+  if (!defined($FD[$fd])) {
+    print("read: fd $fd is not open\n") if ($debug);
+    $AC= 0777777; return;
+  }
+
+  # Read each word in
+  my $FH= $FD[$fd];
+  $count=0;
+  foreach my $addr ($start .. $end) {
+    # It's a terminal, so convert from ASCII
+    if (-t $FH) {
+      my $c1= getc($FH);
+      last if (!defined($c1));			# No character, leave the loop
+      my $c2= getc($FH) || "";			# No character, make it a NUL
+      $Mem[$addr]= (ord($c1) << 9) | ord($c2);	# Pack both into one word
+      $count++;
+    } else {
+      # otherwise (for now) read in one line and convert to octal
+      my $line= <$FH>;
+      chomp($line);
+      last if (!defined($line));		# No line, leave the loop
+      $Mem[$addr]= oct($line) & 0777777;
+      $count++;
+    }
+  }
+  # No error
+  $AC= $count; return;
 }
 
 # Write system call
