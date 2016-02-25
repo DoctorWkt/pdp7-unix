@@ -11,7 +11,13 @@ main:
    lac d1
    sys write; hello; 7
 
-   " open file fred
+   " Test if the assembler can dac into a mid-line label
+   lac helloptr
+   dac 1f
+   lac d1
+   sys write; 1:0; 7
+
+   " Try to open file fred
    sys open; fred; 0; 0
 
    " read 5 words into the buffer from stdin: type in 10 or more characters!
@@ -42,6 +48,7 @@ out: 0
 
 " Hello, world\n, two ASCII chars per word
 hello: 0110145; 0154154; 0157054; 040; 0167157; 0162154; 0144012
+helloptr: hello
 
 " fred as a string, NUL terminated
 fred: 0146162; 0145144; 0

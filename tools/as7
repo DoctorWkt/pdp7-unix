@@ -20,44 +20,51 @@ my @Mline;     # Source lines associated with mem locations
 my $origline;  # The current input line of code
 
 my $stage = 1; # Pass one or pass two
+my $debug = 0; # Run in debug mode
 
 ### Main program ###
 
+# Optional debug argument
+if ( ( @ARGV > 0 ) && ( $ARGV[0] eq "-d" ) ) {
+    $debug = 1;
+    shift(@ARGV);
+}
+
 # Check the arguments
-die("Usage: $0 file1.s [file2.s ...]\n") if ( @ARGV < 1 );
+die("Usage: $0 [-d] file1.s [file2.s ...]\n") if ( @ARGV < 1 );
 
 # Define the syscalls as variables so that
 # I don't have to hand-code the logic below.
 # Also, start with the location counter at zero
-%Var= (
-  '.' => 0,
-  save => 1,
-  getuid => 2,
-  open => 3,
-  read => 4,
-  write => 5,
-  creat => 6,
-  seek => 7,
-  tell => 8,
-  close => 9,
-  link => 10,
-  unlink => 11,
-  setuid => 12,
-  rename => 13,
-  exit => 14,
-  time => 15,
-  intrp => 16,
-  chdir => 17,
-  chmod => 18,
-  chown => 19,
-  badcal => 20,
-  syslog => 21,
-  capt => 23,
-  rele => 24,
-  status => 25,
-  smes => 27,
-  rmes => 28,
-  fork => 29
+%Var = (
+    '.'    => 0,
+    save   => 1,
+    getuid => 2,
+    open   => 3,
+    read   => 4,
+    write  => 5,
+    creat  => 6,
+    seek   => 7,
+    tell   => 8,
+    close  => 9,
+    link   => 10,
+    unlink => 11,
+    setuid => 12,
+    rename => 13,
+    exit   => 14,
+    time   => 15,
+    intrp  => 16,
+    chdir  => 17,
+    chmod  => 18,
+    chown  => 19,
+    badcal => 20,
+    syslog => 21,
+    capt   => 23,
+    rele   => 24,
+    status => 25,
+    smes   => 27,
+    rmes   => 28,
+    fork   => 29
 );
 
 # Parse all the files
@@ -68,16 +75,16 @@ foreach my $file (@ARGV) {
 # Now do it all again, pass two
 $Var{'.'} = 0;
 $stage = 2;
+print("Now in stage 2\n") if ($debug);
 foreach my $file (@ARGV) {
     parse_file($file);
 }
 
 # Now print out the contents of memory
 for my $i ( 0 .. $#Mem ) {
-  if (defined($Mem[$i])) {
-    printf("%06o: %06o\t%s\n",
-	$i, $Mem[$i], $Mline[$i] || "");
-  }
+    if ( defined( $Mem[$i] ) ) {
+        printf( "%06o: %06o\t%s\n", $i, $Mem[$i], $Mline[$i] || "" );
+    }
 }
 
 exit(0);
@@ -91,39 +98,39 @@ sub parse_file {
         # Lose the end of line and any leading/trailing whitespace
         # Discard any comments and preceding comment whitespace
         chomp($line);
-	$origline= $line;
+        $origline = $line;
         $line =~ s{^\s+}{};
         $line =~ s{\s+$}{};
         $line =~ s{\s*\".*}{};
         #print("=>$line<=\n");
 
-        # Split into a section with possible labels and a
-        # section with definitely no labels. The ? makes the
-        # first pattern less greedy. Labels and statements.
-        $line =~ m{(.*?)([^:]*$)};
-        my $labelsect = $1;
-        my $stmntsect = $2;
+        # Split the line into commands that are ; separated
+        # and parse each one
+        foreach my $cmd ( split( /;\s*/, $line ) ) {
 
-        #print(">$labelsect< >$stmntsect<\n");
+            # Split into a section with possible labels and a
+            # statement section with definitely no labels. The ?
+            # makes the first pattern less greedy.
+            #print("cmd is >$cmd<\n");
+            $cmd =~ m{(.*?)([^:]*$)};
+            my $labelsect = $1;
+            my $statement = $2;
 
-        # Split $labelsect into labels using the : character
-        my @labellist = split( /:\s*/, $labelsect );
+            #print(">$labelsect< >$statement<\n");
 
-        # Split $stmntsect into statements using the ; character
-        # Trim any whitespace first
-        $stmntsect =~ s{^\s+}{};
-        my @stmntlist = split( /;\s*/, $stmntsect );
+            # Split $labelsect into labels using the : character
+            my @labellist = split( /:\s*/, $labelsect );
 
-        # First pass: parse the labels
-        if ( $stage == 1 ) {
-            foreach my $l (@labellist) { parse_label($l); }
+            # First pass: parse the labels
+            if ( $stage == 1 ) {
+                foreach my $l (@labellist) {
+                    parse_label($l);
+                }
+            }
+
+            # Parse the statements on both passes
+            parse_statement($statement);
         }
-
-        # Parse the statements on both passes
-        foreach my $s (@stmntlist) {
-            parse_statement($s);
-        }
-        #print("\n");
     }
     close($IN);
 }
@@ -153,6 +160,12 @@ sub parse_statement {
     my $location  = $Var{'.'};
     #printf( "Location: 0%o\n", $location );
 
+    # Empty statement, nothing to do
+    return if ( $statement =~ m{^\s*$} );
+
+    # Lose any leading whitespace
+    $statement =~ s{^\s*}{};
+
     # It's an assignment statement: lhs = rhs
     if ( $statement =~ m{(\S+)\s*=\s*(\S+)} ) {
         my $lhs = $1;
@@ -163,6 +176,7 @@ sub parse_statement {
         my $result = parse_expression($rhs);
         die("expression $rhs has no value in assignment\n")
           if ( !defined($result) );
+
         #printf( "Setting variable %s to 0%o\n", $lhs, $result );
         $Var{$lhs} = $result;
         return;
@@ -173,7 +187,7 @@ sub parse_statement {
     # Also save the input line that altered memory
     if ( $stage == 2 ) {
         my $val = parse_expression($statement);
-        $Mem[$location] = $val & 0777777;
+        $Mem[$location]   = $val & 0777777;
         $Mline[$location] = $origline;
         #printf( "Saving 0%o into memory location 0%o\n", $val, $location );
     }
@@ -190,8 +204,8 @@ sub parse_expression {
 
     # If it's a defined variable ( . , .. , etc.)
     # return the value
-    return($Var{$expression})
-			if (defined($Var{$expression}));
+    return ( $Var{$expression} )
+      if ( defined( $Var{$expression} ) );
 
     # If it's a numeric literal, simply return it
     if ( $expression =~ m{^-?\d+$} ) {
@@ -337,8 +351,8 @@ sub parse_expression {
         #printf( "Found the instruction %s: 0%o\n", $word1, $inst{$word1} );
         my $instruction = $inst{$word1};
 
-	# Is this an indirect instruction?
-	my $indirect = defined($word3) && ($word3 eq "i") ? 020000 : 0;
+        # Is this an indirect instruction?
+        my $indirect = defined($word3) && ( $word3 eq "i" ) ? 020000 : 0;
 
         # We have an expression for this instruction
         if ( ( $stage == 2 ) && defined($word2) ) {
@@ -380,10 +394,10 @@ sub parse_expression {
             die("Unable to subtract $word1 on pass two\n")
               if ( !defined($diff) );
         }
+
         #print("Did a subtraction and got $diff\n");
         return ($diff);
     }
-
     die("I have no idea what $expression is in pass two\n") if ( $stage == 2 );
 }
 
@@ -395,6 +409,7 @@ sub add {
     my $val2 = parse_expression($b);
     #print("Adding $val1 + $val2\n");
     return (undef) if ( !defined($val1) || !defined($val2) );
+
     #print( "  with a good value of ", $val1 + $val2, "\n" );
     return ( $val1 + $val2 );
 }
@@ -407,6 +422,7 @@ sub subtract {
     my $val2 = parse_expression($b);
     #print("Subtracting $val1 - $val2\n");
     return (undef) if ( !defined($val1) || !defined($val2) );
+
     #print( "  with a good value of ", $val1 - $val2, "\n" );
     return ( $val1 - $val2 );
 }
