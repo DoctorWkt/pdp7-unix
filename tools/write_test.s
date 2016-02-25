@@ -1,4 +1,7 @@
 " Test program for several system calls: open, read, write, close, exit
+" Do:
+"     ./as7 write_test.s > a.out
+"     ./a7out -d a.out
 main:
    " Test the lac, dac instructions
    lac in
