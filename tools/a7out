@@ -1,0 +1,137 @@
+#!/usr/bin/perl
+#
+# A7out: user-mode simulator for PDP-7 Unix applications
+#
+# (c) 2016 Warren Toomey, GPL3
+#
+use strict;
+use warnings;
+use Data::Dumper;
+
+### Global variables ###
+my $debug = 0;    # Debug flag
+my @Mem;          # 8K 18-bit words of main memory
+
+# Registers
+my $PC = 0;       # Program counter
+my $AC;           # Accumulator
+my $LINK;         # Link register
+my $MQ;           # MQ register
+
+### Main program ###
+
+# Optional debug argument
+if ( ( @ARGV > 0 ) && ( $ARGV[0] eq "-d" ) ) {
+    $debug = 1; shift(@ARGV);
+}
+
+# Check the arguments
+die("Usage: $0 [-d] a.outfile\n") if ( @ARGV != 1 );
+
+# Load the a.out file into memory
+# and simulate it
+load_code( $ARGV[0] );
+simulate();
+exit(0);
+
+### Load the a.out file into memory
+sub load_code {
+    my $filename = shift;
+
+    # Fill all the 8K words in memory with zeroes
+    foreach my $i ( 0 .. 017777 ) {
+        $Mem[$i] = 0;
+    }
+
+    # Open up the file
+    open( my $IN, "<", $filename ) || die("Unable to open $filename: $!\n");
+    while (<$IN>) {
+        chomp;
+
+        # Lose any textual stuff after a tab character
+        $_ =~ s{\t.*}{};
+
+        # Split into location and value, both in octal
+        my ( $loc, $val ) = split( /:\s+/, $_ );
+
+        # Convert from octal and save
+        $loc       = oct($loc);
+        $val       = oct($val);
+        $Mem[$loc] = $val;
+    }
+    close($IN);
+}
+
+### Simulate the machine code loaded into memory
+sub simulate {
+
+    # List of opcodes that we can simulate
+    my %Oplist = (
+        oct("020") => \&lac,
+        oct("004") => \&dac,
+        oct("074") => \&iot,
+    );
+
+    # Loop indefinitely
+    while (1) {
+
+        # Get the instruction pointed to by PC and decode it
+        my $instruction = $Mem[$PC];
+        my $opcode      = ( $instruction >> 12 ) & 074;
+        my $indirect    = ( $instruction >> 13 ) & 1;
+        my $addr        = $instruction & 017777;
+        printf( "PC %06o: instruction %08o, op %03o, ind %o, addr %06o\n",
+            $PC, $instruction, $opcode, $indirect, $addr )
+          if ($debug);
+
+        # Simulate the instruction. Each subroutine updates the $PC
+        if ( defined( $Oplist{$opcode} ) ) {
+            $Oplist{$opcode}->( $instruction, $indirect, $addr );
+        }
+        else {
+            printf( "Unknown instruction 0%o at location 0%o\n",
+                $instruction, $PC );
+            die("\n");
+        }
+    }
+}
+
+# Debug code: dump memory contents
+sub dump_memory {
+    foreach my $i ( 0 .. 017777 ) {
+        printf( "%06o: %08o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
+    }
+}
+
+# Load AC
+sub lac {
+    my ( $instruction, $indirect, $addr ) = @_;
+    printf( "PC %06o: lac %05o (value %08o) into AC\n",
+        $PC, $addr, $Mem[$addr] )
+      if ($debug);
+    $AC = $Mem[$addr];
+    $PC++;
+}
+
+# Deposit AC
+sub dac {
+    my ( $instruction, $indirect, $addr ) = @_;
+    printf( "PC %06o: dac AC (value %08o) into %05o into AC\n",
+        $PC, $AC, $addr )
+      if ($debug);
+    $Mem[$addr] = $AC;
+    $PC++;
+}
+
+# I/O and trap instructions
+sub iot {
+    my $instruction = shift;
+
+    # Deal with each one in turn
+    # hlt
+    if ( $instruction == 0740040 ) {
+        printf( "PC %06o: program halted\n", $PC );
+        dump_memory() if ($debug);
+        exit(1);
+    }
+}
