@@ -1,8 +1,13 @@
+General PDP-7 info at:
 http://www.soemtron.org/pdp7.html
 
 a "macro7" cross-assembler at:
 https://github.com/simh/simtools/tree/master/crossassemblers/macro7
 
+The Evolution of the Unix Timesharing System at
+https://www.bell-labs.com/usr/dmr/www/hist.html
+
+PDP-7 stuff at Bitsavers
 http://bitsavers.trailing-edge.com/pdf/dec/pdp7/
      	Name	Last modified	Size	Description
 DEC-07-SDDA-D_DECSYS7_Nov66.pdf	2009-12-27 21:50 	1.5M	 
