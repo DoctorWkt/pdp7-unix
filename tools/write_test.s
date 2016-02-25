@@ -47,7 +47,7 @@ in: 023
 out: 0
 
 " Hello, world\n, two ASCII chars per word
-hello: 0110145; 0154154; 0157054; 040; 0167157; 0162154; 0144012
+hello: <He>; <l 0154; 0157 ,>; 040; <wo>; <rl>; <d 012
 helloptr: hello
 
 " fred as a string, NUL terminated

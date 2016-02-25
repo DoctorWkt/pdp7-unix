@@ -198,7 +198,7 @@ sub parse_statement {
 
 # Parse an expression and return either:
 #  a single value which is a PDP-7 word
-#  a single value which is undef, as this was a statement
+#  a single value which is undef, as this was unrecognised
 sub parse_expression {
     my $expression = shift;
 
@@ -345,6 +345,34 @@ sub parse_expression {
     my ( $word1, $word2, $word3 ) = split( /\s+/, $expression );
     #printf( "o>%s<o o>%s<o o>%s<o\n",
     #			$word1 || "", $word2 || "", $word3 || "" );
+
+    # This is a 2-character string literal, put each in separate nine bits
+    if ($word1=~ m{^<(.)(.)>$}) {
+      print("String literal <$1 and $2>\n") if ($debug);
+      return((ord($1) << 9) | ord($2));
+    }
+
+    # This is a <n string literal which might have been followed by a numeric literal
+    if ($word1=~ m{^<(.)}) {
+      print("String literal <$1 and $word2\n") if ($debug);
+      my $msb= $1;
+      my $lsb= (defined($word2)) ? parse_expression($word2) : 0;
+      return((ord($msb) << 9) | $lsb);
+    }
+
+    # This is a n> string literal preceded by a numeric literal
+    if (defined($word2) && ($word2=~ m{(.)>$})) {
+      print("String literal $word1 and $1>\n") if ($debug);
+      my $msb= parse_expression($word1);
+      my $lsb= $1;
+      return(($msb << 9) | ord($lsb));
+    }
+
+    # This is a n> string literal not preceded by a numeric literal
+    if ($word1=~ m{(.)>$}) {
+      print("String literal $1>\n") if ($debug);
+      return(ord($1));
+    }
 
     # This a defined instruction
     if ( defined( $inst{$word1} ) ) {
