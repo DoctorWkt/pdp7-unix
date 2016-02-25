@@ -26,8 +26,39 @@ my $stage = 1; # Pass one or pass two
 # Check the arguments
 die("Usage: $0 file1.s [file2.s ...]\n") if ( @ARGV < 1 );
 
-# Start with the location counter at zero
-$Var{'.'} = 0;
+# Define the syscalls as variables so that
+# I don't have to hand-code the logic below.
+# Also, start with the location counter at zero
+%Var= (
+  '.' => 0,
+  save => 1,
+  getuid => 2,
+  open => 3,
+  read => 4,
+  write => 5,
+  creat => 6,
+  seek => 7,
+  tell => 8,
+  close => 9,
+  link => 10,
+  unlink => 11,
+  setuid => 12,
+  rename => 13,
+  exit => 14,
+  time => 15,
+  intrp => 16,
+  chdir => 17,
+  chmod => 18,
+  chown => 19,
+  badcal => 20,
+  syslog => 21,
+  capt => 23,
+  rele => 24,
+  status => 25,
+  smes => 27,
+  rmes => 28,
+  fork => 29
+);
 
 # Parse all the files
 foreach my $file (@ARGV) {
@@ -189,6 +220,7 @@ sub parse_expression {
         'i'      => 0020000,
         'eae'    => 0640000,
         'iot'    => 0700000,
+        'sys'    => 0700000,
         'opr'    => 0740000,
         'law'    => 0760000,
         'lam'    => 0777777,

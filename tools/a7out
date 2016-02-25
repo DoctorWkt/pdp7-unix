@@ -86,9 +86,9 @@ sub simulate {
         my $opcode      = ( $instruction >> 12 ) & 074;
         my $indirect    = ( $instruction >> 13 ) & 1;
         my $addr        = $instruction & 017777;
-        printf( "PC %06o: instruction %08o, op %03o, ind %o, addr %06o\n",
-            $PC, $instruction, $opcode, $indirect, $addr )
-          if ($debug);
+        #printf( "PC %06o: instruction %08o, op %03o, ind %o, addr %06o\n",
+        #    $PC, $instruction, $opcode, $indirect, $addr )
+        #  if ($debug);
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
@@ -163,14 +163,14 @@ sub iot {
     if ( defined( $Syscallist{$addr} ) ) {
         $Syscallist{$addr}->();
     } else {
-        printf( "Unknown syscall %d at location 0%o\n", $addr, $PC );
+        printf( "PC %06o: Unknown syscall %d\n", $PC, $addr );
         die("\n");
     }
 }
 
 # Exit system call
 sub sys_exit {
-  print("exit system call\n") if ($debug);
+  printf("PC %06o: exit system call\n", $PC) if ($debug);
   exit(0);
 }
 
@@ -178,7 +178,7 @@ sub sys_exit {
 sub sys_close {
   # AC is the file descriptor
   my $fd= $AC;
-  print("close: closing fd $fd\n") if ($debug);
+  printf("PC %06o: close: closing fd %d\n", $PC, $fd) if ($debug);
 
   # Bump up the PC
   $PC += 1;
@@ -207,24 +207,23 @@ sub sys_open {
 
   # Convert this to a sensible ASCII filename
   my $filename= mem2string($start);
-  printf("open: file %s\n", $filename) if ($debug);
+  printf("PC %06o: open: file %s\n", $PC, $filename) if ($debug);
 
-  open(my $FH, "<", $filename);
-
-  # No filehandle, so it's an error
-  if (!defined($FH)) {
+  # Open the file
+  if (open(my $FH, "<", $filename)) {
+    # Find a place in the @FD array to store this filehandle. 99 is arbitrary
+    my $fd;
+    foreach $fd (0 .. 99) {
+      if (!defined($FD[$fd])) {
+        $FD[$fd]= $FH; last;
+      }
+    }
+    $AC=$fd; return;
+  } else {
+    # No filehandle, so it's an error
     print("open failed: $!\n") if ($debug);
     $AC= 0777777; return;
   }
-
-  # Find a place in the @FD array to store this filehandle. 99 is arbitrary
-  my $fd;
-  foreach $fd (0 .. 99) {
-    if (!defined($FD[$fd])) {
-      $FD[$fd]= $FH; last;
-    }
-  }
-  $AC=$fd; return;
 }
 
 # Read system call
@@ -238,7 +237,7 @@ sub sys_read {
   my $start= $Mem[$PC+1];
   my $count= $Mem[$PC+2];
   my $end= $start + $count -1;
-  printf("read: %d words from %o from fd %d\n", $count, $start, $fd) if ($debug);
+  printf("PC %06o: read: %d words from %o from fd %d\n", $PC, $count, $start, $fd) if ($debug);
 
   # Bump up the PC
   $PC += 3;
@@ -284,7 +283,7 @@ sub sys_write {
   my $start= $Mem[$PC+1];
   my $count= $Mem[$PC+2];
   my $end= $start + $count -1;
-  printf("write: %d words from %o to fd %d\n", $count, $start, $fd) if ($debug);
+  printf("PC %06o: write: %d words from %o to fd %d\n", $PC, $count, $start, $fd) if ($debug);
 
   # Bump up the PC
   $PC += 3;
