@@ -1,2 +1,5 @@
 git config remote.origin.url https://DoctorWkt@github.com/DoctorWkt/pdp7-unix.git
 to cache my Github username
+
+git config --global user.name "Warren Toomey"
+git config --global user.email wkt@tuhs.org

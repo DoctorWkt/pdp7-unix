@@ -11,6 +11,7 @@ use Data::Dumper;
 ### Global variables ###
 my $debug = 0;    # Debug flag
 my @Mem;          # 8K 18-bit words of main memory
+my @FD;		  # Array of open filehandles
 
 # Registers
 my $PC = 0;       # Program counter
@@ -43,6 +44,10 @@ sub load_code {
         $Mem[$i] = 0;
     }
 
+    # Set up two file open filehandles
+    $FD[0] = \*STDIN;
+    $FD[1] = \*STDOUT;
+
     # Open up the file
     open( my $IN, "<", $filename ) || die("Unable to open $filename: $!\n");
     while (<$IN>) {
@@ -67,9 +72,10 @@ sub simulate {
 
     # List of opcodes that we can simulate
     my %Oplist = (
-        oct("020") => \&lac,
         oct("004") => \&dac,
-        oct("074") => \&iot,
+        oct("020") => \&lac,
+        oct("070") => \&iot,
+        oct("074") => \&special,
     );
 
     # Loop indefinitely
@@ -109,7 +115,7 @@ sub lac {
     printf( "PC %06o: lac %05o (value %08o) into AC\n",
         $PC, $addr, $Mem[$addr] )
       if ($debug);
-    $AC = $Mem[$addr];
+    $AC = ($indirect) ? $Mem[ $Mem[$addr] & 017777 ]: $Mem[$addr];
     $PC++;
 }
 
@@ -119,12 +125,16 @@ sub dac {
     printf( "PC %06o: dac AC (value %08o) into %05o into AC\n",
         $PC, $AC, $addr )
       if ($debug);
-    $Mem[$addr] = $AC;
+    if ($indirect) {
+      $Mem[ $Mem[$addr] & 017777 ] = $PC;
+    } else {
+      $Mem[$addr] = $AC;
+    }
     $PC++;
 }
 
-# I/O and trap instructions
-sub iot {
+# Special instructions
+sub special {
     my $instruction = shift;
 
     # Deal with each one in turn
@@ -134,4 +144,163 @@ sub iot {
         dump_memory() if ($debug);
         exit(1);
     }
+}
+
+# I/O transfer: used for system calls
+sub iot {
+    my ( $instruction, $indirect, $addr ) = @_;
+
+    # Syscalls that we can simulate
+    my %Syscallist = (
+        3  => \&sys_open,
+        5  => \&sys_write,
+        9  => \&sys_close,
+        14 => \&sys_exit,
+    );
+
+    # Simulate the syscall. Each syscall updates the $PC
+    if ( defined( $Syscallist{$addr} ) ) {
+        $Syscallist{$addr}->();
+    } else {
+        printf( "Unknown syscall %d at location 0%o\n", $addr, $PC );
+        die("\n");
+    }
+}
+
+# Exit system call
+sub sys_exit {
+  print("exit system call\n") if ($debug);
+  exit(0);
+}
+
+# Close system call
+sub sys_close {
+  # AC is the file descriptor
+  my $fd= $AC;
+  print("close: closing fd $fd\n") if ($debug);
+
+  # Bump up the PC
+  $PC += 1;
+
+  # That filehandle is not open, set an error -1 in octal
+  if (!defined($FD[$fd])) {
+    print("close: fd $fd is not open\n") if ($debug);
+    $AC= 0777777; return;
+  }
+  close($FD[$fd]);
+  $FD[$fd]= undef;
+  $AC=0; return;
+}
+
+# Open system call
+sub sys_open {
+  # Open seems to have arguments: PC+1 has a pointer to the filename,
+  # PC+2 and PC+3 I don't know yet, probably read/write and mask?
+  # AC is the opened fd on success, or -1 on error
+
+  # Get the start address of the string
+  my $start= $Mem[$PC+1];
+
+  # Bump up the PC
+  $PC += 4;
+
+  # Convert this to a sensible ASCII filename
+  my $filename= mem2string($start);
+  printf("open: file %s\n", $filename) if ($debug);
+
+  open(my $FH, "<", $filename);
+
+  # No filehandle, so it's an error
+  if (!defined($FH)) {
+    print("open failed: $!\n") if ($debug);
+    $AC= 0777777; return;
+  }
+
+  # Find a place in the @FD array to store this filehandle. 99 is arbitrary
+  my $fd;
+  foreach $fd (0 .. 99) {
+    if (!defined($FD[$fd])) {
+      $FD[$fd]= $FH; last;
+    }
+  }
+  $AC=$fd; return;
+}
+
+# Write system call
+sub sys_write {
+
+  # Write seems to have arguments: AC is the file descriptor, PC+1 is
+  # the pointer to the buffer and PC+2 is the number of words to write
+
+  # Get the file descriptor, start address and end address
+  my $fd= $AC;
+  my $start= $Mem[$PC+1];
+  my $count= $Mem[$PC+2];
+  my $end= $start + $count -1;
+  printf("write: %d words from %o to fd %d\n", $count, $start, $fd) if ($debug);
+
+  # Bump up the PC
+  $PC += 3;
+
+  # That filehandle is not open, set an error -1 in octal
+  if (!defined($FD[$fd])) {
+    print("write: fd $fd is not open\n") if ($debug);
+    $AC= 0777777; return;
+  }
+
+  # Write each word out
+  my $FH= $FD[$fd];
+  foreach my $addr ($start .. $end) {
+    # It's a terminal, so convert to ASCII
+    # otherwise (for now) print in octal
+    if (-t $FH) {
+      print($FH word2ascii($Mem[$addr]));
+    } else {
+      printf($FH "%06o\n", $Mem[$addr]);
+    }
+  }
+  # No error
+  $AC= 0; return;
+}
+
+# Convert an 18-bit word into two ASCII characters and return them.
+# Don't return NUL characters
+sub word2ascii {
+  my $word= shift;
+  my $c1= ($word >> 9) & 0177;
+  my $c2= $word & 0177;
+  my $result= "";
+  $result .= chr($c1) if ($c1);
+  $result .= chr($c2) if ($c2);
+  return($result);
+}
+
+# Given the address of a word in memory, interpret that location
+# and those following as a NUL-terminated ASCII string and return
+# a copy of this string
+sub mem2string {
+  my $addr= shift;
+  my $result= "";
+
+  while (1) {
+    # Stop when the address leave the 8K word address space
+    return($result) if ($addr > 017777);
+
+    # Stop when the value there is zero
+    my $word= $Mem[$addr];
+    return($result) if ($word==0);
+
+    # Get the top ASCII character, return if NUL
+    my $c1= ($word >> 9) & 0177;
+    return($result) if ($c1==0);
+    $result .= chr($c1);
+
+    # Get the bottom ASCII character, return if NUL
+    my $c2= $word & 0177;
+    return($result) if ($c2==0);
+    $result .= chr($c2);
+
+    # Move up to the next address
+    $addr++;
+  }
 }
