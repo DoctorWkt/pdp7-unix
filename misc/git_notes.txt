@@ -3,3 +3,7 @@ to cache my Github username
 
 git config --global user.name "Warren Toomey"
 git config --global user.email wkt@tuhs.org
+
+To bring your own ocal repository up to date with Github:
+ git fetch origin 
+ git merge origin/master
