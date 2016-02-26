@@ -27,11 +27,12 @@ if ( ( @ARGV > 0 ) && ( $ARGV[0] eq "-d" ) ) {
 }
 
 # Check the arguments
-die("Usage: $0 [-d] a.outfile\n") if ( @ARGV != 1 );
+die("Usage: $0 [-d] a.outfile [arg1 arg2 ...]\n") if ( @ARGV < 1 );
 
 # Load the a.out file into memory
 # and simulate it
-load_code( $ARGV[0] );
+load_code( shift(@ARGV) );
+set_arguments(@ARGV);
 simulate();
 exit(0);
 
@@ -67,6 +68,62 @@ sub load_code {
     close($IN);
 }
 
+### Copy the arguments into the PDP-7 memory space, and build
+### an array of pointers to these arguments. Build a pointer
+### at 017777 that points at the array.
+###
+### At the moment, this is NOT what PDP-7 Unix uses, but it's
+### a start and it will help us to grok the real thing.
+###
+### For now, assume abc, def and ghi are stored in memory.
+### The layout of the pointers and strings would be:
+###
+###    +-------+
+###    |       |
+###    | +-----|---------+
+###    | |     |         |
+###    | | +---|---------|---------+
+###    | | |   |         |         |
+###    | | |   V         V         V
+###   |o|o|o|0|<ab>|<c 0|<de>|<f 0|<gh>|<i 0|o|
+###    ^                                     |
+###    |                                     |
+###    +-------------------------------------+
+###    0 0 0 0  0    0    0    0    0    0   0
+###    1 1 1 1  1    1    1    1    1    1   1
+###    7 7 7 7  7    7    7    7    7    7   7
+###    7 7 7 7  7    7    7    7    7    7   7
+###    6 6 6 7  7    7    7    7    7    7   7
+###    5 6 7 0  1    2    3    4    5    6   7
+###
+sub set_arguments {
+  # No arguments, set the 017777 pointer to 017776 which is NULL
+  if (@ARGV==0) {
+    $Mem[ 017777 ] = 017776;
+    print( STDERR "No arguments, so NULL 017777 pointer\n") if ($debug);
+    return;
+  }
+
+  # Count the number of words to store each string and its pointer
+  my $wordcount=1;  # 1 as we count the NULL pointer at end of array
+  my $argcount= @ARGV;
+  foreach my $arg (@ARGV) {
+    # +1 before /2 to allow for the NUL character at end of string
+    # += +1 to include the pointer to the string
+    $wordcount += 1 + ( (length($arg) +1)/2);
+  }
+
+  my $arraybase= 017777 - $wordcount;
+  my $stringbase= $arraybase + $argcount + 1;	# include NULL pointer
+  $Mem[ 017777 ] = $arraybase;
+
+  # Now copy each string into memory and initialise the pointer
+  foreach my $arg (@ARGV) {
+    $Mem[$arraybase++]= $stringbase;
+    $stringbase= string2mem($arg, $stringbase);
+  }
+}
+
 ### Simulate the machine code loaded into memory
 sub simulate {
 
@@ -74,6 +131,7 @@ sub simulate {
     my %Oplist = (
         oct("004") => \&dac,
         oct("020") => \&lac,
+        oct("034") => \&tad,
         oct("060") => \&jmp,
         oct("070") => \&iot,
         oct("074") => \&special,
@@ -123,13 +181,27 @@ sub lac {
 # Deposit AC
 sub dac {
     my ( $instruction, $indirect, $addr ) = @_;
-    printf( STDERR "PC %06o: dac AC (value %08o) into %05o into AC\n",
+    printf( STDERR "PC %06o: dac AC (value %08o) into %05o\n",
         $PC, $AC, $addr )
       if ($debug);
     if ($indirect) {
         $Mem[ $Mem[$addr] & 017777 ] = $PC;
     } else {
         $Mem[$addr] = $AC;
+    }
+    $PC++;
+}
+
+# Add to AC
+sub tad {
+    my ( $instruction, $indirect, $addr ) = @_;
+    printf( STDERR "PC %06o: tac AC (value %08o) from addr %05o\n",
+        $PC, $AC, $addr )
+      if ($debug);
+    if ($indirect) {
+        $AC += $Mem[ $Mem[$addr] & 017777 ];
+    } else {
+        $AC+= $Mem[$addr];
     }
     $PC++;
 }
@@ -153,13 +225,18 @@ sub special {
         exit(1);
     }
     if ( $instruction == 0741100 ) {    # spa: skip on positive AC
-        printf( STDERR "PC %06o: spa\n", $PC ) if ($debug);
+        printf( STDERR "PC %06o: spa AC %06o\n", $PC, $AC ) if ($debug);
         $PC += ( $AC >= 0 ) ? 2 : 1;
         return;
     }
     if ( $instruction == 0741200 ) {    # sna: skip on non-zero AC
-        printf( STDERR "PC %06o: sna\n", $PC ) if ($debug);
+        printf( STDERR "PC %06o: sna AC %06o\n", $PC, $AC ) if ($debug);
         $PC += ( $AC != 0 ) ? 2 : 1;
+        return;
+    }
+    if ( $instruction == 0740200 ) {    # sza: skip on zero AC
+        printf( STDERR "PC %06o: sza AC %06o\n", $PC, $AC ) if ($debug);
+        $PC += ( $AC == 0 ) ? 2 : 1;
         return;
     }
     printf( STDERR "PC %06o: unknown instruction %08o\n", $PC, $instruction );
@@ -237,14 +314,13 @@ sub sys_open {
     if ( open( my $FH, "<", $filename ) ) {
 
        # Find a place in the @FD array to store this filehandle. 99 is arbitrary
-        my $fd;
-        foreach $fd ( 0 .. 99 ) {
+       foreach my $fd ( 0 .. 99 ) {
             if ( !defined( $FD[$fd] ) ) {
                 $FD[$fd] = $FH;
+        	$AC = $fd;
                 last;
             }
         }
-        $AC = $fd;
         return;
     } else {
         # No filehandle, so it's an error
@@ -392,4 +468,23 @@ sub mem2string {
         # Move up to the next address
         $addr++;
     }
+}
+
+# Given a string and the address of a word in memory, copy
+# the string into memory starting at that address and NUL
+# terminate the string. Return the first address after the string.
+#
+# We will go off the end of the string: suppress warnings
+no warnings ('substr');
+sub string2mem {
+    my ($str, $base)= @_;
+
+    # <= length so we go off the end and insert a NUL
+    for (my $i=0; $i <= length($str); $i += 2) {
+      my $c1= substr($str, $i, 1) || "";
+      my $c2= substr($str, $i+1, 1) || "";
+      #printf("Saving %06o to %05o\n", (ord($c1) << 9 ) | ord($c2), $base);
+      $Mem[$base++]= (ord($c1) << 9 ) | ord($c2);
+    }
+    return($base);
 }
