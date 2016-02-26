@@ -14,7 +14,8 @@ s5.s: pages 28-32  of 01-s1.pdf
 s6.s: pages 34-38  of 01-s1.pdf
 s7.s: pages 41-46  of 01-s1.pdf
 s8.s: pages 48-51  of 01-s1.pdf
-s9.s: pages 53-54  of 01-s1.pdf
+s9.s: pages 53-55  of 01-s1.pdf
+sysmap: pages 57-61 of 01-s1.pdf
 sop.s pages 62-63  of 01-s1.pdf
 sx.s: temp additional symbol defns
 maksys.s: page 64  of 01-s1.pdf
