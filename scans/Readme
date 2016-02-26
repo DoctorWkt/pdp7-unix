@@ -1,4 +1,4 @@
-This area contains the OCR'd version of the PDP-7 scans that are at
+This area contains the OCR'd versions of the PDP-7 scans that are at
 http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/0*.pdf
 The files should be unaltered versions of the scanned pages.
 
@@ -12,6 +12,15 @@ s3.s: pages 14-
 s4.s: pages 21-
 s5.s: pages 28-
 s6.s: pages 34-
-sx.s: temp symbol defns (from end of s1.s)
+s7.s: pages ??? of ???
+s8.s: pages ??? of ???
+s9.s: pages ??? of ???
+sx.s: temp symbol defns (pages ??? of s1.s)
 
+bc.s: pages ??? of ???
+bi.s: pages ??? of ???
+bl.s: pages ??? of ???
+cas.s: pages ??? of ???
 cat.c: pages 21-23 of 06-5-12.pdf
+ind.b: pages ??? of ???
+lease.b: pages ??? of ???
