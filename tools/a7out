@@ -103,7 +103,7 @@ sub set_arguments {
   # No arguments, set the 017777 pointer to 017776 which is NULL
   if (@ARGV==0) {
     $Mem[ 017777 ] = 017776;
-    print( STDERR "No arguments, so NULL 017777 pointer\n") if ($debug);
+    dprintf("No arguments, so NULL 017777 pointer\n");
     return;
   }
 
@@ -151,10 +151,8 @@ sub simulate {
 
 	# Work out what any indirect address would be
 	my $indaddr= ($indirect) ? $Mem[$addr] & 017777 : $addr;
-        printf( STDERR
-              "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
-            $PC, $instruction, $opcode, $indirect, $addr, $indaddr )
-          if ($debug);
+        dprintf( "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
+            $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
@@ -162,7 +160,7 @@ sub simulate {
         } else {
             printf( STDERR "Unknown instruction 0%o at location 0%o\n",
                 $instruction, $PC );
-            die("\n");
+            exit(1);
         }
     }
 }
@@ -177,9 +175,8 @@ sub dump_memory {
 # Load AC
 sub lac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    printf( STDERR "PC %06o: lac %05o (value %06o) into AC\n",
-        $PC, $indaddr, $Mem[$indaddr] )
-      if ($debug);
+    dprintf( "PC %06o: lac %05o (value %06o) into AC\n",
+        $PC, $indaddr, $Mem[$indaddr] );
     $AC = $Mem[$indaddr];
     $PC++;
 }
@@ -187,27 +184,25 @@ sub lac {
 # Deposit AC
 sub dac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    printf( STDERR "PC %06o: dac AC (value %06o) into %05o\n",
-        $PC, $AC, $indaddr )
-      if ($debug);
-        $Mem[$indaddr] = $AC;
+    dprintf( "PC %06o: dac AC (value %06o) into %05o\n",
+        $PC, $AC, $indaddr );
+    $Mem[$indaddr] = $AC;
     $PC++;
 }
 
 # Add to AC
 sub tad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    printf( STDERR "PC %06o: tac AC (value %06o) from addr %05o\n",
-        $PC, $AC, $indaddr )
-      if ($debug);
-      $AC+= $Mem[$indaddr];
+    dprintf( "PC %06o: tac AC (value %06o) from addr %05o\n",
+        $PC, $AC, $indaddr );
+    $AC+= $Mem[$indaddr];
     $PC++;
 }
 
 # Jump
 sub jmp {
     my ( $instruction, $addr, $indaddr ) = @_;
-    printf( STDERR "PC %06o: jmp %06o\n", $PC, $indaddr ) if ($debug);
+    dprintf( "PC %06o: jmp %06o\n", $PC, $indaddr );
     $PC = $indaddr;
 }
 
@@ -223,18 +218,18 @@ sub special {
         exit(1);
     }
     if ( $instruction == 0741100 ) {    # spa: skip on positive AC
-        printf( STDERR "PC %06o: spa AC %06o\n", $PC, $AC ) if ($debug);
+        dprintf( "PC %06o: spa AC %06o\n", $PC, $AC );
         # Because we are dealing with 18 bits, compare the range
         $PC += ( ($AC >= 0) && ($AC < 0400000) ) ? 2 : 1;
         return;
     }
     if ( $instruction == 0741200 ) {    # sna: skip on non-zero AC
-        printf( STDERR "PC %06o: sna AC %06o\n", $PC, $AC ) if ($debug);
+        dprintf( "PC %06o: sna AC %06o\n", $PC, $AC );
         $PC += ( $AC != 0 ) ? 2 : 1;
         return;
     }
     if ( $instruction == 0740200 ) {    # sza: skip on zero AC
-        printf( STDERR "PC %06o: sza AC %06o\n", $PC, $AC ) if ($debug);
+        dprintf( "PC %06o: sza AC %06o\n", $PC, $AC );
         $PC += ( $AC == 0 ) ? 2 : 1;
         return;
     }
@@ -260,13 +255,13 @@ sub iot {
         $Syscallist{$addr}->();
     } else {
         printf( STDERR "PC %06o: Unknown syscall %d\n", $PC, $addr );
-        die("\n");
+        exit(1);
     }
 }
 
 # Exit system call
 sub sys_exit {
-    printf( STDERR "PC %06o: exit system call\n", $PC ) if ($debug);
+    dprintf( "PC %06o: exit system call\n", $PC );
     exit(0);
 }
 
@@ -275,14 +270,14 @@ sub sys_close {
 
     # AC is the file descriptor
     my $fd = $AC;
-    printf( STDERR "PC %06o: close: closing fd %d\n", $PC, $fd ) if ($debug);
+    dprintf( "PC %06o: close: closing fd %d\n", $PC, $fd );
 
     # Bump up the PC
     $PC += 1;
 
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
-        print( STDERR "close: fd $fd is not open\n") if ($debug);
+        dprint( "close: fd $fd is not open\n");
         $AC = 0777777;
         return;
     }
@@ -307,7 +302,7 @@ sub sys_open {
 
     # Convert this to a sensible ASCII filename
     my $filename = mem2string($start);
-    printf( STDERR "PC %06o: open: file %s\n", $PC, $filename ) if ($debug);
+    dprintf( "PC %06o: open: file %s\n", $PC, $filename );
 
     # Open the file
     if ( open( my $FH, "<", $filename ) ) {
@@ -323,7 +318,7 @@ sub sys_open {
         return;
     } else {
         # No filehandle, so it's an error
-        print( STDERR "open failed: $!\n") if ($debug);
+        dprintf( "open failed: $!\n");
         $AC = 0777777;
         return;
     }
@@ -340,17 +335,17 @@ sub sys_read {
     my $fd    = $AC;
     my $start = $Mem[ $PC + 1 ];
     my $count = $Mem[ $PC + 2 ];
-    my $end   = $start + $count - 1;
-    printf( STDERR "PC %06o: read: %d words into %o from fd %d\n",
-        $PC, $count, $start, $fd )
-      if ($debug);
+    my $end   = ($start + $count - 1) & 017777;
+    die("sys_read: bad start/end addresses $start $end\n") if ($end < $start);
+    dprintf( "PC %06o: read: %d words into %o from fd %d\n",
+        $PC, $count, $start, $fd );
 
     # Bump up the PC
     $PC += 3;
 
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
-        print( STDERR "read: fd $fd is not open\n") if ($debug);
+        dprint( "read: fd $fd is not open\n");
         $AC = 0777777;
         return;
     }
@@ -393,17 +388,17 @@ sub sys_write {
     my $fd    = $AC;
     my $start = $Mem[ $PC + 1 ];
     my $count = $Mem[ $PC + 2 ];
-    my $end   = $start + $count - 1;
-    printf( STDERR "PC %06o: write: %d words from %o to fd %d\n",
-        $PC, $count, $start, $fd )
-      if ($debug);
+    my $end   = ($start + $count - 1) & 017777;
+    die("sys_write: bad start/end addresses $start $end\n") if ($end < $start);
+    dprintf( "PC %06o: write: %d words from %o to fd %d\n",
+        $PC, $count, $start, $fd );
 
     # Bump up the PC
     $PC += 3;
 
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
-        print( STDERR "write: fd $fd is not open\n") if ($debug);
+        dprint( "write: fd $fd is not open\n");
         $AC = 0777777;
         return;
     }
@@ -486,4 +481,9 @@ sub string2mem {
       $Mem[$base++]= (ord($c1) << 9 ) | ord($c2);
     }
     return($base);
+}
+
+# Print out debug messages
+sub dprintf {
+  printf( STDERR @_) if ($debug);
 }

@@ -44,12 +44,12 @@ stdinout:
 " This section opens files, and copies their contents to standard output
 catfiles:
    " We start with AC pointing to an argument. Save it at label 1f
-   dac 1f
+   dac name
 
    " Open the file and get the fd into AC
-   sys open; 1:0; 0; 0
+   sys open; name:0; 0; 0
    spa
-     jmp noopen		" Bad fd, exit with an error message
+     jmp badfile	" Bad fd, exit with an error message
    dac fd		" Save the file descriptor
 
 fileloop:
@@ -91,14 +91,19 @@ end:
    " exit
    sys exit
 
-noopen:
-   " Print an "err open" string and exit
-   lac d1
-   sys write; noopenstr; 5
-   sys exit
 
-noopenstr:
-   <er>;<r 040;<op>;<en>;012000
+" This code comes from the real cat.s
+badfile:
+   lac name		" Get the pointer to the filename
+   dac 1f		" Store it in 1f below
+   lac d8		" Load fd 8 which is stderr
+   sys write; 1:0; 4	" Write the name, max 4 words
+   lac d8		" Then write " ?\n"
+   sys write; 1f; 2
+   sys exit		" and exit
+
+1: 040; 077012
+
 
 error:
    " Print an "err read" string and exit
@@ -112,6 +117,7 @@ noreadstr:
 fd: 0		" fd of the open file
 d0: 0		" Constants 0 and 1
 d1: 1
+d8: 8		" stderr seems to have fd 8
 
 " Input buffer for read
 buf: 0; 0; 0; 0; 0
