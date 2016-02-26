@@ -50,6 +50,7 @@ sub load_code {
     # Set up two file open filehandles
     $FD[0] = \*STDIN;
     $FD[1] = \*STDOUT;
+    $FD[8] = \*STDERR;		# According to cat.s (uses d8 == 8)
 
     # Open up the file
     open( my $IN, "<", $filename ) || die("Unable to open $filename: $!\n");
