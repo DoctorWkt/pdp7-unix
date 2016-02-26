@@ -3,15 +3,16 @@
 
 pibreak:
    dac .ac	"** CROSSED OUT....
-   lpsf
+
+   dpsf
    jmp 1f
 
-   lpcf
-   dprs		"** ??
+   dpcf
+   dprs
    dac dpstat
    sma ral
    jmp 2f
-   dprc		"** ??
+   dprc
    dac dpchar
    -1
    dac dpread
@@ -71,11 +72,7 @@ cnop:
    jmp piret
 
 1: lds		"** BEGIN CROSSED OUT
-   sma ra1
-   jmp 1f
-   cdf
-   lac .dspb
-   sna
+   sma ral
    jmp 1f
    cdf
    lac .dspb
@@ -86,8 +83,16 @@ cnop:
    jmp dsprestart
    dac .dspb
    jmp piret
+dsprestart:
+   lac d1
+   dac .dspb
+   lac dspbufp
+   beg		"** ???
+   -10
+   dac .dsptm
+   jmp piret
 
-1: sna ra1
+1: sna ral
    jmp .+3
    racf
    jmp piret
@@ -125,7 +130,7 @@ cnop:
 
 "** 01-s1.pdf page 43
 
-   jms ptcr
+   jms putcr
    jms ttyrestart
    jmp piret
 
@@ -277,7 +282,7 @@ ttyrestart: 0
 
 piret:
    lac 0
-   rai
+   ral
    lac .ac
    ion
    jmp 0 i
@@ -292,7 +297,7 @@ wakeup: 0
    dac 2f+1
 1:
    lac 9f+t
-   rao
+   ral
    dac 9f+t
    sma
    jmp 2f+2

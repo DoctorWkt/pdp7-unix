@@ -51,8 +51,8 @@ lookfor: 0
    law sysexit
    dac u.swapret
    lac o200000
-   tad u.listp i
-   dac u.listp i
+   tad u.ulistp i
+   dac u.ulistp i
    jms dskswap; 07000
    lac 9f+t
    dac u.ulistp
@@ -138,7 +138,7 @@ t = t+1
    sad u.ac
    skp
    jmp 1b i
-   lac 1u+2
+   lac lu+2
    sad dm1
    jmp 1f
    lac o100000
@@ -158,7 +158,7 @@ t = t+1
 1:
    -3
    tad 8
-   dac 0f+t
+   dac 9f+t
    lac o700000
    tad 9f+t i
    dac 9f+t i
@@ -281,7 +281,7 @@ rkbdi:
 3:
    jms sleep; sfiles+2
    jms swap
-   jmp rkdbi
+   jmp rkbdi
 
 wdspo:
    jms chkint1

@@ -98,12 +98,12 @@
    jms arg
    dac 2f
    lac d4
-   jms namei; 0; 0
+   jms namei; 0:0
       jms error
-   jms namei; 1; 0
+   jms namei; 1:0
       jms error
    dac u.base
-   jms copy; 2; 0; name; 4
+   jms copy; 2:0; name; 4
    lac u.cdir
    jms namei; name
       skp
@@ -160,12 +160,12 @@
    jms arg
    dac 1f
    lac u.cdir
-   jms namei; 0;0
+   jms namei; 0:0
       jms error
    lac d1
    dac mode
    jms access
-   jms copy; 1; 0; d.name; 4
+   jms copy; 1:0; d.name; 4
    jmp okexit
 
 .time:
@@ -197,7 +197,7 @@
    lac d2
    dac mode
    lac u.cdir
-   jms namei; 0; 0
+   jms namei; 0:0
       jms error
    jms iget
    jms access

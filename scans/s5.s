@@ -89,6 +89,11 @@ forall: 0
    lrs 9
    and o777
    jmp forall i
+failr:
+   lac u.base
+   add o400000
+   dac u.base
+   jmp forall+1
 1:
    lac u.count
    dac u.ac

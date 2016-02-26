@@ -55,7 +55,7 @@ free: 0
 t = t+1
 
 laci: 0
-   and o1777
+   and o17777
    tad o200000
    dac .+1
    lac ..
@@ -144,7 +144,7 @@ getchar: 0
    tad o200001
    dac .+3
    cla
-   jms putc
+   jms putq
    lac q2+1 ..
    isz getchar
    jmp i getchar
@@ -155,7 +155,7 @@ takeq: 0
    dac .+7
    tad o640000
    dac .+17
-   dad s1
+   tad d1
    dac .+14
    tad o500000
    dac .+5
@@ -234,7 +234,7 @@ collapse: 0
    sna
    jmp 0f+3
    dac 0f+2
-   jms copy; 0; ..; ..; ..
+   jms copy; 0:..; ..; ..
    -65
    tad edskbsp
    dac 9f+t
@@ -242,7 +242,7 @@ collapse: 0
    dac 0f
    lac dskaddr
    dac 9f+t i
-   jms copy; dskbuf; 0; ..; 64
+   jms copy; dskbuf; 0:..; 64
    jmp collapse i
 
 dskrd: 0
@@ -265,7 +265,7 @@ dskrd: 0
    dac .+2
    jms copy; ..; dskbuf; 64
 2:
-   jms collaps
+   jms collapse
    jmp dskrd i
 
 dskwr: 0
