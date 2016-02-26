@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# A7out: user-mode simulator for PDP-7 Unix applications
+# a7out: user-mode simulator for PDP-7 Unix applications
 #
 # (c) 2016 Warren Toomey, GPL3
 #
@@ -11,7 +11,7 @@ use Data::Dumper;
 ### Global variables ###
 my $debug = 0;    # Debug flag
 my @Mem;          # 8K 18-bit words of main memory
-my @FD;		  # Array of open filehandles
+my @FD;           # Array of open filehandles
 
 # Registers
 my $PC = 0;       # Program counter
@@ -74,6 +74,7 @@ sub simulate {
     my %Oplist = (
         oct("004") => \&dac,
         oct("020") => \&lac,
+        oct("060") => \&jmp,
         oct("070") => \&iot,
         oct("074") => \&special,
     );
@@ -86,16 +87,16 @@ sub simulate {
         my $opcode      = ( $instruction >> 12 ) & 074;
         my $indirect    = ( $instruction >> 13 ) & 1;
         my $addr        = $instruction & 017777;
-        #printf( "PC %06o: instruction %08o, op %03o, ind %o, addr %06o\n",
-        #    $PC, $instruction, $opcode, $indirect, $addr )
-        #  if ($debug);
+        printf( STDERR
+              "PC %06o: instruction %08o, op %03o, ind %o, addr %06o\n",
+            $PC, $instruction, $opcode, $indirect, $addr )
+          if ($debug);
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
             $Oplist{$opcode}->( $instruction, $indirect, $addr );
-        }
-        else {
-            printf( "Unknown instruction 0%o at location 0%o\n",
+        } else {
+            printf( STDERR "Unknown instruction 0%o at location 0%o\n",
                 $instruction, $PC );
             die("\n");
         }
@@ -105,32 +106,39 @@ sub simulate {
 # Debug code: dump memory contents
 sub dump_memory {
     foreach my $i ( 0 .. 017777 ) {
-        printf( "%06o: %08o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
+        printf( STDERR "%06o: %08o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
     }
 }
 
 # Load AC
 sub lac {
     my ( $instruction, $indirect, $addr ) = @_;
-    printf( "PC %06o: lac %05o (value %08o) into AC\n",
+    printf( STDERR "PC %06o: lac %05o (value %08o) into AC\n",
         $PC, $addr, $Mem[$addr] )
       if ($debug);
-    $AC = ($indirect) ? $Mem[ $Mem[$addr] & 017777 ]: $Mem[$addr];
+    $AC = ($indirect) ? $Mem[ $Mem[$addr] & 017777 ] : $Mem[$addr];
     $PC++;
 }
 
 # Deposit AC
 sub dac {
     my ( $instruction, $indirect, $addr ) = @_;
-    printf( "PC %06o: dac AC (value %08o) into %05o into AC\n",
+    printf( STDERR "PC %06o: dac AC (value %08o) into %05o into AC\n",
         $PC, $AC, $addr )
       if ($debug);
     if ($indirect) {
-      $Mem[ $Mem[$addr] & 017777 ] = $PC;
+        $Mem[ $Mem[$addr] & 017777 ] = $PC;
     } else {
-      $Mem[$addr] = $AC;
+        $Mem[$addr] = $AC;
     }
     $PC++;
+}
+
+# Jump
+sub jmp {
+    my ( $instruction, $indirect, $addr ) = @_;
+    printf( STDERR "PC %06o: jmp %06o\n", $PC, $addr ) if ($debug);
+    $PC = $addr;
 }
 
 # Special instructions
@@ -140,10 +148,22 @@ sub special {
     # Deal with each one in turn
     # hlt
     if ( $instruction == 0740040 ) {
-        printf( "PC %06o: program halted\n", $PC );
+        printf( STDERR "PC %06o: program halted\n", $PC );
         dump_memory() if ($debug);
         exit(1);
     }
+    if ( $instruction == 0741100 ) {    # spa: skip on positive AC
+        printf( STDERR "PC %06o: spa\n", $PC ) if ($debug);
+        $PC += ( $AC >= 0 ) ? 2 : 1;
+        return;
+    }
+    if ( $instruction == 0741200 ) {    # sna: skip on non-zero AC
+        printf( STDERR "PC %06o: sna\n", $PC ) if ($debug);
+        $PC += ( $AC != 0 ) ? 2 : 1;
+        return;
+    }
+    printf( STDERR "PC %06o: unknown instruction %08o\n", $PC, $instruction );
+    exit(1);
 }
 
 # I/O transfer: used for system calls
@@ -163,190 +183,213 @@ sub iot {
     if ( defined( $Syscallist{$addr} ) ) {
         $Syscallist{$addr}->();
     } else {
-        printf( "PC %06o: Unknown syscall %d\n", $PC, $addr );
+        printf( STDERR "PC %06o: Unknown syscall %d\n", $PC, $addr );
         die("\n");
     }
 }
 
 # Exit system call
 sub sys_exit {
-  printf("PC %06o: exit system call\n", $PC) if ($debug);
-  exit(0);
+    printf( STDERR "PC %06o: exit system call\n", $PC ) if ($debug);
+    exit(0);
 }
 
 # Close system call
 sub sys_close {
-  # AC is the file descriptor
-  my $fd= $AC;
-  printf("PC %06o: close: closing fd %d\n", $PC, $fd) if ($debug);
 
-  # Bump up the PC
-  $PC += 1;
+    # AC is the file descriptor
+    my $fd = $AC;
+    printf( STDERR "PC %06o: close: closing fd %d\n", $PC, $fd ) if ($debug);
 
-  # That filehandle is not open, set an error -1 in octal
-  if (!defined($FD[$fd])) {
-    print("close: fd $fd is not open\n") if ($debug);
-    $AC= 0777777; return;
-  }
-  close($FD[$fd]);
-  $FD[$fd]= undef;
-  $AC=0; return;
+    # Bump up the PC
+    $PC += 1;
+
+    # That filehandle is not open, set an error -1 in octal
+    if ( !defined( $FD[$fd] ) ) {
+        print( STDERR "close: fd $fd is not open\n") if ($debug);
+        $AC = 0777777;
+        return;
+    }
+    close( $FD[$fd] );
+    $FD[$fd] = undef;
+    $AC = 0;
+    return;
 }
 
 # Open system call
 sub sys_open {
-  # Open seems to have arguments: PC+1 has a pointer to the filename,
-  # PC+2 and PC+3 I don't know yet, probably read/write and mask?
-  # AC is the opened fd on success, or -1 on error
 
-  # Get the start address of the string
-  my $start= $Mem[$PC+1];
+    # Open seems to have arguments: PC+1 has a pointer to the filename,
+    # PC+2 and PC+3 I don't know yet, probably read/write and mask?
+    # AC is the opened fd on success, or -1 on error
 
-  # Bump up the PC
-  $PC += 4;
+    # Get the start address of the string
+    my $start = $Mem[ $PC + 1 ];
 
-  # Convert this to a sensible ASCII filename
-  my $filename= mem2string($start);
-  printf("PC %06o: open: file %s\n", $PC, $filename) if ($debug);
+    # Bump up the PC
+    $PC += 4;
 
-  # Open the file
-  if (open(my $FH, "<", $filename)) {
-    # Find a place in the @FD array to store this filehandle. 99 is arbitrary
-    my $fd;
-    foreach $fd (0 .. 99) {
-      if (!defined($FD[$fd])) {
-        $FD[$fd]= $FH; last;
-      }
+    # Convert this to a sensible ASCII filename
+    my $filename = mem2string($start);
+    printf( STDERR "PC %06o: open: file %s\n", $PC, $filename ) if ($debug);
+
+    # Open the file
+    if ( open( my $FH, "<", $filename ) ) {
+
+       # Find a place in the @FD array to store this filehandle. 99 is arbitrary
+        my $fd;
+        foreach $fd ( 0 .. 99 ) {
+            if ( !defined( $FD[$fd] ) ) {
+                $FD[$fd] = $FH;
+                last;
+            }
+        }
+        $AC = $fd;
+        return;
+    } else {
+        # No filehandle, so it's an error
+        print( STDERR "open failed: $!\n") if ($debug);
+        $AC = 0777777;
+        return;
     }
-    $AC=$fd; return;
-  } else {
-    # No filehandle, so it's an error
-    print("open failed: $!\n") if ($debug);
-    $AC= 0777777; return;
-  }
 }
 
 # Read system call
 sub sys_read {
-  # Read seems to have arguments: AC is the file descriptor, PC+1 is
-  # the pointer to the buffer and PC+2 is the number of words to read.
-  # Return the number of words read in AC on success, or -1 on error.
 
-  # Get the file descriptor, start address and end address
-  my $fd= $AC;
-  my $start= $Mem[$PC+1];
-  my $count= $Mem[$PC+2];
-  my $end= $start + $count -1;
-  printf("PC %06o: read: %d words from %o from fd %d\n", $PC, $count, $start, $fd) if ($debug);
+    # Read seems to have arguments: AC is the file descriptor, PC+1 is
+    # the pointer to the buffer and PC+2 is the number of words to read.
+    # Return the number of words read in AC on success, or -1 on error.
 
-  # Bump up the PC
-  $PC += 3;
+    # Get the file descriptor, start address and end address
+    my $fd    = $AC;
+    my $start = $Mem[ $PC + 1 ];
+    my $count = $Mem[ $PC + 2 ];
+    my $end   = $start + $count - 1;
+    printf( STDERR "PC %06o: read: %d words into %o from fd %d\n",
+        $PC, $count, $start, $fd )
+      if ($debug);
 
-  # That filehandle is not open, set an error -1 in octal
-  if (!defined($FD[$fd])) {
-    print("read: fd $fd is not open\n") if ($debug);
-    $AC= 0777777; return;
-  }
+    # Bump up the PC
+    $PC += 3;
 
-  # Read each word in
-  my $FH= $FD[$fd];
-  $count=0;
-  foreach my $addr ($start .. $end) {
-    # It's a terminal, so convert from ASCII
-    if (-t $FH) {
-      my $c1= getc($FH);
-      last if (!defined($c1));			# No character, leave the loop
-      my $c2= getc($FH) || "";			# No character, make it a NUL
-      $Mem[$addr]= (ord($c1) << 9) | ord($c2);	# Pack both into one word
-      $count++;
-    } else {
-      # otherwise (for now) read in one line and convert to octal
-      my $line= <$FH>;
-      chomp($line);
-      last if (!defined($line));		# No line, leave the loop
-      $Mem[$addr]= oct($line) & 0777777;
-      $count++;
+    # That filehandle is not open, set an error -1 in octal
+    if ( !defined( $FD[$fd] ) ) {
+        print( STDERR "read: fd $fd is not open\n") if ($debug);
+        $AC = 0777777;
+        return;
     }
-  }
-  # No error
-  $AC= $count; return;
+
+    # Read each word in
+    my $FH = $FD[$fd];
+    $count = 0;
+    foreach my $addr ( $start .. $end ) {
+
+        # It's a terminal, so convert from ASCII
+        if ( -t $FH ) {
+            my $c1 = getc($FH);
+            last if ( !defined($c1) );    # No character, leave the loop
+            my $c2 = getc($FH) || "";     # No character, make it a NUL
+            $Mem[$addr] =
+              ( ord($c1) << 9 ) | ord($c2);    # Pack both into one word
+            $count++;
+        } else {
+            # otherwise (for now) read in one line and convert to octal
+            my $line = <$FH>;
+            last if ( !defined($line) );       # No line, leave the loop
+            chomp($line);
+            $Mem[$addr] = oct($line) & 0777777;
+            $count++;
+        }
+    }
+
+    # No error
+    $AC = $count;
+    return;
 }
 
 # Write system call
 sub sys_write {
 
-  # Write seems to have arguments: AC is the file descriptor, PC+1 is
-  # the pointer to the buffer and PC+2 is the number of words to write
+    # Write seems to have arguments: AC is the file descriptor, PC+1 is
+    # the pointer to the buffer and PC+2 is the number of words to write
 
-  # Get the file descriptor, start address and end address
-  my $fd= $AC;
-  my $start= $Mem[$PC+1];
-  my $count= $Mem[$PC+2];
-  my $end= $start + $count -1;
-  printf("PC %06o: write: %d words from %o to fd %d\n", $PC, $count, $start, $fd) if ($debug);
+    # Get the file descriptor, start address and end address
+    my $fd    = $AC;
+    my $start = $Mem[ $PC + 1 ];
+    my $count = $Mem[ $PC + 2 ];
+    my $end   = $start + $count - 1;
+    printf( STDERR "PC %06o: write: %d words from %o to fd %d\n",
+        $PC, $count, $start, $fd )
+      if ($debug);
 
-  # Bump up the PC
-  $PC += 3;
+    # Bump up the PC
+    $PC += 3;
 
-  # That filehandle is not open, set an error -1 in octal
-  if (!defined($FD[$fd])) {
-    print("write: fd $fd is not open\n") if ($debug);
-    $AC= 0777777; return;
-  }
-
-  # Write each word out
-  my $FH= $FD[$fd];
-  foreach my $addr ($start .. $end) {
-    # It's a terminal, so convert to ASCII
-    # otherwise (for now) print in octal
-    if (-t $FH) {
-      print($FH word2ascii($Mem[$addr]));
-    } else {
-      printf($FH "%06o\n", $Mem[$addr]);
+    # That filehandle is not open, set an error -1 in octal
+    if ( !defined( $FD[$fd] ) ) {
+        print( STDERR "write: fd $fd is not open\n") if ($debug);
+        $AC = 0777777;
+        return;
     }
-  }
-  # No error
-  $AC= 0; return;
+
+    # Write each word out
+    my $FH = $FD[$fd];
+    foreach my $addr ( $start .. $end ) {
+
+        # It's a terminal, so convert to ASCII
+        # otherwise (for now) print in octal
+        if ( -t $FH ) {
+            print( $FH word2ascii( $Mem[$addr] ) );
+        } else {
+            printf( $FH "%06o\n", $Mem[$addr] );
+        }
+    }
+
+    # No error
+    $AC = 0;
+    return;
 }
 
 # Convert an 18-bit word into two ASCII characters and return them.
 # Don't return NUL characters
 sub word2ascii {
-  my $word= shift;
-  my $c1= ($word >> 9) & 0177;
-  my $c2= $word & 0177;
-  my $result= "";
-  $result .= chr($c1) if ($c1);
-  $result .= chr($c2) if ($c2);
-  return($result);
+    my $word   = shift;
+    my $c1     = ( $word >> 9 ) & 0177;
+    my $c2     = $word & 0177;
+    my $result = "";
+    $result .= chr($c1) if ($c1);
+    $result .= chr($c2) if ($c2);
+    return ($result);
 }
 
 # Given the address of a word in memory, interpret that location
 # and those following as a NUL-terminated ASCII string and return
 # a copy of this string
 sub mem2string {
-  my $addr= shift;
-  my $result= "";
+    my $addr   = shift;
+    my $result = "";
 
-  while (1) {
-    # Stop when the address leave the 8K word address space
-    return($result) if ($addr > 017777);
+    while (1) {
 
-    # Stop when the value there is zero
-    my $word= $Mem[$addr];
-    return($result) if ($word==0);
+        # Stop when the address leave the 8K word address space
+        return ($result) if ( $addr > 017777 );
 
-    # Get the top ASCII character, return if NUL
-    my $c1= ($word >> 9) & 0177;
-    return($result) if ($c1==0);
-    $result .= chr($c1);
+        # Stop when the value there is zero
+        my $word = $Mem[$addr];
+        return ($result) if ( $word == 0 );
 
-    # Get the bottom ASCII character, return if NUL
-    my $c2= $word & 0177;
-    return($result) if ($c2==0);
-    $result .= chr($c2);
+        # Get the top ASCII character, return if NUL
+        my $c1 = ( $word >> 9 ) & 0177;
+        return ($result) if ( $c1 == 0 );
+        $result .= chr($c1);
 
-    # Move up to the next address
-    $addr++;
-  }
+        # Get the bottom ASCII character, return if NUL
+        my $c2 = $word & 0177;
+        return ($result) if ( $c2 == 0 );
+        $result .= chr($c2);
+
+        # Move up to the next address
+        $addr++;
+    }
 }
