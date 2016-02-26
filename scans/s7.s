@@ -266,7 +266,7 @@ ttyrestart: 0
    jms wakeup
    dac sfiles+6
    cla
-   wbi
+   wbl
    jmp piret	"** END CROSSED OUT
 
 1: crsf

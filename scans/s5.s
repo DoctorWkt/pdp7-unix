@@ -212,7 +212,7 @@ dspnl: 0
    jmp dspnl i
 1:
    lac o2000
-   wbi			"** ??
+   wbl
    isz dspput
    jmp dspput i
 
