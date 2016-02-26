@@ -33,6 +33,8 @@ die("Usage: $0 [-d] a.outfile [arg1 arg2 ...]\n") if ( @ARGV < 1 );
 # and simulate it
 load_code( shift(@ARGV) );
 set_arguments(@ARGV);
+#dump_memory();
+#exit(0);
 simulate();
 exit(0);
 
@@ -105,7 +107,7 @@ sub set_arguments {
   }
 
   # Count the number of words to store each string and its pointer
-  my $wordcount=1;  # 1 as we count the NULL pointer at end of array
+  my $wordcount=2;  # 2 as we count the NULL pointer at end of array
   my $argcount= @ARGV;
   foreach my $arg (@ARGV) {
     # +1 before /2 to allow for the NUL character at end of string
