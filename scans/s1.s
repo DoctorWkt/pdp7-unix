@@ -102,31 +102,94 @@ swap: 0
    dac u.ulistp i
    ion
    jmp dskswap; 07000
+   lac u.dspbuf
+   sna
+   jmp 2f
+   law dspbuf
+   jms movdsp
+2:
+   iof
+   lac o600000
+   tad 9f+t i
+   dac 9f+t i
+   ion
+   jms dskswap; 06000
+   lac u.swapret
+   dac swap
+   lac o20
+   dac maxquant
+   lac u.dspbuf
+   sza
+"** 01-s1.pdf page 4
+   jms movdsp
+3:
+   dzm uquant
+   iof
+   jmp swap i
+t = t+1
 
-" For now, this stuff is defined so that
-" the assembler doesn't complain about it
+swp:
+   jmp .
+   .save; .getuid; .open; .read; .write; .creat; .seek; .tell
+   .close; .link; .unlink; .setuid; .rename; .exit; .time; .intrp
+   .chdir; .chmod; .chown; badcal; .sysloc; badcal; .capt; .rele
+   .status; badcal; .sems; .rmes; .fork
+swn:
+    .-swp-1 i
 
+.intrp:
+   lac u.ac
+   dac u.intflg
+   jmp okexit
 
-pibreak: 23
-u.ac: 100
-u.mq: 3
-u.rq: 3
-copy: 7
-.savblk: 0
-.insys: 0
-uquant: 0
-betwen: 0
-maxquant: 0
-laci: 0
-swp: 0
-badcal: 0
-coldentry: 0
-halt: 0
-dskio: 0
-sysdata: 0
-dskbuf: 0
-o7000: 07000
-o20001: 020001
+.sysloc:
+   lac u.ac
+   and o1777
+   jms betwen; d1; locn
+      jms error
+   tad locsw
+   dac .+1
+   lac ..
+   dac u.ac
+   jmp sysexit
+
+locsw:
+   lac .
+   iget; inode; userdata; sysdata; copy; copyz; betwen; dskrd
+   dskwr; dskbuf; dpdata; namei; pbsflgs; alloc; free; dspdata
+   crdata
+locn:
+   .-locsw-1
+
 chkint: 0
-.save: 0
-lookfor: 0
+   lac .insys
+   sza
+   jmp chkint i
+   lac .int1
+   sna
+   jmp 1f
+   sad u.ofiles+2
+   jmp 2f
+1:
+   lac .int2
+   sna
+   jmp chkint i
+   sad chkint i
+   sad u.ofiles+2
+   skp
+   jmp chkint i
+   dzm .int2
+   jmp 1f
+2:
+   dzm .int1
+1:
+"** 01-s1.pdf page 5
+   lac u.intflg
+   sza
+   jmp chkint i
+   -1
+   dac .insys
+   ion
+   isz chkint
+   jmp chkint i
+

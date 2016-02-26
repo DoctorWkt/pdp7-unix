@@ -21,6 +21,8 @@ my $origline;  # The current input line of code
 
 my $stage = 1; # Pass one or pass two
 my $debug = 0; # Run in debug mode
+my $errors = 0; # set to non-zero on error
+my %Undef;	# undefined symbols: only complain once
 
 ### Main program ###
 
@@ -87,13 +89,25 @@ for my $i ( 0 .. $#Mem ) {
     }
 }
 
-exit(0);
+exit($errors);
+
+my $file;			# global for error messages
+my $lineno;
+
+sub err {
+    my $msg = shift;
+    $errors = 1;		# exit status
+    print STDERR "$file:$lineno: $msg\n";
+    return 0;
+}
 
 # Open and parse the given file
 sub parse_file {
-    my $file = shift;
+    $file = shift;
     open( my $IN, "<", $file ) || die("Cannot read $file: $!\n");
+    $lineno = 0;
     while ( my $line = <$IN> ) {
+	$lineno++;
 
         # Lose the end of line and any leading/trailing whitespace
         # Discard any comments and preceding comment whitespace
@@ -111,12 +125,12 @@ sub parse_file {
             # Split into a section with possible labels and a
             # statement section with definitely no labels. The ?
             # makes the first pattern less greedy.
-            #print("cmd is >$cmd<\n");
+            print("cmd is >$cmd<\n");
             $cmd =~ m{(.*?)([^:]*$)};
             my $labelsect = $1;
             my $statement = $2;
 
-            #print(">$labelsect< >$statement<\n");
+	    #print(">$labelsect< >$statement<\n");
 
             # Split $labelsect into labels using the : character
             my @labellist = split( /:\s*/, $labelsect );
@@ -147,9 +161,9 @@ sub parse_label {
     }
 
     # It's a textual label, check if it's been defined before
-    die("Label $label defined multiple times\n")
-      if ( defined( $Label{$label} ) );
-
+    if ( defined( $Label{$label} ) ) {
+	err("Label $label defined multiple times\n") if ( $stage == 1 );
+    }
     # Otherwise, save its value
     $Label{$label} = $Var{'.'};
     #printf( "Set absolute label %s to 0%o\n", $label, $Label{$label} );
@@ -202,6 +216,7 @@ sub parse_statement {
 sub parse_expression {
     my $expression = shift;
 
+print "exp: $expression\n";
     # If it's a defined variable ( . , .. , etc.)
     # return the value
     return ( $Var{$expression} )
@@ -426,7 +441,11 @@ sub parse_expression {
         #print("Did a subtraction and got $diff\n");
         return ($diff);
     }
-    die("I have no idea what $expression is in pass two\n") if ( $stage == 2 );
+    if ( $stage == 2 ) {
+	err("undefined: $expression") unless (defined $Undef{$expression});
+	$Undef{$expression} = 1;
+    }
+    return 0;
 }
 
 # Add two expression together
@@ -463,18 +482,20 @@ sub find_relative_label {
     my $curlocation = $Var{'.'};
 
     # Error check: no labels at all
-    die("No relative labels\n") if ( !defined( $Rlabel{$label} ) );
+    if ( !defined( $Rlabel{$label} ) ) {
+	return err("relative label $label not defined\n");
+    }
 
     # Get the list of possible locations for this label
     my $locarray = $Rlabel{$label};
 
     # Error check: no locations
-    die("No relative labels\n") if ( @{$locarray} == 0 );
+    return err("No relative labels") if ( @{$locarray} == 0 );
 
     # Error check: forward but no next location, or backward but no previous
-    die("No forward label\n")
+    return err("No forward label $label")
       if ( ( $direction eq 'f' ) && ( $curlocation > $locarray->[-1] ) );
-    die("No backward label\n")
+    return err("No backward label $label")
       if ( ( $direction eq 'b' ) && ( $curlocation < $locarray->[0] ) );
 
     # Search forward for a location larger then the current one

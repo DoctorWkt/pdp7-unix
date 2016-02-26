@@ -2,15 +2,15 @@
 " s5
 
 dskswap: 0
-   cli; ais 3
+   cll; als 3
    dac 9f+t
    jms dsktrans; -64; userdata; 9f+t; dskswap
-   lac 0f+t
+   lac 9f+t
    tad o20
    dac 9f+t
-   jms dsktrans; -4096; 4096; 9f+t; dekswap
-   isc dskswap
-   jmp dskswap
+   jms dsktrans; -4096; 4096; 9f+t; dskswap
+   isz dskswap
+   jmp dskswap i
 
 t = t+1
 
@@ -21,7 +21,7 @@ access: 0
    spa
    jmp access i
    sad i.uid
-   ird 2
+   lrs 2
    lacq
    and mode
    sza
@@ -60,8 +60,8 @@ t = t+1
 fget: 0
    jms betwen; d0; d9
       jmp fget i
-   cli; mul; 3
-   iacq             "** ??
+   cll; mul; 3
+   lacq
 "** 01-s1.pdf page 29
 
    tad ofilesp
@@ -83,14 +83,14 @@ forall: 0
    sad u.limit
    jmp 1f
    lac u.base
-   rai
+   ral
    lac u.base i
-   sni
+   snl
    lrs 9
    and o777
    jmp forall i
 1:
-   lac u.ount
+   lac u.count
    dac u.ac
    jmp sysexit
 
@@ -157,7 +157,7 @@ icreat: 0
    lac u.uid
    dac u.uid
    -1
-   dac i.niks
+   dac i.nlks
    dzm i.size
    jms copyz; i.dskps; 7
    jms iput
@@ -171,9 +171,9 @@ dspput: 0
    jmp i dspput
    sad o14
    jmp 1f
-   img		"** ???
+   lmq
    sad o12
-   jmp dspni
+   jmp dspnl
    lac dsploc i
    sad o400000
    jmp dspleft
@@ -195,19 +195,19 @@ dspleft:
    dac 8
    lac o400000
    dac 8 i
-   cla; liss 18+7
+   cla; llss 18+7
    dac dsploc i
    jmp dspput i
 
-dspni: 0
-   lac dspino
+dspnl: 0
+   lac dsplno
    sad d33
    jmp 1f
-   isz dspino
-   jmp dspni i
+   isz dsplno
+   jmp dspnl i
 1:
    lac o2000
-   wbi
+   wbi			"** ??
    isz dspput
    jmp dspput i
 
@@ -216,12 +216,12 @@ dspinit: 0
    dac dsploc
    lac o300000
    dac dspbuf+3
-   dzm dspino
+   dzm dsplno
    jmp dspinit i
 
 movdsp: 0
    iof
-   cdf
+   caf
    dac dspbufp
    -1
    dac .dspb
@@ -237,7 +237,7 @@ argname: 0
    jms arg
    dac .+2
    jms copy; ..; name; 4
-   lac u.edir
+   lac u.cdir
    jms namei; name
       jms error
    jmp argname i

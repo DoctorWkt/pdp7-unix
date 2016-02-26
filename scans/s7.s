@@ -3,20 +3,20 @@
 
 pibreak:
    dac .ac	"** CROSSED OUT....
-   dpsf
+   lpsf
    jmp 1f
 
-   dpcf
-   dprs
+   lpcf
+   dprs		"** ??
    dac dpstat
-   sma rad
+   sma ral
    jmp 2f
-   dprc
+   dprc		"** ??
    dac dpchar
    -1
    dac dpread
    lac dpstat
-   rai
+   ral
 2:
    sma
    jmp piret
@@ -28,7 +28,7 @@ pibreak:
    jmp 1f
 
    lpb
-   dac pbsfigs
+   dac pbsflgs
    isz s.tim+1
    skp
    isz s.tim
@@ -251,7 +251,7 @@ ttyrestart: 0
    lpb
    dac pbsflgs+1
 
-"** 01-s1.pdf page 44
+"** 01-s1.pdf page 45
 
    and o2000
    sna

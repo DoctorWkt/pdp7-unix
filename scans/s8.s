@@ -102,7 +102,7 @@ q2:
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
 dsploc: .=.+1
-dspinc: .=.+1
+dsplno: .=.+1
 dspbuf:
    0065057;0147740;0160000
    .=.+30
@@ -113,11 +113,11 @@ coldentry:
    clon
    law 3072
    vcga
-   jsp dspinit
+   jms dspinit
    law dspbuf
-   jsp movdsp
+   jms movdsp
    cla
-   jsp dskio; 06000
+   jms dskio; 06000
    jms copy; dskbuf; sysdata; ulist-sysdata
    lac d3
    jms namei; initf
@@ -194,7 +194,7 @@ inode:
    i.flags: .=.+1
    i.dskps: .=.+7
    i.uid: .=.+1
-   i.lks: .=.+1
+   i.nlks: .=.+1
    i.size: .=.+1
    i.uniq: .=.+1
       .= inode+12

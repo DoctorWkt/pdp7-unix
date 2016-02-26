@@ -6,5 +6,12 @@ For modified versions of these files, look in src/cmds and src/sys.
 
 Details of the files:
 
-s1.s: pages 2-3    of 01-s1.pdf, incomplete and with some cruft at the end
+s1.s: pages 2-5    of 01-s1.pdf, incomplete
+s2.s: pages 7-
+s3.s: pages 14-
+s4.s: pages 21-
+s5.s: pages 28-
+s6.s: pages 34-
+sx.s: temp symbol defns (from end of s1.s)
+
 cat.c: pages 21-23 of 06-5-12.pdf

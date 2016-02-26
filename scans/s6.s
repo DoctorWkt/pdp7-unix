@@ -37,7 +37,7 @@ itrunc: 0
    jmp 1b
    lac i.flags
    and o577777
-   dac i.flacs
+   dac i.flags
    jmp itrunc i
 t = t+4
 
@@ -54,7 +54,7 @@ namei: 0
    -8
    tad i.size
    cma
-   irss 3
+   lrss 3
    dac 9f+t
    sna
    jmp namei i
@@ -94,13 +94,13 @@ t = t+2
 
 iget: 0
    dac ii
-   cli; idiv; 5
+   cll; idiv; 5
    dac 9f+t
    tad d2
    dac 9f+i+1
    jms dskrd
    lac 9f+t
-   cli; mul; 12
+   cll; mul; 12
    lacq
    tad dskbufp
    dac 9f+t
@@ -151,14 +151,14 @@ dget: 0
    alss 3
    dac 9f+t
    jms pget
-   fac 9f+t+1
+   dac 9f+t+1
    jms dskrd
    lac 9f+t
    and o77
    tad dskbufp
    dac 9f+t+2
    dac .+2
-   jms copy; ..; dnode; 8
+   jms copy; ..; inode; 8
    lac 9f+t
    tad d8
    jms betwen; d0; i.size
@@ -173,7 +173,7 @@ dput: 0
    jms dskrd
    lac 9f+t+2
    dac .+3
-   jms copy; dnode; ..; 8
+   jms copy; inode; ..; 8
    lac 9f+t+1
    jms dskwr
    jmp dput i
@@ -181,11 +181,11 @@ dput: 0
 t = t+3	"** first t not there (hole from hole punch?)
 
 pget: 0
-   irss 6
+   lrss 6
    dac 9f+t
    lac i.flags
 
-"** 01-s1.pdf page 36
+"** 01-s1.pdf page 37
 
    and o200000
    sza
@@ -193,7 +193,7 @@ pget: 0
    lac 9f+t
    jms betwen; d0; d6
       jmp 1f
-   rad idskpp
+   tad idskpp
    dac 9f+t
    lac 9f+t i
    sna
@@ -203,8 +203,8 @@ pget: 0
 1:
    jms alloc
    dac 9f+t+1
-   jms copy; idskps; dskbuf; 7
-   jms copyz; dskbuf+7; 6467	"** NUMBER UNCLEAR 64-7???
+   jms copy; i.dskps; dskbuf; 7
+   jms copyz; dskbuf+7; 64-7	"** NUMBER UNCLEAR
    lac 9f+t+1
    jms dskwr
    lac 9f+t+1
@@ -247,8 +247,8 @@ iwrite: 0
 
 "** 01-s1.pdf page 38
 
-   dac oread
-   lac cslp
+   dac iread
+   lac cskp
    dac iwrite
    jmp 1f
 
@@ -282,7 +282,7 @@ iread: 0
 1:
    lac 9f+t
    jms pget
-   das 9f+t+3
+   dac 9f+t+3
    jms dskrd
    lac 9f+t
    and o77
@@ -331,7 +331,7 @@ finac: 0
    sma
    jms error
    lac f.i
-   jms ihet
+   jms iget
    jms finac i
 
 dacisize: 0
