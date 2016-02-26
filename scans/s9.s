@@ -38,7 +38,7 @@
    jmp 1b " 0 count means pause
    dac xx
    isz ii
-   iac ii
+   lac ii
    jms iget
    jms copyz; inode; 12
    jms getw " flags
@@ -95,8 +95,8 @@ getw: 0
    omq
    lmq
    jms getc
-   omg
-   lmg
+   omq
+   lmq
    add sum
    dac sum
    lacq
