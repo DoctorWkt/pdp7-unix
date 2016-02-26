@@ -147,14 +147,17 @@ sub simulate {
         my $opcode      = ( $instruction >> 12 ) & 074;
         my $indirect    = ( $instruction >> 13 ) & 1;
         my $addr        = $instruction & 017777;
+
+	# Work out what any indirect address would be
+	my $indaddr= ($indirect) ? $Mem[$addr] & 017777 : $addr;
         printf( STDERR
-              "PC %06o: instruction %08o, op %03o, ind %o, addr %06o\n",
-            $PC, $instruction, $opcode, $indirect, $addr )
+              "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
+            $PC, $instruction, $opcode, $indirect, $addr, $indaddr )
           if ($debug);
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
-            $Oplist{$opcode}->( $instruction, $indirect, $addr );
+            $Oplist{$opcode}->( $instruction, $addr, $indaddr );
         } else {
             printf( STDERR "Unknown instruction 0%o at location 0%o\n",
                 $instruction, $PC );
@@ -166,53 +169,45 @@ sub simulate {
 # Debug code: dump memory contents
 sub dump_memory {
     foreach my $i ( 0 .. 017777 ) {
-        printf( STDERR "%06o: %08o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
+        printf( STDERR "%06o: %06o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
     }
 }
 
 # Load AC
 sub lac {
-    my ( $instruction, $indirect, $addr ) = @_;
-    printf( STDERR "PC %06o: lac %05o (value %08o) into AC\n",
-        $PC, $addr, $Mem[$addr] )
+    my ( $instruction, $addr, $indaddr ) = @_;
+    printf( STDERR "PC %06o: lac %05o (value %06o) into AC\n",
+        $PC, $indaddr, $Mem[$indaddr] )
       if ($debug);
-    $AC = ($indirect) ? $Mem[ $Mem[$addr] & 017777 ] : $Mem[$addr];
+    $AC = $Mem[$indaddr];
     $PC++;
 }
 
 # Deposit AC
 sub dac {
-    my ( $instruction, $indirect, $addr ) = @_;
-    printf( STDERR "PC %06o: dac AC (value %08o) into %05o\n",
-        $PC, $AC, $addr )
+    my ( $instruction, $addr, $indaddr ) = @_;
+    printf( STDERR "PC %06o: dac AC (value %06o) into %05o\n",
+        $PC, $AC, $indaddr )
       if ($debug);
-    if ($indirect) {
-        $Mem[ $Mem[$addr] & 017777 ] = $PC;
-    } else {
-        $Mem[$addr] = $AC;
-    }
+        $Mem[$indaddr] = $AC;
     $PC++;
 }
 
 # Add to AC
 sub tad {
-    my ( $instruction, $indirect, $addr ) = @_;
-    printf( STDERR "PC %06o: tac AC (value %08o) from addr %05o\n",
-        $PC, $AC, $addr )
+    my ( $instruction, $addr, $indaddr ) = @_;
+    printf( STDERR "PC %06o: tac AC (value %06o) from addr %05o\n",
+        $PC, $AC, $indaddr )
       if ($debug);
-    if ($indirect) {
-        $AC += $Mem[ $Mem[$addr] & 017777 ];
-    } else {
-        $AC+= $Mem[$addr];
-    }
+      $AC+= $Mem[$indaddr];
     $PC++;
 }
 
 # Jump
 sub jmp {
-    my ( $instruction, $indirect, $addr ) = @_;
-    printf( STDERR "PC %06o: jmp %06o\n", $PC, $addr ) if ($debug);
-    $PC = $addr;
+    my ( $instruction, $addr, $indaddr ) = @_;
+    printf( STDERR "PC %06o: jmp %06o\n", $PC, $indaddr ) if ($debug);
+    $PC = $indaddr;
 }
 
 # Special instructions
@@ -242,13 +237,13 @@ sub special {
         $PC += ( $AC == 0 ) ? 2 : 1;
         return;
     }
-    printf( STDERR "PC %06o: unknown instruction %08o\n", $PC, $instruction );
+    printf( STDERR "PC %06o: unknown instruction %06o\n", $PC, $instruction );
     exit(1);
 }
 
 # I/O transfer: used for system calls
 sub iot {
-    my ( $instruction, $indirect, $addr ) = @_;
+    my ( $instruction, $addr, $indaddr ) = @_;
 
     # Syscalls that we can simulate
     my %Syscallist = (
