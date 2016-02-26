@@ -31,7 +31,7 @@ alloc: 0
 
 free: 0
    lmq
-   lac x.nfblks
+   lac s.nfblks
    sad d10
    jmp 1f
    tad fblksp
@@ -42,7 +42,7 @@ free: 0
    isz s.nfblks
    jmp free i
 1:
-   lac x.nxfblk
+   lac s.nxfblk
    dac dskbuf
    jms copy; s.fblks+1; dskbuf+1; 9
    lacq
@@ -57,7 +57,7 @@ t = t+1
 laci: 0
    and o1777
    tad o200000
-   dac ._1
+   dac .+1
    lac ..
    jmp laci i
 
@@ -90,7 +90,7 @@ copy: 0
    dac 8
    isz copy
    -1
-   tad copu i
+   tad copy i
    dac 9
    isz copy
    -1
@@ -128,10 +128,10 @@ putchar: 0
    cla
    jms takeq
       jmp putchar i
-   tad of0001
+   tad o40001
    dac .+4
    lac 9f+t
-   jms putc
+   jms putq
    lac char
    lac q2+1 ..
    isz putchar
@@ -211,7 +211,7 @@ srcdbs: 0
    law 65	"** crossed out
    tad 9f+t+1	"** crossed out isz 8 written
    isz 9f+t+1
-   isx 9f+t
+   isz 9f+t
    jmp 1b
    isz srcdbs
    jmp srcdbs i
@@ -228,8 +228,8 @@ collapse: 0
    tad d2	"** crossed out: original obscured
    dac 0f
    cma
-   rad d1
-   tad esdkbsp
+   tad d1
+   tad edskbsp
    and o17777
    sna
    jmp 0f+3
@@ -243,7 +243,7 @@ collapse: 0
    lac dskaddr
    dac 9f+t i
    jms copy; dskbuf; 0; ..; 64
-   jmp collaps i
+   jmp collapse i
 
 dskrd: 0
    jms betwen; d2; d7999
@@ -293,7 +293,7 @@ dskio: 0
    lac 9f+t
    idiv; 10
    dac 9f+t
-   ils 22
+   lls 22
    xor 9f+t
    jms dsktrans; -64; dskbuf; 9f+t; dskio
    isz dskio

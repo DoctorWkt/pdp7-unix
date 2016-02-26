@@ -72,7 +72,7 @@ lookfor: 0
 t= t+1
 
 badcal:
-   calon
+   clon
    -1
    dac 7
 .save:
@@ -195,7 +195,7 @@ swr:
 sww:
    jmp .-4 i
    .halt; rttyi; rkbdi; rppti; .halt
-   .halt; wttyo; wskpo; wppto
+   .halt; wttyo; wdspo; wppto
 
 .halt: jms halt
 
@@ -203,7 +203,7 @@ rttyi:
    jms chkint1
    lac d1
    jms getchar
-      jmp1f
+      jmp 1f
    and o177
    jms betwen o101; o132
    skp
@@ -225,7 +225,7 @@ wttyo:
    spa
    jmp 1f
    xor 0400000
-   dac dfiles+1
+   dac sfiles+1
    lacq
    tls
    sad o12
@@ -242,7 +242,7 @@ wttyo:
    jms swap
    jmp wttyo
 
-rkdbi:
+rkbdi:
    jms chkint1
    lac d2
    jms getchar
@@ -298,7 +298,7 @@ rppti:
    jms getchar
       jmp .+3
    alss 9
-   jmp apssone
+   jmp passone
    lac sfiles+3
    sma
    rsa
@@ -342,7 +342,7 @@ passone:
 
 error: 0
    -1
-   sac u.ac
+   dac u.ac
    jmp sysexit
 
 chkint1: 0

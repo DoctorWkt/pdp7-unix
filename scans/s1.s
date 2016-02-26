@@ -133,7 +133,7 @@ swp:
    .save; .getuid; .open; .read; .write; .creat; .seek; .tell
    .close; .link; .unlink; .setuid; .rename; .exit; .time; .intrp
    .chdir; .chmod; .chown; badcal; .sysloc; badcal; .capt; .rele
-   .status; badcal; .sems; .rmes; .fork
+   .status; badcal; .smes; .rmes; .fork
 swn:
     .-swp-1 i
 
@@ -144,7 +144,7 @@ swn:
 
 .sysloc:
    lac u.ac
-   and o1777
+   and o17777
    jms betwen; d1; locn
       jms error
    tad locsw

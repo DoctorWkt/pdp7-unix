@@ -30,7 +30,7 @@
 .rele:
    dzm u.dspbuf
    law dspbuf
-   jsp movdsp
+   jms movdsp
    jmp sysexit
 
 .chmod:
@@ -123,7 +123,7 @@
    tad i.nlks
    dac i.nlks
 "** 01-s1.pdf page 9
-   jms imput
+   jms iput
    jms dput
    jms okexit
 
@@ -289,7 +289,7 @@ open1:
    lac f.badd
 1:
    jms iread; ..; ..
-   jmp exitrq
+   jmp exitrw
 
 .write:
    jms arg
