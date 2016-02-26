@@ -125,7 +125,7 @@ sub parse_file {
             # Split into a section with possible labels and a
             # statement section with definitely no labels. The ?
             # makes the first pattern less greedy.
-            print("cmd is >$cmd<\n");
+            #print("cmd is >$cmd<\n");
             $cmd =~ m{(.*?)([^:]*$)};
             my $labelsect = $1;
             my $statement = $2;
@@ -216,7 +216,6 @@ sub parse_statement {
 sub parse_expression {
     my $expression = shift;
 
-print "exp: $expression\n";
     # If it's a defined variable ( . , .. , etc.)
     # return the value
     return ( $Var{$expression} )
