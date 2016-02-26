@@ -4,7 +4,7 @@
 
 " manifests
 mnproc = 10
-dspbss = 270
+dspbsz = 270
 ndskbs = 4
 
 " flags
@@ -24,7 +24,7 @@ maxquant: 30
 ofilesp: u.ofiles
 idskpp: i.dskps
 dskbufp: dskbuf
-edspbuf: dspbuf+dspbzs
+edspbuf: dspbuf+dspbsz
 fblksp: s.fblks
 dacq1: dac q1
 lacq1: lac q1
@@ -113,7 +113,7 @@ coldentry:
    ion
    clon
    law 3072
-   vcga
+   wcga
    jms dspinit
    law dspbuf
    jms movdsp
@@ -142,6 +142,7 @@ ttydelay: .=.+1
 name: .=.+4
 lnkaddr: .=.+1
 char: .=.+1
+dskaddr: .=.+1
 uniqpid: 1
 lu: .=.+4
 sfiles: .=.+10
@@ -180,7 +181,7 @@ userdata:
    u.uid: -1
    u.pid: 1
    u.cdir: 3
-   u.ulistp: clist
+   u.ulistp: ulist
    u.swapret: 0
    u.base: 0
    u.count: 0
@@ -200,6 +201,7 @@ inode:
    i.uniq: .=.+1
       .= inode+12
 di: .=.+1
+dnode:
    d.i: .=.+1
    d.name: .=.+4
    d.uniq: .=.+1

@@ -1,4 +1,4 @@
-"** 01-s1.pdf page 54
+"** 01-s1.pdf page 53
 " s9 -- cold boot
 
 . = coldentry+4
@@ -8,7 +8,7 @@
    dzm ii
    jms copyz; dskbuf; 64
 1:
-   iac ii
+   lac ii
    jms dskio; 0700
    isz ii
    -710
@@ -42,7 +42,7 @@
    jms iget
    jms copyz; inode; 12
    jms getw " flags
-   dac i.dlags
+   dac i.flags
    -1
    dac i.uid
    jms getw " number links
@@ -51,7 +51,7 @@
    tad xx
    dac i.size
    lac ii
-   dac u.uniq
+   dac i.uniq
    law 4096-1
    dac 8
    -1
@@ -65,7 +65,7 @@
 2:
    jms getw
    dac 8 i
-   iss xx
+   isz xx
    jmp 2b
 3:
    lac sum
@@ -80,7 +80,7 @@
    jms iwrite; 4096; ..
    jms iput
    cla
-   jms dksio
+   jms dskio
 
 
 
@@ -90,10 +90,10 @@
 getw: 0
    jms getc
    alss 12
-   imq
+   lmq
    jms getc
-   omg
-   lmg
+   omq
+   lmq
    jms getc
    omg
    lmg
