@@ -1,3 +1,4 @@
+"** 04-cas.pdf page 1
 " cas
 
    narg = i 017777
@@ -60,6 +61,7 @@ mes:
    dac 10
 
 advanc:
+"** 04-cas.pdf page 2
    lac nchar
    dzm nchar
    sza
@@ -121,6 +123,7 @@ adv1:
    sad o170
    skp
    jmp 1f
+"** 04-cas.pdf page 3
    dzm vis
    jmp advanc
 1:
@@ -182,6 +185,7 @@ adv1:
    alss 6
    llss 3
    tad o60060
+"** 04-cas.pdf page 4
    dac i 10
    cla
    llss 3
@@ -243,6 +247,7 @@ loop:
    lac dely  ;"dx ,gr, 0
    sna
    jmp c3
+"** 04-cas.pdf page 5
    spa
    jmp c4
    lac d1
@@ -304,6 +309,7 @@ a:
    dac dist
    tad incxp
    dac tmp
+"** 04-cas.pdf page 6
    lac i tmp
    dac incx
    lac dist
@@ -364,7 +370,7 @@ com:
    tad y
    dac y
    jmp loop
-
+"** 04-cas.pdf page 7
 out:
    lac nx
    dac x
@@ -425,6 +431,7 @@ dm3: -3
 dm4: -4
 o162: 0162
 o166: 0166
+"** 04-cas.pdf page 8
 o17: 017
 o777: 0777
 o72: 072
@@ -486,6 +493,7 @@ o12060: 012060
 
 
 
+"** 04-cas.pdf page 9
 :ca
 v
 af
@@ -548,6 +556,7 @@ x
 mk
 v
 ma
+"** 04-cas.pdf page 10
 aa
 ak
 x
@@ -609,6 +618,7 @@ r
 
 :ci
 x
+"** 04-cas.pdf page 11
 md
 v
 mi
@@ -670,6 +680,7 @@ r
 :cm
 v
 aa
+"** 04-cas.pdf page 12
 hf
 ak
 nk
@@ -731,6 +742,7 @@ ck
 kk
 mi
 mc
+"** 04-cas.pdf page 13
 x
 jh
 v
@@ -792,6 +804,7 @@ x
 aa
 v
 ka
+"** 04-cas.pdf page 14
 mc
 ml "???
 kk
@@ -853,6 +866,7 @@ v
 if
 x
 ak
+"** 04-cas.pdf page 15
 v
 if
 nf
@@ -914,6 +928,7 @@ gc
 ia
 ma
 ml "???
+"** 04-cas.pdf page 16
 mc
 mi
 kk
@@ -975,6 +990,7 @@ hi
 fk
 x
 mn
+"** 04-cas.pdf page 17
 x
 mn
 r
