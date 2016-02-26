@@ -228,7 +228,8 @@ sub special {
     }
     if ( $instruction == 0741100 ) {    # spa: skip on positive AC
         printf( STDERR "PC %06o: spa AC %06o\n", $PC, $AC ) if ($debug);
-        $PC += ( $AC >= 0 ) ? 2 : 1;
+        # Because we are dealing with 18 bits, compare the range
+        $PC += ( ($AC >= 0) && ($AC < 0400000) ) ? 2 : 1;
         return;
     }
     if ( $instruction == 0741200 ) {    # sna: skip on non-zero AC
