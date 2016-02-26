@@ -6,16 +6,19 @@ For modified versions of these files, look in src/cmds and src/sys.
 
 Details of the files:
 
-s1.s: pages 2-5    of 01-s1.pdf, incomplete
-s2.s: pages 7-
-s3.s: pages 14-
-s4.s: pages 21-
-s5.s: pages 28-
-s6.s: pages 34-
-s7.s: pages ??? of ???
-s8.s: pages ??? of ???
-s9.s: pages ??? of ???
-sx.s: temp symbol defns (pages ??? of s1.s)
+s1.s: pages 2-5    of 01-s1.pdf
+s2.s: pages 7-12   of 01-s1.pdf
+s3.s: pages 14-19  of 01-s1.pdf
+s4.s: pages 21-26  of 01-s1.pdf
+s5.s: pages 28-32  of 01-s1.pdf
+s6.s: pages 34-38  of 01-s1.pdf
+s7.s: pages 41-46  of 01-s1.pdf
+s8.s: pages 48-51  of 01-s1.pdf
+s9.s: pages 53-54  of 01-s1.pdf
+sop.s pages 62-63  of 01-s1.pdf
+sx.s: temp additional symbol defns
+maksys.s: page 64  of 01-s1.pdf
+trysys.s: page 65  of 01-s1.pdf
 
 bc.s:  pages 7-11  of 06-5-12.pdf
 bi.s:  pages 12-19 of 06-5-12.pdf
