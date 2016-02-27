@@ -31,18 +31,18 @@ orig:
    dac u.rq+1
    jms copy; 10; u.rq+2; 6
    lac 1b
-   dac u.rq+9
+   dac u.rq+8
    -1
    dac .savblk
    dac .insys
    lac uquant
-   jms betwen; 40; maxquant
+   jms betwen; d0; maxquant
       jms swap
    ion
    -1
    tad u.rq+8
    jms laci
-   jms betwen; o20001; swp
+   jms betwen; o20001; swn
       jmp badcal
    tad swp
    dac .+1
@@ -92,6 +92,7 @@ swap: 0
    jms lookfor; 2 " in/notready
       jmp 1f
    jms lookfor; 1 " in/ready
+      jmp 1f
    jmp 2f
 1:
    lac swap
@@ -101,7 +102,7 @@ swap: 0
    tad u.ulistp i
    dac u.ulistp i
    ion
-   jmp dskswap; 07000
+   jms dskswap; 07000
    lac u.dspbuf
    sna
    jmp 2f
@@ -135,7 +136,7 @@ swp:
    .chdir; .chmod; .chown; badcal; .sysloc; badcal; .capt; .rele
    .status; badcal; .smes; .rmes; .fork
 swn:
-    .-swp-1 i
+   .-swp-1 i
 
 .intrp:
    lac u.ac
@@ -174,7 +175,6 @@ chkint: 0
    lac .int2
    sna
    jmp chkint i
-   sad chkint i
    sad u.ofiles+2
    skp
    jmp chkint i
