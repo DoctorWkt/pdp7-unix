@@ -19,6 +19,10 @@ my $AC;           # Accumulator
 my $LINK;         # Link register
 my $MQ;           # MQ register
 
+# Constants
+my $MAXINT = 0777777;		# Biggest unsigned integer
+my $MAXADDR = 017777;		# Largest memory address
+
 ### Main program ###
 
 # Optional debug argument
@@ -31,8 +35,8 @@ die("Usage: $0 [-d] a.outfile [arg1 arg2 ...]\n") if ( @ARGV < 1 );
 
 # Load the a.out file into memory
 # and simulate it
-load_code( shift(@ARGV) );
-set_arguments(@ARGV);
+load_code( $ARGV[0] );
+set_arguments();
 #dump_memory();
 #exit(0);
 simulate();
@@ -43,7 +47,7 @@ sub load_code {
     my $filename = shift;
 
     # Fill all the 8K words in memory with zeroes
-    foreach my $i ( 0 .. 017777 ) {
+    foreach my $i ( 0 .. $MAXADDR ) {
         $Mem[$i] = 0;
     }
 
@@ -73,58 +77,55 @@ sub load_code {
 
 ### Copy the arguments into the PDP-7 memory space, and build
 ### an array of pointers to these arguments. Build a pointer
-### at 017777 that points at the array.
-###
-### At the moment, this is NOT what PDP-7 Unix uses, but it's
-### a start and it will help us to grok the real thing.
-###
-### For now, assume abc, def and ghi are stored in memory.
-### The layout of the pointers and strings would be:
-###
-###    +-------+
-###    |       |
-###    | +-----|---------+
-###    | |     |         |
-###    | | +---|---------|---------+
-###    | | |   |         |         |
-###    | | |   V         V         V
-###   |o|o|o|0|<ab>|<c 0|<de>|<f 0|<gh>|<i 0|o|
-###    ^                                     |
-###    |                                     |
-###    +-------------------------------------+
-###    0 0 0 0  0    0    0    0    0    0   0
-###    1 1 1 1  1    1    1    1    1    1   1
-###    7 7 7 7  7    7    7    7    7    7   7
-###    7 7 7 7  7    7    7    7    7    7   7
-###    6 6 6 7  7    7    7    7    7    7   7
-###    5 6 7 0  1    2    3    4    5    6   7
+### at $MAXADDR that points at the array.
+### 
+### Each argument string is four words long and space padded if the
+### string is not eight characters long. These are stored below
+### address $MAXADDR. Below this is the count of words in the strings.
+### Address $MAXADDR points at the word count. Graphically (for two arguments):
+### 
+###     +------------+
+###  +--|            | Location 017777 ($MAXADDR)
+###  |  +------------+
+###  |  |............|
+###  |  |............| argv[2]
+###  |  |............|
+###  |  +------------+
+###  |  |............|
+###  |  |............| argv[1]
+###  |  |............|
+###  |  +------------+
+###  |  |............|
+###  |  |............| argv[0]
+###  |  |............|
+###  |  +------------+
+###  +->|  argc=12   |
+###     +------------+
 ###
 sub set_arguments {
-  # No arguments, set the 017777 pointer to 017776 which is NULL
-  if (@ARGV==0) {
-    $Mem[ 017777 ] = 017776;
-    dprintf("No arguments, so NULL 017777 pointer\n");
-    return;
-  }
+    # Get the number of arguments including the command name
+    my $argc= scalar(@ARGV);
 
-  # Count the number of words to store each string and its pointer
-  my $wordcount=2;  # 2 as we count the NULL pointer at end of array
-  my $argcount= @ARGV;
-  foreach my $arg (@ARGV) {
-    # +1 before /2 to allow for the NUL character at end of string
-    # += +1 to include the pointer to the string
-    $wordcount += 1 + ( (length($arg) +1)/2);
-  }
+    # We now know that argc will appear in memory
+    # 4*argc +1 below location $MAXADDR
+    # Set argc to the number of words
+    my $addr= $MAXADDR - (4*$argc+1);
+    $Mem[ $MAXADDR ] = $addr;
+    $Mem[ $addr++ ] = $argc*4;
 
-  my $arraybase= 017777 - $wordcount;
-  my $stringbase= $arraybase + $argcount + 1;	# include NULL pointer
-  $Mem[ 017777 ] = $arraybase;
+    # Now start saving the arguments
+    foreach (@ARGV) {
+	# Truncate and/or space pad the argument
+	my $str= sprintf("%-8s", substr($_, 0, 8));
 
-  # Now copy each string into memory and initialise the pointer
-  foreach my $arg (@ARGV) {
-    $Mem[$arraybase++]= $stringbase;
-    $stringbase= string2mem($arg, $stringbase);
-  }
+	# Store pairs of characters into memory
+        for (my $i=0; $i < length($str); $i += 2) {
+          my $c1= substr($str, $i, 1) || "";
+          my $c2= substr($str, $i+1, 1) || "";
+          #printf("Saving %06o to %05o\n", (ord($c1) << 9 ) | ord($c2), $addr);
+          $Mem[$addr++]= (ord($c1) << 9 ) | ord($c2);
+        }
+    }
 }
 
 ### Simulate the machine code loaded into memory
@@ -135,6 +136,7 @@ sub simulate {
         oct("004") => \&dac,
         oct("020") => \&lac,
         oct("034") => \&tad,
+        oct("054") => \&sad,
         oct("060") => \&jmp,
         oct("070") => \&iot,
         oct("074") => \&special,
@@ -147,12 +149,12 @@ sub simulate {
         my $instruction = $Mem[$PC];
         my $opcode      = ( $instruction >> 12 ) & 074;
         my $indirect    = ( $instruction >> 13 ) & 1;
-        my $addr        = $instruction & 017777;
+        my $addr        = $instruction & $MAXADDR;
 
 	# Work out what any indirect address would be
-	my $indaddr= ($indirect) ? $Mem[$addr] & 017777 : $addr;
-        dprintf( "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
-            $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
+	my $indaddr= ($indirect) ? $Mem[$addr] & $MAXADDR : $addr;
+        #dprintf( "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
+        #    $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
@@ -167,7 +169,7 @@ sub simulate {
 
 # Debug code: dump memory contents
 sub dump_memory {
-    foreach my $i ( 0 .. 017777 ) {
+    foreach my $i ( 0 .. $MAXADDR ) {
         printf( STDERR "%06o: %06o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
     }
 }
@@ -193,10 +195,17 @@ sub dac {
 # Add to AC
 sub tad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "PC %06o: tac AC (value %06o) from addr %05o\n",
+    dprintf( "PC %06o: tad AC (value %06o) from addr %05o\n",
         $PC, $AC, $indaddr );
-    $AC+= $Mem[$indaddr];
+    $AC= ($AC + $Mem[$indaddr]) & $MAXINT;
     $PC++;
+}
+
+# Skip if AC different to Y
+sub sad {
+    my ( $instruction, $addr, $indaddr ) = @_;
+    dprintf( "PC %06o: sad AC %06o cf. %06o\n", $PC, $AC, $Mem[$indaddr]);
+    $PC += ($AC != $Mem[$indaddr]) ? 2 : 1;
 }
 
 # Jump
@@ -301,7 +310,7 @@ sub sys_open {
     $PC += 4;
 
     # Convert this to a sensible ASCII filename
-    my $filename = mem2string($start);
+    my $filename = mem2arg($start);
     dprintf( "PC %06o: open: file %s\n", $PC, $filename );
 
     # Open the file
@@ -335,7 +344,7 @@ sub sys_read {
     my $fd    = $AC;
     my $start = $Mem[ $PC + 1 ];
     my $count = $Mem[ $PC + 2 ];
-    my $end   = ($start + $count - 1) & 017777;
+    my $end   = ($start + $count - 1) & $MAXADDR;
     die("sys_read: bad start/end addresses $start $end\n") if ($end < $start);
     dprintf( "PC %06o: read: %d words into %o from fd %d\n",
         $PC, $count, $start, $fd );
@@ -388,7 +397,7 @@ sub sys_write {
     my $fd    = $AC;
     my $start = $Mem[ $PC + 1 ];
     my $count = $Mem[ $PC + 2 ];
-    my $end   = ($start + $count - 1) & 017777;
+    my $end   = ($start + $count - 1) & $MAXADDR;
     die("sys_write: bad start/end addresses $start $end\n") if ($end < $start);
     dprintf( "PC %06o: write: %d words from %o to fd %d\n",
         $PC, $count, $start, $fd );
@@ -433,9 +442,29 @@ sub word2ascii {
     return ($result);
 }
 
+# Given the address of a four word argument string in
+# memory, return a copy of the string in ASCII format.
+# Lose any trailing spaces as well.
+sub mem2arg {
+    my $addr   = shift;
+    my $result = "";
+
+    foreach (1 .. 4) {
+        # Stop if the address leave the 8K word address space
+        last if ( $addr > $MAXADDR );
+        my $word = $Mem[$addr++];
+        my $c1 = ( $word >> 9 ) & 0177;
+        my $c2 = $word & 0177;
+ 	$result .= chr($c1) . chr($c2);
+    }
+    $result=~ s{ *$}{};
+    return($result);
+}
+
 # Given the address of a word in memory, interpret that location
 # and those following as a NUL-terminated ASCII string and return
 # a copy of this string
+# XXX: not sure if I still need this.
 sub mem2string {
     my $addr   = shift;
     my $result = "";
@@ -443,7 +472,7 @@ sub mem2string {
     while (1) {
 
         # Stop when the address leave the 8K word address space
-        return ($result) if ( $addr > 017777 );
+        return ($result) if ( $addr > $MAXADDR );
 
         # Stop when the value there is zero
         my $word = $Mem[$addr];
@@ -462,25 +491,6 @@ sub mem2string {
         # Move up to the next address
         $addr++;
     }
-}
-
-# Given a string and the address of a word in memory, copy
-# the string into memory starting at that address and NUL
-# terminate the string. Return the first address after the string.
-#
-# We will go off the end of the string: suppress warnings
-no warnings ('substr');
-sub string2mem {
-    my ($str, $base)= @_;
-
-    # <= length so we go off the end and insert a NUL
-    for (my $i=0; $i <= length($str); $i += 2) {
-      my $c1= substr($str, $i, 1) || "";
-      my $c2= substr($str, $i+1, 1) || "";
-      #printf("Saving %06o to %05o\n", (ord($c1) << 9 ) | ord($c2), $base);
-      $Mem[$base++]= (ord($c1) << 9 ) | ord($c2);
-    }
-    return($base);
 }
 
 # Print out debug messages

@@ -13,33 +13,15 @@
 " Also, the current coding is hideous and needs refactoring.
 " I'm still coming to grips with PDP-7 assembly code.
 
-
 main:
    " Load the pointer pointer in 017777 to see if we have any arguments
    lac 017777 i
-   sza			" No args, so copy stdin to stdout
-     jmp catfiles	" Yes args, so deal with them below
+   sad d4		" Skip if we have more than four argument words
+     jmp stdinout	" Only four argument words, so no arguments
 
-" This section copies from standard input to standard output
-stdinout:
-   " Read five words into the buffer from stdin
-   " Five was chosen arbitrarily
-   lac d0
-   sys read; buf; 5
-   spa			" Skip if result was >= 0
-     jmp error		" Result was -ve, so error result
-   sna			" Skip if result was >0
-     jmp end		" Result was zero, so nothing left to read
-
-   " Save the count of words read in
-   dac 1f
-
-   " Write five words from the buffer to stdout
-   lac d1
-   sys write; buf; 1:0
-
-   " and loop back for more words to read
-   jmp stdinout
+   lac 017777
+   tad d1		" Bump AC up by 5 so that it points at the first argument
+   tad d4
 
 " This section opens files, and copies their contents to standard output
 catfiles:
@@ -76,20 +58,43 @@ fileend:
    lac fd
    sys close
 
-   " Load and increment the 017777 pointer
-   lac 017777
-   tad d1
-   dac 017777
+   " Subtract 4 from the count of argument words
+   lac minus4
+   tad 017777 i
+   dac 017777 i
+   sad d4		" Is the value 4, i.e. no args left?
+     jmp end		" Yes, so exit
 
-   " Load the pointer pointer in 017777 to see if we have any more arguments
-   lac 017777 i
-   sna			" No args, so end the program
-     jmp end
-   jmp catfiles		" Otherwise loop back to cat this file
+   " Still an argument, so move up to the next filename argument
+   lac name
+   tad d4
+   dac name
+   jmp catfiles		" and loop back to cat this file
 
 end:
    " exit
    sys exit
+
+" This section copies from standard input to standard output
+stdinout:
+   " Read five words into the buffer from stdin
+   " Five was chosen arbitrarily
+   lac d0
+   sys read; buf; 5
+   spa			" Skip if result was >= 0
+     jmp error		" Result was -ve, so error result
+   sna			" Skip if result was >0
+     jmp end		" Result was zero, so nothing left to read
+
+   " Save the count of words read in
+   dac 1f
+
+   " Write five words from the buffer to stdout
+   lac d1
+   sys write; buf; 1:0
+
+   " and loop back for more words to read
+   jmp stdinout
 
 
 " This code comes from the real cat.s
@@ -117,7 +122,9 @@ noreadstr:
 fd: 0		" fd of the open file
 d0: 0		" Constants 0 and 1
 d1: 1
+d4: 4
 d8: 8		" stderr seems to have fd 8
+minus4:	0777774	" -4 constant
 
 " Input buffer for read
 buf: 0; 0; 0; 0; 0
