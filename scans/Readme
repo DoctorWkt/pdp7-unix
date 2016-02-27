@@ -24,8 +24,18 @@ trysys.s: page 65  of 01-s1.pdf
 bc.s:  pages 7-11  of 06-5-12.pdf
 bi.s:  pages 12-19 of 06-5-12.pdf
 bl.s:  pages 3-6   of 06-5-12.pdf
+cat.s: pages 21-23 of 06-5-12.pdf
+
+db.s:     pages 2-21  of 07-13-19.pdf
+dmabs.s:  pages 23-27 of 07-13-19.pdf
+ds.s:     pages 30-38 of 07-13-19.pdf
+dsksav.s: page  40    of 07-13-19.pdf
+dskres.s: page  41    of 07-13-19.pdf
+dskio.s:  pages 42-43 of 07-13-19.pdf
+dsw.s:    page  45    of 07-13-19.pdf
+init.s    pages 47-51 of 07-13-19.pdf
+
 cas.s: pages 1-17 of 04-cas.pdf
-cat.c: pages 21-23 of 06-5-12.pdf
 
 ind.b:   page 2 of 08-rest.pdf
 lease.b: page 4 of 08-rest.pdf
