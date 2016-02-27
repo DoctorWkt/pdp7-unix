@@ -11,7 +11,6 @@ dskswap: 0
    jms dsktrans; -4096; 4096; 9f+t; dskswap
    isz dskswap
    jmp dskswap i
-
 t = t+1
 
 access: 0
@@ -29,13 +28,13 @@ access: 0
    jms error
 
 fassign: 0
-   -1
+   -10
    dac 9f+t
 1:
    lac 9f+t
    tad d10
    jms fget
-      jms halt  " will not happen
+      jms halt " will not happen
    lac f.flags
    sma
    jmp 1f
@@ -89,7 +88,7 @@ forall: 0
    lrs 9
    and o777
    jmp forall i
-failr:
+fallr:
    lac u.base
    add o400000
    dac u.base
@@ -119,6 +118,8 @@ sleep: 0
    lac sleep i
    dac 9f+t
    lac 9f+t i
+   omq
+   dac 9f+t i
    isz sleep
    jmp sleep i
 t = t+1
@@ -160,7 +161,7 @@ icreat: 0
    xor o400000
    dac i.flags
    lac u.uid
-   dac u.uid
+   dac i.uid
    -1
    dac i.nlks
    dzm i.size
@@ -178,7 +179,7 @@ dspput: 0
    jmp 1f
    lmq
    sad o12
-   jmp dspnl
+   jms dspnl
    lac dsploc i
    sad o400000
    jmp dspleft
@@ -217,16 +218,16 @@ dspnl: 0
    jmp dspput i
 
 dspinit: 0
-   lac dspbuf+3
+   lac dspbufp3
    dac dsploc
-   lac o300000
+   lac o400000
    dac dspbuf+3
    dzm dsplno
    jmp dspinit i
 
 movdsp: 0
    iof
-   caf
+   cdf
    dac dspbufp
    -1
    dac .dspb
