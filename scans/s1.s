@@ -61,7 +61,7 @@ sysexit:
    jmp 1f
    jms copy; sysdata; dskbuf; 64
    cla
-   jms dskio; o7000
+   jms dskio; 07000
 1:
    dzm .insys
    jms chkint

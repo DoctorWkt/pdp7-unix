@@ -115,7 +115,7 @@
    lac u.base
    jms iget
    lac ii
-   dac d.i	"** ??
+   dac d.i
    jms copy; name; d.name; 4
    lac i.uniq
    dac d.uniq
