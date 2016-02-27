@@ -51,12 +51,12 @@ sub load_code {
         $Mem[$i] = 0;
     }
 
-    # Set up two file open filehandles
+    # Set up some open filehandles
     $FD[0] = \*STDIN;
     $FD[1] = \*STDOUT;
     $FD[8] = \*STDERR;		# According to cat.s (uses d8 == 8)
 
-    # Open up the file
+    # Open up the PDP-7 executable file
     open( my $IN, "<", $filename ) || die("Unable to open $filename: $!\n");
     while (<$IN>) {
         chomp;
@@ -122,7 +122,7 @@ sub set_arguments {
         for (my $i=0; $i < length($str); $i += 2) {
           my $c1= substr($str, $i, 1) || "";
           my $c2= substr($str, $i+1, 1) || "";
-          #printf("Saving %06o to %05o\n", (ord($c1) << 9 ) | ord($c2), $addr);
+          #printf("Saving %06o to %06o\n", (ord($c1) << 9 ) | ord($c2), $addr);
           $Mem[$addr++]= (ord($c1) << 9 ) | ord($c2);
         }
     }
@@ -135,8 +135,12 @@ sub simulate {
     my %Oplist = (
         oct("004") => \&dac,
         oct("010") => \&jms,
+        oct("010") => \&dzm,
         oct("020") => \&lac,
+        oct("024") => \&xor,
         oct("034") => \&tad,
+        oct("044") => \&isz,
+        oct("050") => \&and,
         oct("054") => \&sad,
         oct("060") => \&jmp,
         oct("070") => \&iot,
@@ -178,7 +182,7 @@ sub dump_memory {
 # Load AC
 sub lac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "PC %06o: lac %05o (value %06o) into AC\n",
+    dprintf( "PC %06o: lac %06o (value %06o) into AC\n",
         $PC, $indaddr, $Mem[$indaddr] );
     $AC = $Mem[$indaddr];
     $PC++;
@@ -187,7 +191,7 @@ sub lac {
 # Deposit AC
 sub dac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "PC %06o: dac AC (value %06o) into %05o\n",
+    dprintf( "PC %06o: dac AC (value %06o) into %06o\n",
         $PC, $AC, $indaddr );
     $Mem[$indaddr] = $AC;
     $PC++;
@@ -196,9 +200,27 @@ sub dac {
 # Add to AC
 sub tad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "PC %06o: tad AC (value %06o) from addr %05o\n",
-        $PC, $AC, $indaddr );
+    dprintf( "PC %06o: tad AC (value %06o) with addr %06o (%06o)\n",
+        $PC, $AC, $indaddr, $Mem[$indaddr] );
     $AC= ($AC + $Mem[$indaddr]) & MAXINT;
+    $PC++;
+}
+
+# And AC and Y
+sub and {
+    my ( $instruction, $addr, $indaddr ) = @_;
+    dprintf( "PC %06o: and AC (value %06o) with addr %06o (%06o)\n",
+        $PC, $AC, $indaddr, $Mem[$indaddr] );
+    $AC &= $Mem[$indaddr];
+    $PC++;
+}
+
+# Xor AC and Y
+sub xor {
+    my ( $instruction, $addr, $indaddr ) = @_;
+    dprintf( "PC %06o: xor AC (value %06o) with addr %06o (%06o)\n",
+        $PC, $AC, $indaddr, $Mem[$indaddr] );
+    $AC ^= $Mem[$indaddr];
     $PC++;
 }
 
@@ -207,6 +229,21 @@ sub sad {
     my ( $instruction, $addr, $indaddr ) = @_;
     dprintf( "PC %06o: sad AC %06o cf. %06o\n", $PC, $AC, $Mem[$indaddr]);
     $PC += ($AC != $Mem[$indaddr]) ? 2 : 1;
+}
+
+# Deposit zero in memory
+sub dzm {
+    my ( $instruction, $addr, $indaddr ) = @_;
+    dprintf( "PC %06o: dzm into %06o\n", $PC, $indaddr);
+    $Mem[$indaddr]= 0;
+}
+
+# Index and skip if zero
+sub isz {
+    my ( $instruction, $addr, $indaddr ) = @_;
+    dprintf( "PC %06o: isz %06o\n", $PC, $Mem[$indaddr]);
+    $Mem[$indaddr]++; $Mem[$indaddr] &= MAXINT;
+    $PC += ($Mem[$indaddr] == 0) ? 2 : 1;
 }
 
 # Jump
@@ -251,6 +288,21 @@ sub special {
     if ( $instruction == 0740200 ) {    # sza: skip on zero AC
         dprintf( "PC %06o: sza AC %06o\n", $PC, $AC );
         $PC += ( $AC == 0 ) ? 2 : 1;
+        return;
+    }
+    if ( $instruction == 0741400 ) {    # szl: Skip when $LINK is zero
+        dprintf( "PC %06o: szl LINK %0o\n", $PC, $LINK );
+        $PC += ( $LINK == 0 ) ? 2 : 1;
+        return;
+    }
+    if ( $instruction == 0740400 ) {    # snl: Skip when $LINK not zero
+        dprintf( "PC %06o: snl LINK %0o\n", $PC, $LINK );
+        $PC += ( $LINK != 0 ) ? 2 : 1;
+        return;
+    }
+    if ( $instruction == 0741000 ) {    # ska: skip always
+        dprintf( "PC %06o: skp\n", $PC );
+        $PC += 2;
         return;
     }
     if ( ($instruction >= 0760000) && ($instruction <= MAXINT) ) {    # law: load word into AC
