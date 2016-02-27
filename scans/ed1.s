@@ -703,7 +703,7 @@ addline: 0
    dac otal    "
 2: "[line crossed out - scan markup]
    lac i 8
-   dac i otal "[line crossed out and a note that looks like *jous prtwrd*]
+   dac i otal "[line crossed out and a note that looks like *jms prtwrd*]
    isz otal
    dzm wrflg "[line crossed out - scan markup]
    isz apt1
