@@ -314,7 +314,6 @@ wakeup: 0
    jmp 1b
    cla
    jmp wakeup i
-
 t = t+2
 
 putcr: 0
@@ -327,7 +326,7 @@ putcr: 0
    jmp putcr i
 
 intrp1:
-   lac d5
+   lac d6
    dac .int1
    lac d1
    jms getchar

@@ -220,7 +220,7 @@ wttyo:
    jms chkint1
    jms forall
    sna
-   jmp failr
+   jmp fallr
    lmq
    lac sfiles+1
    spa
@@ -231,14 +231,14 @@ wttyo:
    tls
    sad o12
    jms putcr
-   jmp failr
+   jmp fallr
 1:
    lacq
    dac char
    lac d2	"** written: d6 ttyout
    jms putchar
       skp
-   jmp failr
+   jmp fallr
    jms sleep; sfiles+1
    jms swap
    jmp wttyo
@@ -286,7 +286,7 @@ wdspo:
    jms chkint1
    jms forall
    jms dspput
-      jmp failr
+      jmp fallr
    jms sleep; sfiles+6
    jms swap
    jmp wdspo
@@ -310,7 +310,7 @@ rppti:
 wppto:
    jms forall
    sna
-   jmp failr
+   jmp fallr
    lmq
    lac sfiles+4
    spa
@@ -319,14 +319,14 @@ wppto:
    dac sfiles+4
    lacq
    psa
-   jmp failr
+   jmp fallr
 1:
    lacq
    dac char
    lac d5
    jms putchar
       skp
-   jmp failr
+   jmp fallr
    jms sleep; sfiles+4
    jms swap
    jmp wppto
