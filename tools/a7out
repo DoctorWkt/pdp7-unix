@@ -16,7 +16,7 @@ my @FD;           # Array of open filehandles
 # Registers
 my $PC = 0;       # Program counter
 my $AC;           # Accumulator
-my $LINK;         # Link register
+my $LINK = 0;     # Link register
 my $MQ;           # MQ register
 
 # Constants
@@ -134,6 +134,7 @@ sub simulate {
     # List of opcodes that we can simulate
     my %Oplist = (
         oct("004") => \&dac,
+        oct("010") => \&jms,
         oct("020") => \&lac,
         oct("034") => \&tad,
         oct("054") => \&sad,
@@ -153,8 +154,8 @@ sub simulate {
 
 	# Work out what any indirect address would be
 	my $indaddr= ($indirect) ? $Mem[$addr] & MAXADDR : $addr;
-        dprintf( "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
-            $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
+        #dprintf( "PC %06o: instr %06o, op %03o, in %o, addr %06o indaddr %06o\n",
+        #   $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
@@ -213,6 +214,16 @@ sub jmp {
     my ( $instruction, $addr, $indaddr ) = @_;
     dprintf( "PC %06o: jmp %06o\n", $PC, $indaddr );
     $PC = $indaddr;
+}
+
+# Jump to subroutine
+sub jms {
+    my ( $instruction, $addr, $indaddr ) = @_;
+    dprintf( "PC %06o: jms %06o\n", $PC, $indaddr );
+    
+    # Save the LINK and current PC into the $indaddr location
+    $Mem[$indaddr++]= $PC+1 | (($LINK) ? 0400000 : 0);
+    $PC= $indaddr;
 }
 
 # Special instructions
