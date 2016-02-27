@@ -20,8 +20,8 @@ my $LINK;         # Link register
 my $MQ;           # MQ register
 
 # Constants
-my $MAXINT = 0777777;		# Biggest unsigned integer
-my $MAXADDR = 017777;		# Largest memory address
+use constant MAXINT => 0777777;		# Biggest unsigned integer
+use constant MAXADDR => 017777;		# Largest memory address
 
 ### Main program ###
 
@@ -47,7 +47,7 @@ sub load_code {
     my $filename = shift;
 
     # Fill all the 8K words in memory with zeroes
-    foreach my $i ( 0 .. $MAXADDR ) {
+    foreach my $i ( 0 .. MAXADDR ) {
         $Mem[$i] = 0;
     }
 
@@ -77,15 +77,15 @@ sub load_code {
 
 ### Copy the arguments into the PDP-7 memory space, and build
 ### an array of pointers to these arguments. Build a pointer
-### at $MAXADDR that points at the array.
+### at MAXADDR that points at the array.
 ### 
 ### Each argument string is four words long and space padded if the
 ### string is not eight characters long. These are stored below
-### address $MAXADDR. Below this is the count of words in the strings.
-### Address $MAXADDR points at the word count. Graphically (for two arguments):
+### address MAXADDR. Below this is the count of words in the strings.
+### Address MAXADDR points at the word count. Graphically (for two arguments):
 ### 
 ###     +------------+
-###  +--|            | Location 017777 ($MAXADDR)
+###  +--|            | Location 017777 (MAXADDR)
 ###  |  +------------+
 ###  |  |............|
 ###  |  |............| argv[2]
@@ -107,10 +107,10 @@ sub set_arguments {
     my $argc= scalar(@ARGV);
 
     # We now know that argc will appear in memory
-    # 4*argc +1 below location $MAXADDR
+    # 4*argc +1 below location MAXADDR
     # Set argc to the number of words
-    my $addr= $MAXADDR - (4*$argc+1);
-    $Mem[ $MAXADDR ] = $addr;
+    my $addr= MAXADDR - (4*$argc+1);
+    $Mem[ MAXADDR ] = $addr;
     $Mem[ $addr++ ] = $argc*4;
 
     # Now start saving the arguments
@@ -149,12 +149,12 @@ sub simulate {
         my $instruction = $Mem[$PC];
         my $opcode      = ( $instruction >> 12 ) & 074;
         my $indirect    = ( $instruction >> 13 ) & 1;
-        my $addr        = $instruction & $MAXADDR;
+        my $addr        = $instruction & MAXADDR;
 
 	# Work out what any indirect address would be
-	my $indaddr= ($indirect) ? $Mem[$addr] & $MAXADDR : $addr;
-        #dprintf( "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
-        #    $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
+	my $indaddr= ($indirect) ? $Mem[$addr] & MAXADDR : $addr;
+        dprintf( "PC %06o: instr %06o, op %03o, ind %o, addr %06o ind %06o\n",
+            $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
@@ -169,7 +169,7 @@ sub simulate {
 
 # Debug code: dump memory contents
 sub dump_memory {
-    foreach my $i ( 0 .. $MAXADDR ) {
+    foreach my $i ( 0 .. MAXADDR ) {
         printf( STDERR "%06o: %06o\n", $i, $Mem[$i] ) if ( $Mem[$i] != 0 );
     }
 }
@@ -197,7 +197,7 @@ sub tad {
     my ( $instruction, $addr, $indaddr ) = @_;
     dprintf( "PC %06o: tad AC (value %06o) from addr %05o\n",
         $PC, $AC, $indaddr );
-    $AC= ($AC + $Mem[$indaddr]) & $MAXINT;
+    $AC= ($AC + $Mem[$indaddr]) & MAXINT;
     $PC++;
 }
 
@@ -229,7 +229,7 @@ sub special {
     if ( $instruction == 0741100 ) {    # spa: skip on positive AC
         dprintf( "PC %06o: spa AC %06o\n", $PC, $AC );
         # Because we are dealing with 18 bits, compare the range
-        $PC += ( ($AC >= 0) && ($AC < 0400000) ) ? 2 : 1;
+        $PC += ( ($AC >= 0) && ($AC <= MAXINT) ) ? 2 : 1;
         return;
     }
     if ( $instruction == 0741200 ) {    # sna: skip on non-zero AC
@@ -241,6 +241,11 @@ sub special {
         dprintf( "PC %06o: sza AC %06o\n", $PC, $AC );
         $PC += ( $AC == 0 ) ? 2 : 1;
         return;
+    }
+    if ( ($instruction >= 0760000) && ($instruction <= MAXINT) ) {    # law: load word into AC
+        dprintf( "PC %06o: law %06o into AC\n", $PC, $instruction);
+        $AC = $instruction;
+        $PC++; return;
     }
     printf( STDERR "PC %06o: unknown instruction %06o\n", $PC, $instruction );
     exit(1);
@@ -287,7 +292,7 @@ sub sys_close {
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
         dprint( "close: fd $fd is not open\n");
-        $AC = 0777777;
+        $AC = MAXINT;
         return;
     }
     close( $FD[$fd] );
@@ -328,7 +333,7 @@ sub sys_open {
     } else {
         # No filehandle, so it's an error
         dprintf( "open failed: $!\n");
-        $AC = 0777777;
+        $AC = MAXINT;
         return;
     }
 }
@@ -344,7 +349,7 @@ sub sys_read {
     my $fd    = $AC;
     my $start = $Mem[ $PC + 1 ];
     my $count = $Mem[ $PC + 2 ];
-    my $end   = ($start + $count - 1) & $MAXADDR;
+    my $end   = ($start + $count - 1) & MAXADDR;
     die("sys_read: bad start/end addresses $start $end\n") if ($end < $start);
     dprintf( "PC %06o: read: %d words into %o from fd %d\n",
         $PC, $count, $start, $fd );
@@ -355,7 +360,7 @@ sub sys_read {
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
         dprint( "read: fd $fd is not open\n");
-        $AC = 0777777;
+        $AC = MAXINT;
         return;
     }
 
@@ -377,7 +382,7 @@ sub sys_read {
             my $line = <$FH>;
             last if ( !defined($line) );       # No line, leave the loop
             chomp($line);
-            $Mem[$addr] = oct($line) & 0777777;
+            $Mem[$addr] = oct($line) & MAXINT;
             $count++;
         }
     }
@@ -397,7 +402,7 @@ sub sys_write {
     my $fd    = $AC;
     my $start = $Mem[ $PC + 1 ];
     my $count = $Mem[ $PC + 2 ];
-    my $end   = ($start + $count - 1) & $MAXADDR;
+    my $end   = ($start + $count - 1) & MAXADDR;
     die("sys_write: bad start/end addresses $start $end\n") if ($end < $start);
     dprintf( "PC %06o: write: %d words from %o to fd %d\n",
         $PC, $count, $start, $fd );
@@ -408,7 +413,7 @@ sub sys_write {
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
         dprint( "write: fd $fd is not open\n");
-        $AC = 0777777;
+        $AC = MAXINT;
         return;
     }
 
@@ -451,7 +456,7 @@ sub mem2arg {
 
     foreach (1 .. 4) {
         # Stop if the address leave the 8K word address space
-        last if ( $addr > $MAXADDR );
+        last if ( $addr > MAXADDR );
         my $word = $Mem[$addr++];
         my $c1 = ( $word >> 9 ) & 0177;
         my $c2 = $word & 0177;
@@ -472,7 +477,7 @@ sub mem2string {
     while (1) {
 
         # Stop when the address leave the 8K word address space
-        return ($result) if ( $addr > $MAXADDR );
+        return ($result) if ( $addr > MAXADDR );
 
         # Stop when the value there is zero
         my $word = $Mem[$addr];
