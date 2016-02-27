@@ -1,5 +1,5 @@
 "** 01-s1.pdf page 34
-" S6
+" s6
 
 itrunc: 0
    -7
@@ -25,7 +25,7 @@ itrunc: 0
    sza
    jms free
    isz 9f+t+3
-   isz 9f+t+3
+   isz 9f+t+2
    jmp 2b
 3:
    lac 9f+t+1 i
@@ -82,9 +82,13 @@ namei: 0
    sad 8 i
    skp
    jmp 2f
+   lac d.name.3
+   sad 8 i
+   skp
+   jmp 2f
    lac d.i
    isz namei
-   jmp namei 1
+   jmp namei i
 2:
    isz di
    isz 9f+t
@@ -96,8 +100,9 @@ iget: 0
    dac ii
    cll; idiv; 5
    dac 9f+t
+   lacq
    tad d2
-   dac 9f+i+1
+   dac 9f+t+1
    jms dskrd
    lac 9f+t
    cll; mul; 12
@@ -158,7 +163,7 @@ dget: 0
    tad dskbufp
    dac 9f+t+2
    dac .+2
-   jms copy; ..; inode; 8
+   jms copy; ..; dnode; 8
    lac 9f+t
    tad d8
    jms betwen; d0; i.size
@@ -173,12 +178,12 @@ dput: 0
    jms dskrd
    lac 9f+t+2
    dac .+3
-   jms copy; inode; ..; 8
+   jms copy; dnode; ..; 8
    lac 9f+t+1
    jms dskwr
    jmp dput i
 
-t = t+3	"** first t not there (hole from hole punch?)
+t = t+3
 
 pget: 0
    lrss 6
@@ -204,7 +209,7 @@ pget: 0
    jms alloc
    dac 9f+t+1
    jms copy; i.dskps; dskbuf; 7
-   jms copyz; dskbuf+7; 64-7	"** NUMBER UNCLEAR
+   jms copyz; dskbuf+7; 64-7
    lac 9f+t+1
    jms dskwr
    lac 9f+t+1
@@ -215,7 +220,7 @@ pget: 0
    dac i.flags
 2:
    lac 9f+t
-   lrss 7
+   lrss 6
    jms betwen; d0; d6
       jms halt " file too big
    tad idskpp
@@ -237,6 +242,10 @@ pget: 0
    dac 9f+t
    lac 9f+t+2
    jms dskrd
+   lac 9f+t
+   dac 9f+t+1 i
+   lac 9f+t+2
+   jms dskwr
    lac 9f+t
    jmp pget i
 t = t+3
@@ -306,11 +315,11 @@ cskp:
       jms betwen; d0; i.size
          dac i.size
       lac 9f+t+3
+      jms dskwr
    4:
 "** 01-s1.pdf page 38
       lac 9f+t+2
       jmp iread i
-
 3:
    lac 9f+t
    and o77
@@ -332,7 +341,7 @@ finac: 0
    jms error
    lac f.i
    jms iget
-   jms finac i
+   jmp finac i
 
 dacisize: 0
    dac i.size

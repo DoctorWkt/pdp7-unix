@@ -9,10 +9,11 @@
    jms copyz; dskbuf; 64
 1:
    lac ii
-   jms dskio; 0700
+   jms dskio; 07000
    isz ii
    -710
    tad ii
+   sza
    jmp 1b
 
 " free rest of disk
@@ -80,11 +81,7 @@
    jms iwrite; 4096; ..
    jms iput
    cla
-   jms dskio
-
-
-
-; 07000	"** writing on listing
+   jms dskio; 07000	"** writing on listing
    jmp 1b
 
 getw: 0
@@ -92,6 +89,7 @@ getw: 0
    alss 12
    lmq
    jms getc
+   alss 6
    omq
    lmq
    jms getc
