@@ -24,10 +24,15 @@ sx.s: temp additional symbol defns
 maksys.s: page 64  of 01-s1.pdf
 trysys.s: page 65  of 01-s1.pdf
 
-bc.s:  pages 7-11  of 06-5-12.pdf
-bi.s:  pages 12-19 of 06-5-12.pdf
-bl.s:  pages 3-6   of 06-5-12.pdf
-cat.s: pages 21-23 of 06-5-12.pdf
+bl.s:    pages 3-6   of 06-5-12.pdf
+bc.s:    pages 7-11  of 06-5-12.pdf
+bi.s:    pages 12-19 of 06-5-12.pdf
+cat.s:   pages 21-23 of 06-5-12.pdf
+check.s: pages 25-30 of 06-5-12.pdf
+chown.s: pages 32-33 of 06-5-12.pdf
+chmod.s: pages 35-36 of 06-5-12.pdf
+cp.s:    pages 38-39 of 06-5-12.pdf
+chrm.s:  page  41    of 06-5-12.pdf
 
 db.s:     pages 2-21  of 07-13-19.pdf
 dmabs.s:  pages 23-27 of 07-13-19.pdf
