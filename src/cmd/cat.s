@@ -58,7 +58,7 @@ nofiles:
 
 done:
    lac noc
-   sns
+   sna
      sys exit
    and d1
    sna cla
