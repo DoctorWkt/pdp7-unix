@@ -8,7 +8,7 @@ as the files 0*.pdf. We now need to convert these to machine-readable
 assembly code, write tools such as an assembler, a filesystem creation tool,
 and write from scratch missing things like a shell, ls etc.
 
-The code in the original scans are (c) Novel who own the rights to the Unix
+The code in the original scans are (c) Novell who own the rights to the Unix
 source code. Everything that didn't come from the scanned pages are GPLv3.
 
 scans	  holds the unmodified OCR versions of the scanned files

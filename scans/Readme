@@ -2,8 +2,8 @@ This area contains the OCR'd versions of the PDP-7 scans that are at
 http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/0*.pdf
 The files should be unaltered versions of the scanned pages.
 
-Novel owns the rights to the Unix source code, so these files are probably
-(c) 1970 Novel. They are certainly not under the GPLv3 license.
+Novell owns the rights to the Unix source code, so these files are probably
+(c) 1970 Novell. They are certainly not under the GPLv3 license.
 
 For modified versions of these files, look in src/cmds and src/sys.
 
