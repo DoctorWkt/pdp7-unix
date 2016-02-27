@@ -82,7 +82,7 @@ namei: 0
    sad 8 i
    skp
    jmp 2f
-   lac d.name.3
+   lac d.name+3
    sad 8 i
    skp
    jmp 2f
