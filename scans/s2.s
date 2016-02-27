@@ -18,6 +18,7 @@
       jms error
    dac .+3
    jms copy; inode; ..; 12
+   lac d.i
    dac 9 i
    jmp okexit
 
@@ -115,7 +116,7 @@
    lac u.base
    jms iget
    lac ii
-   dac d.i	"** ??
+   dzm d.i
    jms copy; name; d.name; 4
    lac i.uniq
    dac d.uniq
@@ -125,7 +126,7 @@
 "** 01-s1.pdf page 9
    jms iput
    jms dput
-   jms okexit
+   jmp okexit
 
 .unlink:
    jms argname
@@ -136,7 +137,6 @@
    dac d.i
    jms dput
    lac u.base
-   jms u.base
    jms iget
    isz i.nlks
    jmp 1f
@@ -331,4 +331,4 @@ exitrw:
    dac f.badd
    jms iput
    jms fput
-    jmp sysexit
+   jmp sysexit

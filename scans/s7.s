@@ -87,14 +87,14 @@ dsprestart:
    lac d1
    dac .dspb
    lac dspbufp
-   beg		"** ???
+   beg
    -10
    dac .dsptm
    jmp piret
 
 1: sna ral
    jmp .+3
-   racf
+   dpcf
    jmp piret
    sma
    jmp 1f

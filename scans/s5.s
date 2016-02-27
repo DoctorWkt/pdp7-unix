@@ -16,7 +16,7 @@ t = t+1
 
 access: 0
    lac i.flags
-   idunno	"** ???
+   lmq
    lac u.uid
    spa
    jmp access i
@@ -74,7 +74,7 @@ fget: 0
 fput: 0
    lac 9f+t
    dac .+3
-   jms copy; ; fnode; ..; 3
+   jms copy; fnode; ..; 3
    jmp fput i
 t = t+1
 
@@ -103,7 +103,7 @@ sleep: 0
    law ulist-1
    dac 8
    lac o200000
-   lmq		"** ???
+   lmq
 1:
    lac u.ulistp i
    sad 8 i

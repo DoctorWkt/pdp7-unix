@@ -22,6 +22,7 @@ searchu: 0
    jmp 1b
    isz searchu
    jmp searchu i
+t = t+2
 
 lookfor: 0
    jms searchu; 1f
@@ -41,7 +42,7 @@ lookfor: 0
    jmp lookfor i
 
 .fork:
-   jms lookfor; 0 " not-user
+   jms lookfor; 0 " not-used
       skp
       jms error
    dac 9f+t
@@ -115,7 +116,7 @@ badcal:
    cma
    dac u.ac
    dzm 9f+t i
-   isz 9f+t i
+   isz 9f+t
    lac 9f+t i
    dac u.mq
    dzm 9f+t i
@@ -205,8 +206,8 @@ rttyi:
    jms getchar
       jmp 1f
    and o177
-   jms betwen o101; o132
-   skp
+   jms betwen; o101; o132
+      skp
    tad o40
    alss 9
    jmp passone
@@ -224,7 +225,7 @@ wttyo:
    lac sfiles+1
    spa
    jmp 1f
-   xor 0400000
+   xor o400000
    dac sfiles+1
    lacq
    tls
@@ -244,7 +245,7 @@ wttyo:
 
 rkbdi:
    jms chkint1
-   lac d2
+   lac d3
    jms getchar
 "** 01-s1.pdf page 18
       jmp 3f
@@ -255,9 +256,7 @@ rkbdi:
    lacq
    and o137
    sad o134
-   lacq
-   xor o40
-   lmq
+   skp
    jmp 2f
 1:
    lacq
@@ -347,7 +346,7 @@ error: 0
 
 chkint1: 0
    dzm .insys
-   jmp chkint
+   jms chkint
       skp
    jmp .save
    -1
