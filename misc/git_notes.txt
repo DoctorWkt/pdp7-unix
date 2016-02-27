@@ -6,4 +6,5 @@ git config --global user.email wkt@tuhs.org
 
 To bring your own ocal repository up to date with Github:
  git fetch origin 
+ git diff master origin/master
  git merge origin/master
