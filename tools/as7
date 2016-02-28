@@ -4,10 +4,14 @@
 # and convert them into PDP-7 machine code
 #
 # (c) 2016 Warren Toomey, GPL3
+# Tweaked by Phil Budne (expression parsing, "list" format)
 #
 use strict;
 use warnings;
 use Data::Dumper;
+use Getopt::Long qw(GetOptions);
+
+Getopt::Long::Configure qw(gnu_getopt);
 
 ### Global variables ###
 my %Var;       # Variables such as ., .., t
@@ -17,30 +21,39 @@ my %Rlabel;    # Relative labels, e.g. 1:, 2:
 
 my @Mem;       # Actual PDP-7 memory locations
 my @Mline;     # Source lines associated with mem locations
-my $origline;  # The current input line of code
-
+my $origline;  # The original current input line of code
+my $line;      # line being parsed
 my $stage = 1; # Pass one or pass two
-my $debug = 0; # Run in debug mode
 my $errors = 0; # set to non-zero on error
 my %Undef;	# undefined symbols: only complain once
+my $line_error = ' ';
+my $file;	# current file name
+my $lineno;	# current line number
+
+## command line options
+my $debug = 0;		# Run in debug mode
+my $symbols = 0;	# dump symbols
+my $format = 'a7out';	# output format
+
+# keep this near the GetOptions call to make it easy to add documentation!
+sub usage {
+    die("Usage: $0 [--debug] [--format=a7out|list ] file1.s [file2.s ...]\n")
+}
 
 ### Main program ###
 
-# Optional debug argument
-if ( ( @ARGV > 0 ) && ( $ARGV[0] eq "-d" ) ) {
-    $debug = 1;
-    shift(@ARGV);
-}
+GetOptions(
+    'debug|d' => \$debug,
+    'format|f=s' => \$format,
+) or usage();
 
-# Check the arguments
-die("Usage: $0 [-d] file1.s [file2.s ...]\n") if ( @ARGV < 1 );
+usage() if ( @ARGV < 1 );
 
-# Define the syscalls as variables so that
-# I don't have to hand-code the logic below.
-# Also, start with the location counter at zero
+# predefine syscall and opcodes as variables
+# start with the location counter at zero
 %Var = (
     '.'    => 0,
-    save   => 1,
+    save   => 1,		# saves core dump & user area!
     getuid => 2,
     open   => 3,
     read   => 4,
@@ -59,14 +72,141 @@ die("Usage: $0 [-d] file1.s [file2.s ...]\n") if ( @ARGV < 1 );
     chdir  => 17,
     chmod  => 18,
     chown  => 19,
-    badcal => 20,
-    syslog => 21,
-    capt   => 23,
-    rele   => 24,
-    status => 25,
+    # 20 removed
+    sysloc => 21,		# return system addresses
+    # 22 removed
+    capt   => 23,		# capture display?
+    rele   => 24,		# release display?
+    status => 25,		# "stat"
     smes   => 27,
     rmes   => 28,
-    fork   => 29
+    fork   => 29,
+
+    # List of instruction names and machine code values
+    # These come from https://raw.githubusercontent.com/simh/
+    #   simtools/master/crossassemblers/macro7/macro7.c
+    # PLB: replace with symbols in "sop.s"?
+    sys    => 0000000,		# cal instruction (trap thru 020)
+    i      => 0020000,		# indirect bit
+
+    # memory reference instructions
+    dac    => 0040000,		# deposit AC
+    jms    => 0100000,		# jump to subroutine
+    dzm    => 0140000,		# deposit zero in memory
+    lac    => 0200000,		# load AC
+    xor    => 0240000,		# exclusive or
+    add    => 0300000,		# one's complement add
+    tad    => 0340000,		# two's complement add
+    xct    => 0400000,		# execute
+    isz    => 0440000,		# increment and skip if zero
+    and    => 0500000,		# AND with contents of Y
+    sad    => 0540000,		# skip if AC different from content of Y
+    jmp    => 0600000,		# jump to Y
+
+    # Type 177 Extended Arithmetic Element (EAE)
+    eae    => 0640000,		# base instruction (nop)
+    osc    => 0640001,		# OR SC into AC
+    omq    => 0640002,		# OR MQ into AC
+    cmq    => 0640004,		# Complement MQ
+    div    => 0640323,		# divide
+    norm   => 0640444,		# normalize, unsigned
+    lls    => 0640600,		# long left shift
+    als    => 0640700,		# AC shift
+    lrs    => 0640500,		# long right shift
+    lacs   => 0641001,		# load AC with SC
+    lacq   => 0641002,		# load AC with MQ
+    abs    => 0644000,		# absolute value
+    divs   => 0644323,		# divide, signed
+
+    clq    => 0650000,		# clear MQ
+    frdiv  => 0650323,		# fractional divide
+    lmq    => 0652000,		# load MQ from AC
+    mul    => 0653122,		# multiply
+    idiv   => 0653323,		# integer divide
+    idivs  => 0657323,		# integer divide, signed
+    frdivs => 0654323,		# fractional divide, signed
+    muls   => 0657122,		# multiply, signed
+
+    norms  => 0660444,		# normalize, signed
+    gsm    => 0664000,		# get sign and magnitude
+    lrss   => 0660500,		# long right shift, signed
+    llss   => 0660600,		# long left shift, signed
+    alss   => 0660700,		# AC left shift, signed
+
+    # I/OT instructions
+    iot    => 0700000,		# base i/o transfer instruction
+    clsf   => 0700001,		# skip if RT clock overflow
+    iof    => 0700002,		# interrupts off (disable PIC)
+    ion    => 0700042,		# interrupts on (enable PIC)
+    iton   => 0700062,		# interrupt and trap on
+    clof   => 0700004,		# clear clock flag, disable clock
+    clon   => 0700044,		# clear clock flag, enable clock
+
+    rsf    => 0700101,		# skip if PTR flag set
+    rrb    => 0700112,		# clear PTR flag, OR buffer with AC
+    rcf    => 0700102,		# clear PTR flag
+    rsa    => 0700104,		# select PTR in alphanumeric mode
+    rsb    => 0700144,		# select PTR in binary mode
+
+    psf    => 0700201,		# skip if PTP flag set
+    pcf    => 0700202,		# clear PTP clag
+    psa    => 0700204,		# punch PTP in alphanumeric mode
+    psb    => 0700244,		# punch PTP in binary mode
+
+    ksf    => 0700301,		# skip if KBD flag set
+    krb    => 0700312,		# read KBD buffer
+    iors   => 0700314,		# input/output read status
+
+    tsf    => 0700401,		# if if TTY output flag set
+    tcf    => 0700402,		# clear TTY output flag
+    tls    => 0700406,		# load TTY output buffer and select
+
+    tts    => 0703301,		# Test Teleprinter and Skip
+    skp7   => 0703341,		# skip if processor is PDP-7!
+    caf    => 0703302,		# Clear All Flags
+
+    crsf   => 0706701,		# skip if CDR is ready
+    crrb   => 0706712,		# read CDR buffer
+    crsa   => 0706704,		# select CDR alphanumeric mode
+    crsb   => 0706744,		# select CDR binary mode
+
+    # Operate Instructions
+
+    # Group 1 (OPR 1) instructions
+    opr    => 0740000,		# base operate instruction (nop)
+    nop    => 0740000,
+    cma    => 0740001,		# complement accumulator
+    cml    => 0740002,		# complement link
+    oas    => 0740004,		# inclusive or accumulator switches
+    ral    => 0740010,		# rotate (ac, link) left
+    rar    => 0740020,		# rotate (ac, link) right
+    hlt    => 0740040,		# HALT
+    xx     => 0740040,
+    sma    => 0740100,		# skip on minus accumulator
+    sza    => 0740200,		# skip on zero accumulator
+    snl    => 0740400,		# skip on non-zero link
+
+    skp    => 0741000,		# unconditional skip
+    spa    => 0741100,		# skip on positive accumulator
+    sna    => 0741200,		# skip on negative accumulator
+    szl    => 0741400,		# skip on zero link
+
+    rtl    => 0742010,		# rotate two left (ral*2)
+    rtr    => 0742020,		# rotate two right (rar*2)
+
+    cll    => 0744000,		# clear link
+    stl    => 0744002,		# set link
+    rcl    => 0744010,		# clear link, rotate left
+    rcr    => 0744020,		# clear link, rotate right
+
+    cla    => 0750000,		# clear accumulator
+    clc    => 0750001,		# clear and complement acc
+    las    => 0750004,		# load acc from switches
+    glk    => 0750010,		# get link
+
+    # Group 2 operate
+    law    => 0760000,		# load accumulator with (instruction)
+    lam    => 0777777,		# (load accumulator minus)
 );
 
 # Parse all the files
@@ -77,28 +217,44 @@ foreach my $file (@ARGV) {
 # Now do it all again, pass two
 $Var{'.'} = 0;
 $stage = 2;
-print("Now in stage 2\n") if ($debug);
+print("PASS 2\n") if ($debug);
 foreach my $file (@ARGV) {
     parse_file($file);
 }
 
-# Now print out the contents of memory
-for my $i ( 0 .. $#Mem ) {
-    if ( defined( $Mem[$i] ) ) {
-        printf( "%06o: %06o\t%s\n", $i, $Mem[$i], $Mline[$i] || "" );
+if ($format eq 'a7out') {
+    # print out the contents of memory
+    for my $i ( 0 .. $#Mem ) {
+	if ( defined( $Mem[$i] ) ) {
+	    printf( "%06o: %06o\t%s\n", $i, $Mem[$i], $Mline[$i] || "" );
+	}
     }
 }
-
+elsif ($format eq 'list') {
+    print "\n";
+    print "Labels:\n";
+    foreach my $key (sort keys %Label) {
+	printf("%-8.8s %#06o\n", $key, $Label{$key});
+    }
+}
+else {
+    die("unknown format $format");
+}
 exit($errors);
 
-my $file;			# global for error messages
-my $lineno;
-
+# report an assmebly error:
+# sets error flag
+# reports filename:lineno for emacs m-x compile
 sub err {
+    $line_error = shift;
     my $msg = shift;
+
     $errors = 1;		# exit status
-    print STDERR "$file:$lineno: $msg\n";
-    return 0;
+    if ($stage == 2) {
+	print STDERR "$file:$lineno: $msg\n";
+	print "$file:$lineno: $msg\n" if (! -t STDOUT);
+    }
+    return 0;			# expression value
 }
 
 # Open and parse the given file
@@ -106,371 +262,175 @@ sub parse_file {
     $file = shift;
     open( my $IN, "<", $file ) || die("Cannot read $file: $!\n");
     $lineno = 0;
-    while ( my $line = <$IN> ) {
+    while ( $line = <$IN> ) {
 	$lineno++;
-
-        # Lose the end of line and any leading/trailing whitespace
-        # Discard any comments and preceding comment whitespace
-        chomp($line);
+        chomp($line);		# Lose the end of line
         $origline = $line;
-        $line =~ s{^\s+}{};
-        $line =~ s{\s+$}{};
-        $line =~ s{\s*\".*}{};
-        #print("=>$line<=\n");
-
-        # Split the line into commands that are ; separated
-        # and parse each one
-        foreach my $cmd ( split( /;\s*/, $line ) ) {
-
-            # Split into a section with possible labels and a
-            # statement section with definitely no labels. The ?
-            # makes the first pattern less greedy.
-            #print("cmd is >$cmd<\n");
-            $cmd =~ m{(.*?)([^:]*$)};
-            my $labelsect = $1;
-            my $statement = $2;
-
-	    #print(">$labelsect< >$statement<\n");
-
-            # Split $labelsect into labels using the : character
-            my @labellist = split( /:\s*/, $labelsect );
-
-            # First pass: parse the labels
-            if ( $stage == 1 ) {
-                foreach my $l (@labellist) {
-                    parse_label($l);
-                }
-            }
-
-            # Parse the statements on both passes
-            parse_statement($statement);
-        }
+	print "\t\t$line\n" if ($stage == 2 && $line ne '' && $format eq 'list');
+	parse_line();
     }
     close($IN);
 }
 
-# Parse a label and set its value to the location counter
-sub parse_label {
+# process a label and set its value to the location counter (only called on pass 1)
+# (if called on pass 2, should check if values are identical)
+sub process_label {
     my $label = shift;
 
     # It's a relative label, save its current value in a list
     if ( $label =~ m{^\d+$} ) {
         push( @{ $Rlabel{$label} }, $Var{'.'} );
-        #printf( "Pushing 0%o for relative label %s\n", $Var{'.'}, $label );
+        printf( "Pushing %#o for relative label %s\n", $Var{'.'}, $label ) if ($debug);
         return;
     }
 
     # It's a textual label, check if it's been defined before
     if ( defined( $Label{$label} ) ) {
-	err("Label $label defined multiple times\n") if ( $stage == 1 );
+	err('M', "Label $label defined multiple times\n");
     }
     # Otherwise, save its value
     $Label{$label} = $Var{'.'};
-    #printf( "Set absolute label %s to 0%o\n", $label, $Label{$label} );
+    printf( "Set label %s to %#o\n", $label, $Label{$label} ) if ($debug);
 }
 
-sub parse_statement {
-    my $statement = shift;
-    my $location  = $Var{'.'};
-    #printf( "Location: 0%o\n", $location );
+# Blame Phil for this....
+# parses global $line based on prefixes
+# (nibbling of a bit at a time)
+# handles multiple ';' separated words per line
+sub parse_line {
+    $line_error = ' ';
+    
+    while (1) {
+	# Lose any leading whitespace
+	$line =~ s{^\s*}{};
 
-    # Empty statement, nothing to do
-    return if ( $statement =~ m{^\s*$} );
+	print "parse_line: '$line'\n" if ($debug);
 
-    # Lose any leading whitespace
-    $statement =~ s{^\s*}{};
+	return if ($line eq '');
 
-    # It's an assignment statement: lhs = rhs
-    if ( $statement =~ m{(\S+)\s*=\s*(\S+)} ) {
-        my $lhs = $1;
-        my $rhs = $2;
-        #print("Assignment $statement\n");
+	if ($line =~ m{^"}) { # remainder of line is comment
+	    return;
+        }
 
-        # Save the expression's value into the variable
-        my $result = parse_expression($rhs);
-        die("expression $rhs has no value in assignment\n")
-          if ( !defined($result) );
+	if ($line =~ s{^([a-z0-9\.]+):}{}) { # label
+	    my $label = $1;
 
-        #printf( "Setting variable %s to 0%o\n", $lhs, $result );
-        $Var{$lhs} = $result;
-        return;
-    }
+            # First pass: parse the labels
+	    # (could check for same value on pass 2)
+            if ( $stage == 1 ) {
+		process_label($1);
+	    }
+	}
+	else {
+	    my $lhs = undef;
+	    if ( $line =~ s{^(\S+)\s*=}{}) { # assignment
+		$lhs = $1;
+            }
+	    my $word = parse_expression();
+	    if ($lhs) {
+	        printf( "Setting variable %s to 0%o\n", $lhs, $word ) if ($debug);
+	        $Var{$lhs} = $word;
+	        printf("\t%06o %s\n", $word, $line_error) if ($stage == 2 && $format eq 'list');
+	    }
+	    else {	# bare expression
+		# Get its value on pass two and save to memory
+		# Also save the input line that altered memory
+		if ( $stage == 2 ) {
+		    my $location  = $Var{'.'};
+		    $Mem[$location]   = $word;
+		    $Mline[$location] = $origline;
+		    $origline = '';
+		    if ($format eq 'list') {
+			printf( "%06o: %06o %s\n", $location, $word, $line_error);
+		    }
+		}
+		# Move up to the next location in both passes
+		$Var{'.'}++;
+	    } # expr
+        } # assignment or expression
 
-    # It's an expression, not a statement
-    # Get its value on pass two and save to memory
-    # Also save the input line that altered memory
-    if ( $stage == 2 ) {
-        my $val = parse_expression($statement);
-        $Mem[$location]   = $val & 0777777;
-        $Mline[$location] = $origline;
-        #printf( "Saving 0%o into memory location 0%o\n", $val, $location );
-    }
-
-    # Move up to the next location in both passes
-    $Var{'.'}++;
+	# eat trailing whitespace and ";", if any
+	$line =~ s{^\s*}{};
+	$line =~ s{^;}{};
+    } # while
 }
 
-# Parse an expression and return either:
-#  a single value which is a PDP-7 word
-#  a single value which is undef, as this was unrecognised
+# Blame Phil for this bit too...
+# Parse an expression off $line and return a PDP-7 word
+# as a series of whitespace separated "syllables"
+# and adds them together.
 sub parse_expression {
-    my $expression = shift;
+    my $word = 0;
 
-    # If it's a defined variable ( . , .. , etc.)
-    # return the value
-    return ( $Var{$expression} )
-      if ( defined( $Var{$expression} ) );
+    print "expression: '$line'\n" if ($debug);
 
-    # If it's a numeric literal, simply return it
-    if ( $expression =~ m{^-?\d+$} ) {
-        #print("Returning numeric literal $expression\n");
-        return ( oct($expression) ) if ( $expression =~ m{^0} );
-        return ($expression);
+    while (1) {
+	my $syllable = 0;
+	my $sign = 1;
+
+	$line =~ s{^\s+}{};
+	print "    '$line'\n" if ($debug);
+
+	if ($line eq '' || $line =~ m{^[";]}) { # EOL ; and " terminate expr
+	    printf("\tparse_expression => %#o\n", $word) if ($debug);
+	    return $word;
+	}
+
+	if ($line =~ s{^-}{}) {
+	    # leading '-' negates upcomming syllable.
+	    $sign = -$sign;
+	}
+	else {
+	    # ignore leading '+'
+	    $line =~ s{^\+}{};
+	}
+
+	if ($line =~ s{^<(.)}{}) { # <char
+	    $syllable = ord($1) << 9;
+	}
+	elsif ($line =~ s{^(.)>}{}) { # char>
+	    $syllable = ord($1)
+	}
+	elsif ($line =~ s{^>(.)}{}) { # >char !!
+	    $syllable = ord($1)
+	}
+	elsif ($line =~ s{^([a-z\.][a-z0-9\.]*)}{}) {
+	    my $sym = $1;
+	    print "\tsym: $sym\n" if ($debug);
+	    if (defined($Var{$sym})) {
+		$syllable = $Var{$sym};
+		printf("\tvar: %s: %#o\n", $sym, $syllable) if ($debug);
+	    }
+	    elsif (defined($Label{$sym})) {
+		$syllable = $Label{$sym};
+		printf("\tlbl: %s: %#o\n", $sym, $syllable) if ($debug);
+	    }
+	    elsif ($stage == 2) {
+		err('U', "$sym not defined") unless (defined $Undef{$sym});
+		$Undef{$sym} = 1; # only complain once
+	    } # pass 2
+	} # symbol
+	elsif ( $line =~ s{^(\d+)([fb])}{} ) { # relative label
+	    $syllable = find_relative_label( $1, $2 ) if ($stage == 2);
+	}
+	elsif ( $line =~ s{^(\d+)}{} )  {
+	    my $value = $1;
+	    if ( $value =~ m{^0} ) {
+		$syllable = oct($value);
+	    }
+	    else {
+		$syllable = $value + 0;
+	    }
+	}
+	else {
+	    err('?', "huh? '$line'");
+	    $line = '';
+	    return $word;
+	}
+	$syllable = ($syllable * $sign) & 0777777;
+	$word = ($word + $syllable) & 0777777;
+	printf("\tsyllable: %#o word: %#o\n", $syllable, $word) if ($debug);
     }
-
-    # List of instruction names and machine code values
-    # These come from https://raw.githubusercontent.com/simh/
-    #   simtools/master/crossassemblers/macro7/macro7.c
-    my %inst = (
-        'cal'    => 0000000,
-        'dac'    => 0040000,
-        'jms'    => 0100000,
-        'dzm'    => 0140000,
-        'lac'    => 0200000,
-        'xor'    => 0240000,
-        'add'    => 0300000,
-        'tad'    => 0340000,
-        'xct'    => 0400000,
-        'isz'    => 0440000,
-        'and'    => 0500000,
-        'sad'    => 0540000,
-        'jmp'    => 0600000,
-        'i'      => 0020000,
-        'eae'    => 0640000,
-        'iot'    => 0700000,
-        'sys'    => 0700000,
-        'opr'    => 0740000,
-        'law'    => 0760000,
-        'lam'    => 0777777,
-        'osc'    => 0640001,
-        'lacs'   => 0641001,
-        'omq'    => 0640002,
-        'lacq'   => 0641002,
-        'cmq'    => 0640004,
-        'clq'    => 0650000,
-        'lmq'    => 0652000,
-        'abs'    => 0644000,
-        'gsm'    => 0664000,
-        'mul'    => 0653122,
-        'muls'   => 0657122,
-        'div'    => 0640323,
-        'divs'   => 0644323,
-        'idiv'   => 0653323,
-        'idivs'  => 0657323,
-        'frdiv'  => 0650323,
-        'frdivs' => 0654323,
-        'norm'   => 0640444,
-        'norms'  => 0660444,
-        'lrs'    => 0640500,
-        'lrss'   => 0660500,
-        'lls'    => 0640600,
-        'llss'   => 0660600,
-        'als'    => 0640700,
-        'alss'   => 0660700,
-        'nop'    => 0740000,
-        'cma'    => 0740001,
-        'cml'    => 0740002,
-        'oas'    => 0740004,
-        'las'    => 0750004,
-        'ral'    => 0740010,
-        'rcl'    => 0744010,
-        'rtl'    => 0742010,
-        'rar'    => 0740020,
-        'rcr'    => 0744020,
-        'rtr'    => 0742020,
-        'hlt'    => 0740040,
-        'xx'     => 0740040,
-        'sma'    => 0740100,
-        'sza'    => 0740200,
-        'snl'    => 0740400,
-        'skp'    => 0741000,
-        'spa'    => 0741100,
-        'sna'    => 0741200,
-        'szl'    => 0741400,
-        'cll'    => 0744000,
-        'stl'    => 0744002,
-        'cla'    => 0750000,
-        'clc'    => 0750001,
-        'glk'    => 0750010,
-        'clsf'   => 0700001,
-        'iof'    => 0700002,
-        'ion'    => 0700042,
-        'iton'   => 0700062,
-        'clof'   => 0700004,
-        'clon'   => 0700044,
-        'tts'    => 0703301,
-        'skp7'   => 0703341,
-        'caf'    => 0703302,
-        'sem'    => 0707701,
-        'eem'    => 0707702,
-        'emir'   => 0707742,
-        'lem'    => 0707704,
-        'rsf'    => 0700101,
-        'rrb'    => 0700112,
-        'rcf'    => 0700102,
-        'rsa'    => 0700104,
-        'rsb'    => 0700144,
-        'psf'    => 0700201,
-        'pcf'    => 0700202,
-        'psa'    => 0700204,
-        'pls'    => 0700204,
-        'psb'    => 0700244,
-        'ksf'    => 0700301,
-        'krb'    => 0700312,
-        'iors'   => 0700314,
-        'tsf'    => 0700401,
-        'tcf'    => 0700402,
-        'tls'    => 0700406,
-        'lpsf'   => 0706501,
-        'lpcb'   => 0706502,
-        'lpb1'   => 0706566,
-        'lpb2'   => 0706526,
-        'lpb3'   => 0706546,
-        'lpse'   => 0706601,
-        'lpcf'   => 0706602,
-        'lppb'   => 0706606,
-        'lpls'   => 0706626,
-        'lpps'   => 0706646,
-        'crsf'   => 0706701,
-        'crrb'   => 0706712,
-        'crsa'   => 0706704,
-        'crsb'   => 0706744,
-        'mmdf'   => 0707501,
-        'mmef'   => 0707541,
-        'mmrd'   => 0707512,
-        'mmwr'   => 0707504,
-        'mmbf'   => 0707601,
-        'mmrs'   => 0707612,
-        'mmlc'   => 0707604,
-        'mmse'   => 0707644,
-    );
-
-    # Split the expression into two or three words separated by whitespace
-    my ( $word1, $word2, $word3 ) = split( /\s+/, $expression );
-    #printf( "o>%s<o o>%s<o o>%s<o\n",
-    #			$word1 || "", $word2 || "", $word3 || "" );
-
-    # This is a 2-character string literal, put each in separate nine bits
-    if ($word1=~ m{^<(.)(.)>$}) {
-      print("String literal <$1 and $2>\n") if ($debug);
-      return((ord($1) << 9) | ord($2));
-    }
-
-    # This is a <n string literal which might have been followed by a numeric literal
-    if ($word1=~ m{^<(.)}) {
-      print("String literal <$1 and $word2\n") if ($debug);
-      my $msb= $1;
-      my $lsb= (defined($word2)) ? parse_expression($word2) : 0;
-      return((ord($msb) << 9) | $lsb);
-    }
-
-    # This is a n> string literal preceded by a numeric literal
-    if (defined($word2) && ($word2=~ m{(.)>$})) {
-      print("String literal $word1 and $1>\n") if ($debug);
-      my $msb= parse_expression($word1);
-      my $lsb= $1;
-      return(($msb << 9) | ord($lsb));
-    }
-
-    # This is a n> string literal not preceded by a numeric literal
-    if ($word1=~ m{(.)>$}) {
-      print("String literal $1>\n") if ($debug);
-      return(ord($1));
-    }
-
-    # This a defined instruction
-    if ( defined( $inst{$word1} ) ) {
-        #printf( "Found the instruction %s: 0%o\n", $word1, $inst{$word1} );
-        my $instruction = $inst{$word1};
-
-        # Is this an indirect instruction?
-        my $indirect = defined($word3) && ( $word3 eq "i" ) ? 020000 : 0;
-
-        # We have an expression for this instruction
-        if ( ( $stage == 2 ) && defined($word2) ) {
-            #print(" and I need to parse $word2\n");
-            my $val = parse_expression($word2);
-            die("Unable to parse $word2 on pass two\n") if ( !defined($val) );
-            $instruction |= $val | $indirect;
-        }
-        return ($instruction);
-    }
-
-    # This is a defined label
-    if ( defined( $Label{$word1} ) ) {
-        #printf( "Found the label %s: 0%o\n", $word1, $Label{$word1} );
-        return ( $Label{$word1} );
-    }
-
-    # This is a defined relative label: digits followed by f or b
-    if ( $word1 =~ m{^(\d+)([fb])} ) {
-        my $val = find_relative_label( $1, $2 );
-        #print("Got location $val for relative label $1$2\n");
-        return ($val);
-    }
-
-    # This is an addition. Some operands may not yet be defined
-    if ( $word1 =~ m{(.*)\+(.*)} ) {
-        my $sum = add( $1, $2 );
-        if ( !defined($sum) ) {
-            die("Unable to add $word1 on pass two\n") if ( !defined($sum) );
-        }
-        #print("Did an addition and got $sum\n");
-        return ($sum);
-    }
-
-    # This is a subtraction. Some operands may not yet be defined
-    if ( $word1 =~ m{(.*)-(.*)} ) {
-        my $diff = subtract( $1, $2 );
-        if ( !defined($diff) ) {
-            die("Unable to subtract $word1 on pass two\n")
-              if ( !defined($diff) );
-        }
-
-        #print("Did a subtraction and got $diff\n");
-        return ($diff);
-    }
-    if ( $stage == 2 ) {
-	err("undefined: $expression") unless (defined $Undef{$expression});
-	$Undef{$expression} = 1;
-    }
-    return 0;
-}
-
-# Add two expression together
-sub add {
-    my ( $a, $b ) = @_;
-
-    my $val1 = parse_expression($a);
-    my $val2 = parse_expression($b);
-    #print("Adding $val1 + $val2\n");
-    return (undef) if ( !defined($val1) || !defined($val2) );
-
-    #print( "  with a good value of ", $val1 + $val2, "\n" );
-    return ( $val1 + $val2 );
-}
-
-# Subtract two expression
-sub subtract {
-    my ( $a, $b ) = @_;
-
-    my $val1 = parse_expression($a);
-    my $val2 = parse_expression($b);
-    #print("Subtracting $val1 - $val2\n");
-    return (undef) if ( !defined($val1) || !defined($val2) );
-
-    #print( "  with a good value of ", $val1 - $val2, "\n" );
-    return ( $val1 - $val2 );
 }
 
 # Given a relative label number and a direction,
@@ -482,31 +442,28 @@ sub find_relative_label {
 
     # Error check: no labels at all
     if ( !defined( $Rlabel{$label} ) ) {
-	return err("relative label $label not defined\n");
+	return err('U', "relative label $label not defined\n");
     }
 
     # Get the list of possible locations for this label
     my $locarray = $Rlabel{$label};
 
     # Error check: no locations
-    return err("No relative labels") if ( @{$locarray} == 0 );
+    return err('U', "No relative labels") if ( @{$locarray} == 0 );
 
-    # Error check: forward but no next location, or backward but no previous
-    return err("No forward label $label")
-      if ( ( $direction eq 'f' ) && ( $curlocation > $locarray->[-1] ) );
-    return err("No backward label $label")
-      if ( ( $direction eq 'b' ) && ( $curlocation < $locarray->[0] ) );
-
-    # Search forward for a location larger then the current one
     if ( $direction eq 'f' ) {
+	# Search forward for first location larger then the current one
         foreach my $reflocation ( @{$locarray} ) {
+	    printf("forward %#o %#o\n", $reflocation, $curlocation) if ($debug);
             return ($reflocation) if ( $reflocation > $curlocation );
         }
     }
     else {
-        # Search backwards for a location smaller than the current one
+        # Search backwards for first location smaller than the current one
         foreach my $reflocation ( sort( { $b <=> $b } @{$locarray} ) ) {
+	    printf("backward %#o %#o\n", $reflocation, $curlocation) if ($debug);
             return ($reflocation) if ( $reflocation < $curlocation );
         }
     }
+    return err('U', "No relative label $label");
 }
