@@ -18,9 +18,9 @@
    dac c1
 1:
    lac t1 i
-   dac r2 i
+   dac t2 i
    isz t1
-   isz r2
+   isz t2
    isz c1
    jmp 1b
    jmp 0100
