@@ -1,4 +1,5 @@
-" chown
+" chmode
+
    lac 017777 i
    sad d4
    jmp error
@@ -9,7 +10,7 @@
    tad d1
    dac name
    dzm octal
-   dzm nochar
+   dzm nchar
    -8
    dac c1
 1:
@@ -46,7 +47,7 @@ loop:
    tad d4
    dac name
    lac octal
-   sys chowner; name:0
+   sys chmode; name:0
    sma
    jmp loop
    lac name
@@ -60,7 +61,7 @@ loop:
    040;077012
 error:
    lac d1
-   sys write;  1b+1; 1
+   sys write; 1b+1; 1
    sys exit
 
 om60: -060
