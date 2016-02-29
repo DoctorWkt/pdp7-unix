@@ -757,16 +757,16 @@ sub cmd_delbreak {
 }
 
 sub cmd_help {
-    print("  [b]reak <octal>:           set a breakpoint\n");
-    print("  [c]ontinue:                leave single-step and continue\n");
-    print("  [d]ump [<octal>] [<octal]: dump addresses in range\n");
-    print("  db <octal>:                delete a breakpoint\n");
-    print("  [del]ete <octal>:          delete a breakpoint\n");
-    print("  [l]ist                     list breakpoints\n");
-    print("  [r]egs                     print PC, AC, LINK and MQ regs\n");
-    print("  [s]tep:                    single-step this instruction\n");
-    print("  ?, h, help:                print this help list\n");
-    print("  e[x]it, [q]uit:            exit this program\n");
+    print("  [b]reak <octal>             set a breakpoint\n");
+    print("  [c]ontinue                  leave single-step and continue\n");
+    print("  [d]ump [<octal>] [<octal>]  dump addresses in range\n");
+    print("  db <octal>                  delete a breakpoint\n");
+    print("  [del]ete <octal>            delete a breakpoint\n");
+    print("  [l]ist                      list breakpoints\n");
+    print("  [r]egs                      print PC, LINK, AC and MQ regs\n");
+    print("  [s]tep                      single-step next instruction\n");
+    print("  ?, h, help                  print this help list\n");
+    print("  e[x]it, [q]uit              exit the program\n");
     return (0);
 }
 
