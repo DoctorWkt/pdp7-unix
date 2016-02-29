@@ -1,42 +1,273 @@
-Basics of the Unix assembler syntax
+Basics of the "Unix v0" 'as' assembler syntax and PDP-7 coding:
 
-Lines starting with " are comment lines
+ASSEMBLER SYNTAX:
+=================
+
+Anything from " to end of line is a comment.
 
 . is the location counter, where the next code or constant will be placed
-.. is the relocation counter
+.. is the relocation counter (not currently handled)
 
-t = 0		Sets a built-in variable to this value without generating any machine code.
-		Variables so far are . .. and t. Not sure what t's purpose is yet.
+Symbol names start with a letter, and can contain letters and "."
+The dump of label values in "scans/sysmap" appears to show truncation
+after 8 characters (not currently enforced by the "as7" Perl script).
 
-orig:		is a label. It looks like labels can have dots in them.
-		Dots seem to separate structures and fields, e.g. u.base
-		but there are some symbols that start with dots, e.g. .seek
+symbol = expression
 
-jms copy; 10; u.rg+2; 6		Semicolons separate instructions and
-				word expressions that follow the instruction
+	Sets a built-in variable to this value without generating any
+	machine code.
 
-				Some expressions are 0:0, not sure about this.
-				Is it two 9-bit fields? No idea
+	as7 enters machine instructions and the indirect bit (i)
+	into the variable table.
 
-jmp 1f		Jump back to the closest 1:	label
-jmp 1b		Jump forward to the closest 1:	label
+label:	is a label.
 
-Some lines are indented differently to others e.g.
+	single digit decimal numbers can be used as "local" labels,
+	which are referenced with Nf and Nb:
 
-	jms betwen; o10000; o17762
-	   jms error
-	dac .+1
+	jmp 1f		Jump back to the closest 1: label
+	jmp 1b		Jump forward to the closest 1: label
 
-I think this is to indicate the skip logic, but it plays no part in the assembly syntax.
-
--1 occurs instead of instructions, so it looks like the assembler allows
-literal constants at any time.
+multiple words can be entered on one line, separated by semi-colon.
 
 String literals seem to be two characters decorated with < > characters, e.g.
 "ab" is <a>b. I'm guessing these are placed as pairs in one word. The syntax
 is confusing, because I've also seen <no> ; 040 ; <fi> ; <le>; <s 012 which
 appears to mean "no files\n".
 
-Looks like a line can contain multiple labels, e.g. o12: d10: 10
+A line can contain multiple labels, e.g. o12: d10: 10
 
 Numeric literals: 0xx are octal values, [1-9]xx are decimal values.
+
+CONVENTIONS:
+============
+
+Because there is no immediate mode (and "as" lacks the literal syntax
+found in DEC assemblers), there is a convention for literal (manifest)
+constants:
+
+	dNNN indicates the location of a constant for decimal NNN.
+	oOOO for octal constant OOO.
+	dmN (decimal minus) indicates a constant for decimal -N.
+
+High order bits of the "law" (load ac with word) instruction are all
+ones, so "-1" as an instruction loads -1 into AC.
+
+Subroutine arguments are often located in the words following the
+call. When an argument is a variable, sometimes a "0:" local label is
+used to tag the location:
+
+	jms namei; 0:0
+
+Indentation is (sometimes) used to indicate an instruction
+or subroutine that may skip:
+
+	jms betwen; o10000; o17762
+	   jms error
+	dac .+1
+
+NOTE! the "betwen" (between) routine (which appears in multiple
+places) takes ADDRESSES of values (which can be literals, as above),
+or could be symbol names for variables.
+
+I haven't seen any cases where "skip chains" (sequences of skip
+instructions) are indicated by multiple indents.
+
+There is no hardware stack, so the only form of subroutine call (jms)
+is "impure" and leaves the (updated) program counter in the first word
+of the subroutine, and execution starts on the second word.
+
+Routines which fetch arguments from after the jms instruction may do:
+
+	 routine: 0
+	    lac routine i	" pick up argument after jms
+	    dac temp		" store in temp location
+	    isz routine		" increment return PC to skip argument
+
+Routines which (optionally) skip (eg; on success) may use "isz
+routine" to (conditionally) increment the return PC.
+In the system code t is used as a (current) offset into a block of
+temporary location(s) for a routine or group of routines , at label
+9f, so you'll see:
+
+    this:
+	0
+	lac 9f+t+N
+    ....
+    t=t+M
+    ....
+    that:
+	0
+	lac 9f+t+I
+    ....
+    t=t+J
+    .....
+    .....
+    .....
+    9f:
+       .=.+t
+
+
+HARDWARE:
+=========
+
+References:
+http://simh.trailing-edge.com/docs/architecture18b.pdf
+http://www.soemtron.org/pdp7.html
+http://www.soemtron.org/pdp7history.html
+
+NOTE!  All opcodes are defined in "sop.s" (and in "as7") and are
+commented as below.
+
+The PDP-4/7/9/15 family started as a simplified version of the PDP-1,
+(itself an evolution of the TX-0, designed at MIT Lincoln Labs). The
+PDP-4 wasn't very successful (offering 5/8 PDP-1 performance at 1/2
+the price).
+
+The PDP-7 was originally concieved of as a repackaging of the PDP-1,
+but DEC had a built up more system software for the PDP-4 than for the
+PDP-1 (including a FORTRAN II compiler!), so they continued with the
+new architecture.   See Bob's paper (first link above) for more detail.
+
+The Living Computing Museum in Seattle has a running PDP-7, and
+intends to build simulated disk hardware to enable running "Unix v0".
+
+Words are 18 bits, words are typically represented as six octal digits.
+
+There is one 18 bit accumulator, called "AC".
+
+The "LINK" register is a 1-bit register that is included in shifts.
+
+The Extended Arithmetic Element (EAE) option adds an "MQ" register which
+has limited uses.
+
+Bit numbering is "big endian": bit zero is 400000.
+
+There are no "addressing" modes: memory referencing instructions,
+(opcodes 0 thru 060) decode the low 14 bits as:
+    I (020000) "indirect" bit
+    Y (017777) 13-bit address field.
+
+When the "I" bit is clear, the "Y" field is the address of the operand.
+When the "I" bit is set, the word referenced by the contents of the
+word addressed by "Y" field is used as the operand.
+
+Unlike the PDP-1 (and PDP-6/10) indirect references are not
+multi-level, and end after the first indirect fetch.
+
+The PDP-7 found by Ken Thompson apparently did not have extended
+memory or memory protection options and could directly reference all
+8K words of memory (at all times).
+
+Unix system code appears to have resided in the low 4K of memory, and
+a single user program in the high 4K.  The system had a "fast"
+fixed-head disk, but indirect memory access locks out DMA by the disk
+controller, and indirect access cannot be used while disk transfers
+are active (the interrupt service routines for clock and TTY, are
+coded without using indirect!).  Because of this, disk access cannot
+be "overlapped" with user code, but users are free to use "indirect"
+freely.
+
+When locations 010 through 017 of memory are referenced *INDIRECTLY*,
+they auto-increment after access, and can be used as "index
+registers".
+
+System calls are made using the "CAL" (call) instruction (octal 00).
+The Y field indicates the system call number.  "CAL" behaves like "jms
+020".  "CAL" with the "I" bit set behaves like "jms 20 i".  The system
+handler appears to deal with both (although the non-indirect form
+destroys the contents of location 020), and has a longer code path, so
+it seems likely that "sys=cal i" became the preferred system call at
+some point?
+
+The kernel preserves the contents of the users' AC and MQ registers
+and locations 8-15 in the "userdata" block (symbols u.ac, u.mq and
+u.rq).  Location u.rq+8 is the saved PC of the last system call.
+
+The "save" system call (and any undefined system call) write high 4K
+of memory and the "userdata" block (to fd 1?????)
+
+The system did not have advanced interrupt processing hardware, so all
+"priority interrupts" (also known in the past as "address break"
+processing) dispatched as if a "jms 0" was executed, and are processed
+in the "pibreak" routine.
+
+Summary of memory instructions (from annotated sop.s):
+
+    dac = 0040000		" MEM: deposit AC
+    jms = 0100000		" MEM: jump to subroutine
+    dzm = 0140000		" MEM: deposit zero to memory
+    lac = 0200000		" MEM: load AC
+    xor = 0240000		" MEM: XOR with AC
+    add = 0300000		" MEM: one's complement add
+    tad = 0340000		" MEM: two's complement add
+    xct = 0400000		" MEM: execute
+    isz = 0440000		" MEM: increment and skip if zero
+    and = 0500000		" MEM: AND with memory
+    sad = 0540000		" MEM: skip if AC different
+    jmp = 0600000		" MEM: jump
+
+Other instruction groups do not interpret the "I" bit, and all begin
+with '7' in the high three bits.
+
+I/O Transfer (or IOT) have 111000 (070) in the high six bits. the next
+six bits (two octal digits) indicate the device number.
+
+Operate (OPR) which is "microcoded" with low order bits indicating
+"micro operations" to be performed have 11110 (074) in the high four
+bits:
+
+    cma = 0740001		" OPR: complement AC
+    ral = 0740010		" OPR: rotate AC left
+    rar = 0740020		" OPR: rotate AC right
+    hlt = 0740040		" OPR: halt
+    sma = 0740100		" OPR: skip on minus AC
+    sza = 0740200		" OPR: skip on zero AC
+    snl = 0740400		" OPR: skip on non-zero link
+    skp = 0741000		" OPR: skip unconditionally
+    sna = 0741200		" OPR: skip on negative AC
+    szl = 0741400		" OPR: skip on zero link
+    rtl = 0742010		" OPR: rotate two left
+    rtr = 0742020		" OPR: rotate two right
+    cll = 0744000		" OPR: clear link
+    rcl = 0744010		" OPR: clear link, rotate left
+    rcr = 0744020		" OPR: clear link, rotate right
+    cla = 0750000		" OPR: clear AC
+    las = 0750004		" OPR: load AC from switches
+
+With some limitations, OPR instructions can be OR-ed together.
+(Ordering of operations is determined by the hardware, not by their
+order in the source!!):
+
+  sna cla		" skip on negative AC, clear AC
+  sna spa		" skip on negative or positive AC
+  sna ral		" skip on negative AC, rotate AC left
+  cla cll sza		" skip on AC zero, clear AC, clear LINK
+
+The last "operate" instruction is not microcoded:
+    law = 0760000		" OPR: load accumulator with (instr)
+
+and as noted above, is often coded directly as an immediate negative constant.
+
+Unix v0 depends on the EAE option, which uses instructions with 064 in
+the top four bits, and is used for multiply, divide, and the 18-bit MQ
+register:
+
+    lrs = 0640500		" EAE: long right shift
+    lrss = 0660500		" EAE: long right shift, signed
+
+    lls = 0640600		" EAE: long left shift
+    llss = 0660600		" EAE: long left shift, signed
+
+    als = 0640700		" EAE: AC left shift
+    alss = 0660700		" EAE: AC left shift, signed
+
+    mul = 0653323		" EAE: multiply
+    idiv = 0653323		" EAE: integer divide
+
+    lacq = 0641002		" EAE: load AC with MQ
+    clq = 0650000		" EAE: clear MQ
+    omq = 0650002		" EAE: OR MQ into AC
+    cmq = 0650004		" EAE: complement MQ
+    lmq = 0652000		" EAE: load MQ from AC
+

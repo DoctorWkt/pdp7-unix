@@ -21,61 +21,61 @@ orig:
    jmp 1f+1
    1f
 1: 0
-   iof
-   dac u.ac
+   iof				" interrupts off
+   dac u.ac			" save user AC
    lacq
-   dac u.mq
+   dac u.mq			" save user MQ
    lac 8
-   dac u.rq
+   dac u.rq			" save user auto-index location 8
    lac 9
-   dac u.rq+1
-   jms copy; 10; u.rq+2; 6
-   lac 1b
-   dac u.rq+8
+   dac u.rq+1			" save user auto-index location 9
+   jms copy; 10; u.rq+2; 6	" save user auto-index locations 10-15
+   lac 1b			" load user PC after system call
+   dac u.rq+8			" save user PC
+   -1				" load -1
+   dac .savblk			" set "save" flag (cleared by disk I/O?)
+   dac .insys			" set "in system" flag
+   lac uquant			" load user quantum count
+   jms betwen; d0; maxquant	" check if between 0 & maxquant??
+      jms swap			" no: swap processes
+   ion				" interrupts on
    -1
-   dac .savblk
-   dac .insys
-   lac uquant
-   jms betwen; d0; maxquant
-      jms swap
-   ion
-   -1
-   tad u.rq+8
-   jms laci
-   jms betwen; o20001; swn
-      jmp badcal
-   tad swp
-   dac .+1
-   jmp .. i
+   tad u.rq+8			" get address of system call
+   jms laci			" load AC indirect??
+   jms betwen; o20001; swn	" range check
+      jmp badcal		" bad system call
+   tad swp			" add system call table base
+   dac .+1			" save as next instruction
+   jmp .. i			" dispatch system call
 
 . = orig+0100
    jmp coldentry
    jms halt
 
 okexit:
-   dzm: u.ac
-sysexit:
-   ion
-   lac .savblk
-   sza
-   jmp 1f
-   jms copy; sysdata; dskbuf; 64
+   dzm u.ac			" 'OK' system call exit: clear user AC
+sysexit:			" common system call exit code
+   ion				" enable interrupts
+   lac .savblk			" load "save" flag
+   sza				" is zero (cleared by disk I/O)?
+   jmp 1f			" no: no disk I/O done?
+   jms copy; sysdata; dskbuf; 64 " copy system data to disk buffer
    cla
-   jms dskio; 07000
+   jms dskio; 07000		" save to disk?
 1:
-   dzm .insys
+   dzm .insys			" clear "in system call" flag
    jms chkint
       skp
-   jmp .save
-   jms copy; u.rq+2; 10; 6
-   lac u.rq+1
+   jmp .save			" dump core??
+   jms copy; u.rq+2; 10; 6	" restore auto-index locations 10-15
+   lac u.rq+1			" restore auto-index location 9
    dac 9
-   lac u.rq
+   lac u.rq			" restore auto-index location 8
    dac 8
-   lac u.rq
+   lac u.mq			" restore MQ register
    lmq
-   lac u.ac
-   jmp u.rq+8 i
+   lac u.ac			" restore AC register
+   jmp u.rq+8 i			" return to user
 
 swap: 0
    ion
@@ -129,21 +129,21 @@ swap: 0
    jmp swap i
 t = t+1
 
-swp:
-   jmp .
+swp:			" system call dispatch table
+   jmp .		" base instruction
    .save; .getuid; .open; .read; .write; .creat; .seek; .tell
    .close; .link; .unlink; .setuid; .rename; .exit; .time; .intrp
    .chdir; .chmod; .chown; badcal; .sysloc; badcal; .capt; .rele
    .status; badcal; .smes; .rmes; .fork
 swn:
-   .-swp-1 i
+   .-swp-1 i		" count of system calls, plus indirect!
 
 .intrp:
    lac u.ac
    dac u.intflg
    jmp okexit
 
-.sysloc:
+.sysloc:		" "sysloc": syscall to return system addresses
    lac u.ac
    and o17777
    jms betwen; d1; locn
@@ -154,7 +154,7 @@ swn:
    dac u.ac
    jmp sysexit
 
-locsw:
+locsw:			" table of system data structures for "sysloc" call
    lac .
    iget; inode; userdata; sysdata; copy; copyz; betwen; dskrd
    dskwr; dskbuf; dpdata; namei; pbsflgs; alloc; free; dspdata

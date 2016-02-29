@@ -53,7 +53,7 @@ orig:
    jms halt
 
 okexit:
-   dzm: u.ac
+   dzm u.ac
 sysexit:
    ion
    lac .savblk
@@ -72,7 +72,7 @@ sysexit:
    dac 9
    lac u.rq
    dac 8
-   lac u.rq
+   lac u.mq
    lmq
    lac u.ac
    jmp u.rq+8 i
