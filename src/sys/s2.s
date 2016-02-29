@@ -53,9 +53,9 @@
    jms iput
    jmp okexit
 
-.getuid:
+.getuid:			" getuid system call
    lac u.uid
-   dac u.ac
+   dac u.ac			" return u.uid in user AC
    jmp sysexit
 
 .seek:
@@ -146,12 +146,12 @@
    jms iput
    jmp sysexit
 
-.setuid:
-   lac u.uid
-   sma
-   jms error
-   lac u.ac
-   dac u.uid
+.setuid:			" setuid system call
+   lac u.uid			" load current user id
+   sma				" negative?
+   jms error			" no: error!!
+   lac u.ac			" load user AC
+   dac u.uid			" save as new uid
    jmp sysexit
 
 .rename:
@@ -168,11 +168,14 @@
    jms copy; 1:0; d.name; 4
    jmp okexit
 
+	" time system call returns line (mains) frequency ticks since boot?
+	" note: returns uptime!?
+	" at 60Hz, 36 bits would last 36+ years!
 .time:
-   lac s.tim
-   dac u.ac
-   lac s.tim+1
-   dac u.mq
+   lac s.tim			" load high order bits
+   dac u.ac			" return in AC
+   lac s.tim+1			" load low order bits
+   dac u.mq			" return in MQ
    jmp sysexit
 
 .chdir:
