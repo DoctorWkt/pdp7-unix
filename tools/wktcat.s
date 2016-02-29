@@ -26,7 +26,7 @@ catfiles:
    dac name
 
    " Open the file and get the fd into AC
-   sys open; name:0; 0; 0
+   sys open; name:0; 0;
    spa
      jmp badfile	" Negative fd, exit with an error message
    dac fd		" Save the file descriptor

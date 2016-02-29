@@ -10,7 +10,7 @@
    dac name
 
 loop:
-   sys open; name; 0; 0		" Open file, get fd back
+   sys open; name:0; 0;		" Open file, get fd back
    spa
      jmp badfile		" Negative fd, exit with an error message
    dac fi			" save file descriptor in fi
@@ -70,14 +70,14 @@ done:
    rcr
    dac 1f
    lac fo			" Load fd 1, stdout
-   sys write; iopt+1; 1:..
+   sys write; iopt+1; 1
    sys exit
 
 getc: 0
    lac ipt
    sad eipt
      jmp 1f
-   dac 1f
+   dac 2f
    add o400000
    dac ipt
    ral
@@ -99,7 +99,7 @@ getc: 0
    dac ipt
    jmp getc+1
 1:
-   lac 64
+   lac o4
    jmp getc i			" return from subroutine
 
 putc: 0
@@ -140,7 +140,6 @@ opt: .+2
 iopt: .+1; .=.+64		" 64 word output buffer
 noc: 0
 fo: 1				" output file descriptor, fd 1 is stdout
-name: 0				" not in the original
 
 d1: 1				" octal and decimal constants
 o4:d4: 4
