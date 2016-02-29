@@ -47,7 +47,7 @@ loop:
    tad d4
    dac name
    lac octal
-   sys chowner; name: 0
+   sys chowner; name:0
    sma
    jmp loop
    lac name

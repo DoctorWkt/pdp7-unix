@@ -9,7 +9,7 @@
    dac name
 
 loop:
-   sys open; name; 0; 0
+   sys open; name: 0; 0
    spa
    jmp badfile
    dac fi
@@ -74,7 +74,7 @@ getc: 0
    lac ipt
    sad eipt
    jmp 1f
-   dac 1f
+   dac 2f
    add o400000
    dac ipt
    ral
@@ -96,7 +96,7 @@ getc: 0
    dac ipt
    jmp getc+1
 1:
-   lac 64
+   lac o4
    jmp getc i
 
 putc: 0

@@ -42,7 +42,7 @@ dac dskbuf1
    dzm licnt
    dzm blcnt
    dzm curi
-   jms coopyz i; usetab; 500
+   jms copyz i; usetab; 500
 
 iloop:
    isz curi
@@ -68,7 +68,7 @@ iloop:
 1:
    lac i t1
    sza
-   jms dupchech
+   jms dupcheck
    isz t1
    isz t2
    jmp 1b
@@ -108,7 +108,7 @@ iloop:
 
 dupcheck: 0
    isz blcnt
-   jms betwen i d709; d6400
+   jms betwen i; d709; d6400
    jmp badadr
    dac t5
    lrss 4
@@ -126,8 +126,6 @@ dupcheck: 0
    sza
    jmp dup
    lac i t6
-   xor bit
-   dac i t6
    xor bit
    dac i t6
    jmp i dupcheck
@@ -181,7 +179,7 @@ part2:
    sys write; m4; m4s
    lac indircnt
    jms print
-   dac d1
+   lac d1
    sys write; m5; m5s
    lac blcnt
    jms print
