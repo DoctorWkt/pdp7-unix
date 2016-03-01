@@ -37,8 +37,7 @@ prog
     ;
 
 line
-    : (label? declarations? comment? eol)
-    | eol 
+    : ( label | declarations)* comment? eol
     ;
 
 declarations
@@ -69,7 +68,8 @@ atom
     | DECIMAL
     | DECIMAL_MINUS
     | OCTAL
-    | HEX  
+    | OCTAL_LITERAL
+    | DECIMAL_LITERAL
     ;
 
 eol
@@ -129,8 +129,12 @@ IDENTIFIER
     : [a-zA-Z]+
     ;
 
-HEX
-    : [0-9a-f]+
+OCTAL_LITERAL
+    : [0] [0-7]+
+    ;
+
+DECIMAL_LITERAL
+    : [1-9] [0-9]+
     ;
 
 DECIMAL
