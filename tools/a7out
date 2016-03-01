@@ -454,6 +454,7 @@ sub cal {
         3  => \&sys_open,
         4  => \&sys_read,
         5  => \&sys_write,
+        6  => \&sys_creat,
         9  => \&sys_close,
         14 => \&sys_exit,
     );
@@ -525,6 +526,29 @@ sub sys_close {
     return;
 }
 
+# Common code for creat and open
+sub creatopen {
+    my ($filename, $readorwrite)= @_;
+
+    # Open the file
+    if ( open( my $FH, $readorwrite, $filename ) ) {
+
+        # Find a place in the @FD array to store this filehandle.
+        # 99 is arbitrary
+        foreach my $fd ( 0 .. 99 ) {
+            if ( !defined( $FD[$fd] ) ) {
+                $FD[$fd] = $FH;
+                $AC = $fd;
+                last;
+            }
+        }
+    } else {
+        # No filehandle, so it's an error
+        dprintf("open failed: $!\n");
+        $AC = MAXINT;
+    }
+}
+
 # Open system call
 sub sys_open {
 
@@ -546,25 +570,31 @@ sub sys_open {
     # Bump up the PC
     $PC += 3;
 
-    # Open the file
-    if ( open( my $FH, $readorwrite, $filename ) ) {
+    # Now open the file and return
+    creatopen($filename, $readorwrite);
+}
 
-        # Find a place in the @FD array to store this filehandle.
-        # 99 is arbitrary
-        foreach my $fd ( 0 .. 99 ) {
-            if ( !defined( $FD[$fd] ) ) {
-                $FD[$fd] = $FH;
-                $AC = $fd;
-                last;
-            }
-        }
-        return;
-    } else {
-        # No filehandle, so it's an error
-        dprintf("open failed: $!\n");
-        $AC = MAXINT;
-        return;
-    }
+# Creat system call
+sub sys_creat {
+    # Open seems to have 1 arguments: PC+1 is a pointer to the filename.
+    # Some programs seem to have a second argument always set to 0.
+    # AC is the opened fd on success, or -1 on error
+
+    # Get the start address of the string
+    my $start = $Mem[ $PC + 1 ];
+
+    # Convert this to a sensible ASCII filename
+    my $filename = mem2arg($start);
+
+    # Choose to open write-only
+    my $readorwrite = ">";
+    dprintf( "creat: base %06o, file %s\n", $start, $filename );
+
+    # Bump up the PC
+    $PC += 2;
+
+    # Now open the file and return
+    creatopen($filename, $readorwrite);
 }
 
 # Read system call
