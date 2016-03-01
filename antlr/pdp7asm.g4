@@ -57,7 +57,7 @@ argument
     ;
 
 assignment
-    : variable '=' expression
+    : (variable | LOC | RELOC) '=' expression
     ;
 
 expression 
