@@ -298,13 +298,13 @@ sub process_label {
 # (: and ; can appear in char literals)
 # handles multiple ';' separated words per line
 sub parse_line {
-    # Lose any leading whitespace
-    $line =~ s{^\s*}{};
-
     while (1) {
 	$line_error = ' ';	# clear listing error indicator
 
 	return if ($line eq '' || $line =~ m{^"}); # empty or comment: quit
+
+	# Lose any leading whitespace
+	$line =~ s{^\s*}{};
 
 	print "parse_line: '$line'\n" if ($debug);
 
