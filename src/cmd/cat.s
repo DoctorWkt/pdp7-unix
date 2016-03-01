@@ -63,14 +63,14 @@ done:
    and d1
    sna cla
      jmp 1f
-   jms putc			" Print out the character
+   jms putc			" Store the character in the buffer
    jmp done			" and loop back
 1:
-   lac noc			
-   rcr
-   dac 1f
+   lac noc			" Get the number of characters in the buffer
+   rcr				" Divide by two to convert to words
+   dac 1f			" Save in the write's word count below
    lac fo			" Load fd 1, stdout
-   sys write; iopt+1; 1
+   sys write; iopt+1; 1:..	" Write the leftover buffer and exit
    sys exit
 
 getc: 0
