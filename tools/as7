@@ -4,7 +4,7 @@
 # and convert them into PDP-7 machine code
 #
 # (c) 2016 Warren Toomey, GPL3
-# Tweaked by Phil Budne (line, expression parsing, "list" format)
+# Tweaked by Phil Budne (line, expression parsing, "list", "ptr" formats)
 #
 use strict;
 use warnings;
@@ -31,12 +31,11 @@ my $lineno;	# current line number
 
 ## command line options
 my $debug = 0;		# Run in debug mode
-my $symbols = 0;	# dump symbols
 my $format = 'a7out';	# output format
 
 # keep this near the GetOptions call to make it easy to add documentation!
 sub usage {
-    die("Usage: $0 [--debug] [--format=a7out|list ] file1.s [file2.s ...]\n")
+    die("Usage: $0 [--debug] [--format=a7out|list|ptr ] file1.s [file2.s ...]\n")
 }
 
 ### Main program ###
@@ -48,10 +47,16 @@ GetOptions(
 
 usage() if ( @ARGV < 1 );
 
-# predefine syscall and opcodes as variables
 # start with the location counter at zero
+# predefine syscall and opcodes as variables
 %Var = (
     '.'    => 0,
+    '..'   => 4096,		# output base addr?
+
+    # as.s does not have an initial symbol table
+    # (except for the above), so there must have been a
+    # user "ops" file
+
     save   => 1,		# saves core dump & user area!
     getuid => 2,
     open   => 3,
@@ -83,9 +88,8 @@ usage() if ( @ARGV < 1 );
 
     # List of instruction names and machine code values
     # These come from https://raw.githubusercontent.com/simh/
-    #   simtools/master/crossassemblers/macro7/macro7.c
-    # PLB: replace with symbols in "sop.s"?
-    sys    => 0000000,		# cal instruction (trap thru 020)
+
+    sys    => 0020000,		# "cal i" instruction (trap indirect thru 020)
     i      => 0020000,		# indirect bit
 
     # memory reference instructions
@@ -132,42 +136,7 @@ usage() if ( @ARGV < 1 );
     llss   => 0660600,		# long left shift, signed
     alss   => 0660700,		# AC left shift, signed
 
-    # I/OT instructions
-    iot    => 0700000,		# base i/o transfer instruction
-    clsf   => 0700001,		# skip if RT clock overflow
-    iof    => 0700002,		# interrupts off (disable PIC)
-    ion    => 0700042,		# interrupts on (enable PIC)
-    iton   => 0700062,		# interrupt and trap on
-    clof   => 0700004,		# clear clock flag, disable clock
-    clon   => 0700044,		# clear clock flag, enable clock
-
-    rsf    => 0700101,		# skip if PTR flag set
-    rrb    => 0700112,		# clear PTR flag, OR buffer with AC
-    rcf    => 0700102,		# clear PTR flag
-    rsa    => 0700104,		# select PTR in alphanumeric mode
-    rsb    => 0700144,		# select PTR in binary mode
-
-    psf    => 0700201,		# skip if PTP flag set
-    pcf    => 0700202,		# clear PTP flag
-    psa    => 0700204,		# punch PTP in alphanumeric mode
-    psb    => 0700244,		# punch PTP in binary mode
-
-    ksf    => 0700301,		# skip if KBD flag set
-    krb    => 0700312,		# read KBD buffer
-    iors   => 0700314,		# input/output read status
-
-    tsf    => 0700401,		# skip if if TTY output flag set
-    tcf    => 0700402,		# clear TTY output flag
-    tls    => 0700406,		# load TTY output buffer and select
-
-    tts    => 0703301,		# Test Teleprinter and Skip
-    skp7   => 0703341,		# skip if processor is PDP-7!
-    caf    => 0703302,		# Clear All Flags
-
-    crsf   => 0706701,		# skip if CDR is ready
-    crrb   => 0706712,		# read CDR buffer
-    crsa   => 0706704,		# select CDR alphanumeric mode
-    crsb   => 0706744,		# select CDR binary mode
+    # PLB: removed I/OT instructions: kernel uses sop.s
 
     # Operate Instructions
 
@@ -205,7 +174,7 @@ usage() if ( @ARGV < 1 );
 
     # Group 2 operate
     law    => 0760000,		# load accumulator with (instruction)
-    lam    => 0777777,		# (load accumulator minus)
+#   lam    => 0777777,		# (load accumulator minus)
 );
 
 # Parse all the files
@@ -236,9 +205,23 @@ elsif ($format eq 'list') {
 	printf("%-8.8s %#06o\n", $key, $Label{$key});
     }
 }
+elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
+    for my $loc ( 0 .. $#Mem ) {
+	my $m = $Mem[$loc] || 0;
+	printf("%c%c%c", ($m >> 12) & 077, ($m >> 6) & 077, $m & 077);
+    }
+}
 else {
     die("unknown format $format");
 }
+
+# as.s writes a binary file named n.out, ours is ascii
+open (my $NOUT, ">n.out") || die "n.out";
+foreach my $key (sort keys %Label) {
+    printf $NOUT "%-8.8s %#06o\n", $key, $Label{$key};
+}
+close($NOUT);
+
 exit($errors);
 
 # report an assmebly error:
@@ -251,7 +234,7 @@ sub err {
     $errors = 1;		# exit status
     if ($stage == 2) {
 	print STDERR "$file:$lineno: $msg\n";
-	print "$file:$lineno: $msg\n" if (! -t STDOUT);
+	print "$file:$lineno: $msg\n" if (! -t STDOUT && $format ne 'ptr');
     }
     return 0;			# expression value
 }
@@ -272,36 +255,46 @@ sub parse_file {
 }
 
 # process a label and set its value to the location counter
-# only called on pass 1;
-# if called on pass 2, should check if values are identical
+# OK for symbolic label to be entered twice, so long as it's the same value
+# (ie; both passes)
 sub process_label {
     my $label = shift;
+    my $loc = $Var{'.'};
 
-    # It's a relative label, save its current value in a list
-    if ( $label =~ m{^\d+$} ) {
-        push( @{ $Rlabel{$label} }, $Var{'.'} );
-        printf( "Pushing %#o for relative label %s\n", $Var{'.'}, $label ) if ($debug);
-        return;
-    }
+    print "process_label $label\n" if ($debug);
 
-    # It's a textual label, check if it's been defined before
-    if ( defined( $Label{$label} ) ) {
-	err('M', "Label $label defined multiple times\n");
+    if ( $label =~ m{^\d+$} ) { # numeric (relative) label?
+	if ($stage == 1) {
+	    push( @{ $Rlabel{$label} }, $loc );
+	    printf( "Pushing %#o for label %s\n", $loc, $label ) if ($debug);
+	}
+    } # numeric label
+    else {			# symbolic label
+	# error to have different values
+	if ( defined( $Label{$label} ) && $Label{$label} != $loc ) {
+	    err('M', "Label $label multiply defined");
+	}
+	else {
+	    $Label{$label} = $loc;
+	    printf( "Set label %s to %#o\n", $label, $loc ) if ($debug);
+	}
     }
-    # Otherwise, save its value
-    $Label{$label} = $Var{'.'};
-    printf( "Set label %s to %#o\n", $label, $Label{$label} ) if ($debug);
+}
+
+sub eol {
+    return $line eq '' || $line =~ m{^"}; # empty or comment
 }
 
 # Blame Phil for this....
 # parses global $line based on prefixes, nibbling of a bit at a time
 # (: and ; can appear in char literals)
 # handles multiple ';' separated words per line
+# allows " in character literals (tho none appear in listings)
 sub parse_line {
     while (1) {
 	$line_error = ' ';	# clear listing error indicator
 
-	return if ($line eq '' || $line =~ m{^"}); # empty or comment: quit
+	return if (eol());
 
 	# Lose any leading whitespace
 	$line =~ s{^\s*}{};
@@ -309,14 +302,10 @@ sub parse_line {
 	print "parse_line: '$line'\n" if ($debug);
 
 	while ($line =~ s{^([a-z0-9\.]+):\s*}{}) { # labels
-	    my $label = $1;
-
-            # First pass: parse the labels
-	    # (could check for same value on pass 2)
-            if ( $stage == 1 ) {
-		process_label($1);
-	    }
+	    process_label($1);
 	}
+
+	return if (eol());
 
 	if ( $line =~ s{^(\S+)\s*=}{}) { # assignment
 	    my $lhs = $1;
@@ -325,7 +314,7 @@ sub parse_line {
 	    $Var{$lhs} = $word;
 	    printf("\t%06o %s\n", $word, $line_error) if ($stage == 2 && $format eq 'list');
 	}
-	else {	# bare expression
+	else {	# bare expression (not assignment)
 	    # Get its value on pass two and save to memory
 	    # Also save the input line that altered memory
 	    my $word = parse_expression();
@@ -334,7 +323,7 @@ sub parse_line {
 		$Mem[$location]   = $word;
 		$Mline[$location] = $origline;
 		$origline = '';
-		if ($format eq 'list') {
+		if ($format eq 'list' and defined($word)) {
 		    printf( "%06o: %06o %s\n", $location, $word, $line_error);
 		}
 	    }
@@ -360,7 +349,7 @@ sub parse_expression {
 	my $syllable = 0;
 	my $op = '|';
 
-	$line =~ s{^\s+}{};
+	$line =~ s{^\s+}{};	# as.s accepts ",' as whitespace too!
 
 	if ($line eq '' || $line =~ m{^[";]}) { # EOL ; and " terminate expr
 	    printf("\tparse_expression => %#o\n", $word) if ($debug);
@@ -370,19 +359,24 @@ sub parse_expression {
 	print "    '$line'\n" if ($debug);
 
 	if ($line =~ s{^-}{}) {
+	    print "\tfound -\n" if ($debug);
 	    $op = '-';
 	}
         elsif ($line =~ s{^\+}{}) {
+	    print "\tfound +\n" if ($debug);
 	    $op = '+';
 	}
 
 	if ($line =~ s{^<(.)}{}) { # <char
+	    print "\tfound <x\n" if ($debug);
 	    $syllable = ord($1) << 9;
 	}
 	elsif ($line =~ s{^(.)>}{}) { # char>
+	    print "\tfound x>\n" if ($debug);
 	    $syllable = ord($1)
 	}
 	elsif ($line =~ s{^>(.)}{}) { # >char !!
+	    print "\tfound >x\n" if ($debug);
 	    $syllable = ord($1)
 	}
 	elsif ($line =~ s{^([a-z\.][a-z0-9\.]*)}{}) {
@@ -401,10 +395,12 @@ sub parse_expression {
 	    } # pass 2
 	} # symbol
 	elsif ( $line =~ s{^(\d+)([fb])}{} ) { # relative label
+	    printf "\tfound relative: $1$2\n" if ($debug);
 	    $syllable = find_relative_label( $1, $2 ) if ($stage == 2);
 	}
-	elsif ( $line =~ s{^(\d+)}{} )  {
+	elsif ( $line =~ s{^(\d+)}{} )  { # constant
 	    my $value = $1;
+	    printf "\tfound constant: $value\n" if ($debug);
 	    if ( $value =~ m{^0} ) {
 		$syllable = oct($value);
 	    }
@@ -424,8 +420,9 @@ sub parse_expression {
 	    # he says, "will usually know what's wrong.
 	    err('?', "huh? '$line'");
 	    $line = '';		# abort processing
-	    return $word;
+	    return undef;
 	}
+
 	if ($op eq '+') {
 	    $word += $syllable;
 	}
@@ -449,7 +446,7 @@ sub find_relative_label {
 
     # Error check: no labels at all
     if ( !defined( $Rlabel{$label} ) ) {
-	return err('U', "relative label $label not defined\n");
+	return err('U', "relative label $label never defined");
     }
 
     # Get the list of possible locations for this label
@@ -472,5 +469,5 @@ sub find_relative_label {
             return ($reflocation) if ( $reflocation < $curlocation );
         }
     }
-    return err('U', "No relative label $label");
+    return err('U', "undefined relative reference $label$direction");
 }
