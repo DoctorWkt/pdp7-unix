@@ -18,7 +18,7 @@ main:
    sys write; 1:0; 7
 
    " Try to open file fred
-   sys open; fred; 0; 0
+   sys open; fred; 0;
 
    " read 5 words into the buffer from stdin: type in 10 or more characters!
    lac d0
@@ -50,8 +50,8 @@ out: 0
 hello: <He>; <l 0154; 0157 ,>; 040; <wo>; <rl>; <d 012
 helloptr: hello
 
-" fred as a string, NUL terminated
-fred: 0146162; 0145144; 0
+" fred as a four word filename
+fred: <fr>; <ed>; 040040; 040040
 
 " Input buffer for read
 . = 0400

@@ -1,3 +1,4 @@
+"** 05-1-4.pdf page 32
 " as
 
    jms init1
@@ -60,6 +61,7 @@ assm3:
    dzm name+3
    jms tlookup
    -1
+"** 05-1-4.pdf page 33
    dac fbflg
 assm4:
    lac rand+1
@@ -121,6 +123,7 @@ init1: 0
 
 init2: 0
    lac d1
+"** 05-1-4.pdf page 34
    dac passno
    sys write; 1f; 2f-1f
    jms init
@@ -181,7 +184,7 @@ finis:
    lac bfi
    sys close
    sys exit
-
+"** 05-1-4.pdf page 35
 n.out:
    0156056;0157165;0164040;040040
 
@@ -208,7 +211,7 @@ proc1:
    jmp proc2
    jms bufwr
    jms copyz; buf; 64
-   lac lyrand
+   lac lvrand
    and o17700
    dac bufadd
    dac 1f
@@ -220,7 +223,7 @@ proc1:
    sys read; buf; 64
 
 proc2:
-   lac lyrand
+   lac lvrand
    and o77
    jms betwen; dm1; maxsto
    dac maxsto
@@ -243,6 +246,7 @@ proc3:
 proc4:
    jms error; .>
    lac d1
+"** 05-1-4.pdf page 34
    dac dot
    dzm dot+1
    jmp skip
@@ -256,12 +260,12 @@ bufwr: 0
    sys seek; bufadd: 0; 0
    isz maxsto
    lac bfo
-   sys write; bufp: buf; maxstp: -1
+   sys write; bufp: buf; maxsto: -1
    -1
    dac maxsto
    jmp i bufwr
 
-Xnumber: 0
+:number: 0
    dac 3f
    lac d1000
    dac 2f
@@ -273,7 +277,7 @@ Xnumber: 0
    lacq
    tad o60
    dac i 8
-   iac 2b
+   lac 2b
    cll
    idiv; 10
    lacq
@@ -304,6 +308,7 @@ putsc: 0
    lac i putsc
    dac sctalp
    isz putsc
+"** 05-1-4.pdf page 37
    lac i sctalp
    dac sctal
    add o400000
@@ -334,7 +339,7 @@ betwen: 0
    cma
    tad 2f
    spa
-   jmp 2f
+   jmp 1f
    lac i betwen
    dac 3f
    isz betwen
@@ -365,6 +370,7 @@ copyz: 0
    isz 2f
    jmp 1b
    jmp i copyz
+"** 05-1-4.pdf page 38
 2: 0
 
 error: 0
@@ -426,6 +432,7 @@ ioinit: 0
    dac tal
    -129
    dac talc
+"** 05-1-4.pdf page 39
    jmp i ioinit
 
 nextfil: 0
@@ -447,7 +454,7 @@ nf1:
    lac fname
    tad d4
    dac fname
-   sys open; frame: 0; 0
+   sys open; fname: 0; 0
    dac iof
    sma
    lac passno
@@ -487,25 +494,26 @@ gchar: 0
    jms getsc; tal
    sna
    jmp gchar+1
+"** 05-1-4.pdf page 40
    sad o177
    jmp gchar+1
    sad o12
    skp
    jmp 1f
-   dzm comflc
+   dzm comflg
    isz lineno
 1:
    sad o42
-   dac comflc
+   dac comflg
    dac char
-   lac comflc
+   lac comflg
    sza
    jmp gchar+1
    lac char
 
 gch3:
    dac char
-   jms betwn; d0; o200
+   jms betwen; d0; o200
    cla
    tad lactab
    dac .+1
@@ -548,6 +556,7 @@ badchr:
    jms gchar
    lac char
    sad o12
+"** 05-1-4.pdf page 41
    skp
    jmp 1b
    dac savchr
@@ -609,6 +618,7 @@ gnam3:
    dac savchr
 1:
    lac o40
+"** 05-1-4.pdf page 42
    jms putsc; tal1
    isz tal1c
    jmp 1b
@@ -670,6 +680,7 @@ tlookup: 0
 lookup: 0
       dzm tlookup
 1:
+"** 05-1-4.pdf page 43
    -1
    tad namlstp
    dac 8
@@ -731,6 +742,7 @@ lu2:
    -3
    tad 8
    dac rand+1
+"** 05-1-4.pdf page 44
       lac tlookup
       sza
       jmp i tlookup
@@ -792,6 +804,7 @@ exp1:
    jms grand
    lac orator
    sad d4
+"** 05-1-4.pdf page 45
    jmp exp2
    jms oper; rand
    jmp exp1
@@ -801,12 +814,12 @@ exp2:
    dac srand
    lac r+1
    dac srand+1
-   jmp expb
+   jmp exp5
 exp3:
    sad d5
    jmp exp4
    jms error; x>
-   smp skip
+   jmp skip
 exp4:
    jms pickup
    jmp i expr
@@ -853,6 +866,7 @@ opsw:
    jmp .-1
    jmp oplus
    jmp ominus
+"** 05-1-4.pdf page 46
    tad r
    dac r
    lac r+1
@@ -914,6 +928,7 @@ o142: 0142
 o40040: 040040
 o56056: 056056
 o56040: 056040
+"** 05-1-4.pdf page 47
 o146: 0146
 o17777: 017777
 d1000: 1000
@@ -924,7 +939,7 @@ o74: 074
 o76: 076
 
 namsiz: -2
-namistp: namlst
+namlstp: namlst
 fnamep: fakename
 lactab: lac .+1
 8;8;8;8;8;8;8;8
@@ -975,6 +990,7 @@ lineno: .=.+1
 fakename: .=.+6
 namlst:
 .=.+4
+"** 05-1-4.pdf page 48
 dot:
 .=.+6
 cmflx:

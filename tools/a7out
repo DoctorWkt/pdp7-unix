@@ -27,6 +27,8 @@ use constant MAXPOSINT => 0377777;     # Biggest signed integer
 use constant MAXADDR   => 017777;      # Largest memory address
 use constant LINKMASK  => 01000000;    # Mask for LINK register
 use constant EAESTEP   => 077;         # EAE step count mask
+use constant EAEIMASK  => 0777700;     # EAE instruction mask
+use constant SIGN      => 0400000;     # Sign bit
 
 ### Main program ###
 
@@ -35,12 +37,13 @@ while ( defined( $ARGV[0] ) && ( $ARGV[0] =~ m{^-} ) ) {
 
     # -d: debug mode
     if ( $ARGV[0] eq "-d" ) {
-        $debug = 1; shift(@ARGV);
+        $debug = 1;
+        shift(@ARGV);
     }
 
     # -b: set a breakpoint
     if ( $ARGV[0] eq "-b" ) {
-        $singlestep = 1; shift(@ARGV);
+        shift(@ARGV);
         $Breakpoint{ oct( shift(@ARGV) ) } = 1;
     }
 }
@@ -142,7 +145,7 @@ sub set_arguments {
             my $c1 = substr( $str, $i,     1 ) || "";
             my $c2 = substr( $str, $i + 1, 1 ) || "";
 
-            #printf("Saving %06o to %06o\n", (ord($c1) << 9 ) | ord($c2), $addr);
+           #printf("Saving %06o to %06o\n", (ord($c1) << 9 ) | ord($c2), $addr);
             $Mem[ $addr++ ] = ( ord($c1) << 9 ) | ord($c2);
         }
     }
@@ -166,8 +169,7 @@ sub simulate {
         oct("054") => \&sad,
         oct("060") => \&jmp,
         oct("064") => \&eae,
-        oct("070") => \&iot,
-        oct("074") => \&special,
+        oct("074") => \&opr,
     );
 
     # Loop indefinitely
@@ -183,18 +185,21 @@ sub simulate {
         my $indaddr = ($indirect) ? $Mem[$addr] & MAXADDR : $addr;
 
         # If this is a breakpoint, stop now and get a user command
-        $singlestep = 1 if ( defined( $Breakpoint{$PC} ) );
+        if ( defined( $Breakpoint{$PC} ) ) {
+            $singlestep = 1;
+            dprintf( "break at PC %06o\n", $PC );
+        }
         get_user_command() if ($singlestep);
         dprintf( "PC %06o: ", $PC );
 
-        #dprintf("PC %06o: instr %06o, op %03o, in %o, addr %06o indaddr %06o\n",
-        #   $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
+       #dprintf("PC %06o: instr %06o, op %03o, in %o, addr %06o indaddr %06o\n",
+       #   $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
 
         # Simulate the instruction. Each subroutine updates the $PC
         if ( defined( $Oplist{$opcode} ) ) {
             $Oplist{$opcode}->( $instruction, $addr, $indaddr );
         } else {
-            printf( STDERR "Unknown instruction 0%o at location 0%o\n",
+            printf( STDERR "Unknown instruction 0%06o at location 0%06o\n",
                 $instruction, $PC );
             exit(1);
         }
@@ -243,14 +248,18 @@ sub tad {
 sub add {
     my ( $instruction, $addr, $indaddr ) = @_;
     dprintf( "add AC (value %06o) with addr %06o (%06o)\n",
-        $PC, $AC, $indaddr, $Mem[$indaddr] );
-    $LINK = 0;
-    $AC   = $AC + $Mem[$indaddr];
-    if ( $AC & LINKMASK ) {
-        $AC++;    # End-around carry
-        $LINK = LINKMASK;
+        $AC, $indaddr, $Mem[$indaddr] );
+
+    # This logic shamelessly borrowed from SimH
+    # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
+    my $sum = $AC + $Mem[$indaddr];
+    if ( $sum > MAXINT ) {    # end around carry
+        $sum = ( $sum + 1 ) & MAXINT;
     }
-    $AC = $AC & MAXINT;
+    if ( ( ( ~$AC ^ $sum ) & ( $AC ^ $sum ) ) & SIGN ) {    # overflow?
+        $LINK = LINKMASK;                                   # set link
+    }
+    $AC = $sum;
     $PC++;
 }
 
@@ -290,7 +299,7 @@ sub dzm {
 # Index and skip if zero
 sub isz {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "isz %06o\n", $Mem[$indaddr] );
+    dprintf( "isz %06o (value %06o)\n", $indaddr, $Mem[$indaddr] );
     $Mem[$indaddr]++;
     $Mem[$indaddr] &= MAXINT;
     $PC += ( $Mem[$indaddr] == 0 ) ? 2 : 1;
@@ -313,79 +322,127 @@ sub jms {
     $PC = $indaddr;
 }
 
-# Special instructions
-sub special {
-    my $instruction = shift;
+# OPR instructions
+sub opr {
+    my ( $instruction, $addr, $indaddr ) = @_;
 
-    # Deal with each one in turn
-    # hlt
+    # hlt: halt simulation
     if ( $instruction == 0740040 ) {
         printf( STDERR "PC %06o: program halted\n", $PC );
         dump_memory( 0, MAXADDR, 0 ) if ($debug);
         exit(1);
     }
-    if ( $instruction == 0741100 ) {    # spa: skip on positive AC
-        dprintf( "spa AC %06o\n", $AC );
-
-        # Because we are dealing with 18 bits, compare the range
-        $PC += ( ( $AC >= 0 ) && ( $AC <= MAXPOSINT ) ) ? 2 : 1;
-        return;
-    }
-    if ( $instruction == 0741200 ) {    # sna: skip on non-zero AC
-        dprintf( "sna AC %06o\n", $AC );
-        $PC += ( $AC != 0 ) ? 2 : 1;
-        return;
-    }
-    if ( $instruction == 0740200 ) {    # sza: skip on zero AC
-        dprintf( "sza AC %06o\n", $AC );
-        $PC += ( $AC == 0 ) ? 2 : 1;
-        return;
-    }
-    if ( $instruction == 0741400 ) {    # szl: Skip when $LINK is zero
-        dprintf( "szl LINK %0o\n", $LINK );
-        $PC += ( $LINK == 0 ) ? 2 : 1;
-        return;
-    }
-    if ( $instruction == 0740400 ) {    # snl: Skip when $LINK not zero
-        dprintf( "snl LINK %0o\n", $LINK );
-        $PC += ( $LINK != 0 ) ? 2 : 1;
-        return;
-    }
-    if ( $instruction == 0741000 ) {    # ska: skip always
-        dprintf("skp\n");
-        $PC += 2;
-        return;
-    }
-
-    # ral: rotate left or rcr: clear link then rotate left
-    if ( ( $instruction == 0740010 ) || ( $instruction == 0744010 ) ) {
-        $LINK = 0 if ( $instruction == 0744010 );
-        $AC   = $AC << 1 + ($LINK) ? 1 : 0;
-        $LINK = $AC & LINKMASK;
-        $AC   = $AC & MAXINT;
-        $PC++;
-        return;
-    }
-
-    # rar: rotate right or rcr: clear link then rotate right
-    if ( ( $instruction == 0740020 ) || ( $instruction == 0744020 ) ) {
-        $LINK = 0 if ( $instruction == 0744020 );
-        my $newlink = ( $AC & 1 ) ? LINKMASK : 0;
-        $AC   = ( $LINK | $AC ) >> 1;
-        $LINK = $newlink;
-        $PC++;
-        return;
-    }
 
     # law: load word into AC
-    if ( ( $instruction >= 0760000 ) && ( $instruction <= MAXINT ) ) {
+    my $indirect = ( $instruction >> 13 ) & 1;
+    if ($indirect) {
         dprintf( "law %06o into AC\n", $instruction );
         $AC = $instruction;
         $PC++;
         return;
     }
-    printf( STDERR "PC %06o: unknown instruction %06o\n", $PC, $instruction );
-    exit(1);
+
+    # List of skip opcode names for the next section
+    my @skipop = (
+        '',    'sma',     'sza',     'sza sma',
+        'snl', 'snl sma', 'snl sza', 'snl sza sma',
+        'skp', 'spa',     'sna',     'sna spa',
+        'szl', 'szl spa', 'szl sna', 'szl sna spa'
+    );
+
+    # This logic shamelessly borrowed from SimH
+    # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
+    my $skip = 0;
+    my $i    = ( $instruction >> 6 ) & 017;    # decode IR<8:11>
+    dprintf( "L.AC %d.%06o %s", ($LINK) ? 1 : 0, $AC, $skipop[$i] );
+
+    $skip = 1 if ( ( $i == 1 ) && ( $AC & SIGN ) != 0 );      # sma
+    $skip = 1 if ( ( $i == 2 ) && ( $AC & MAXINT ) == 0 );    # sza
+    $skip = 1 if ( ( $i == 3 )
+        && ( ( ( $AC & MAXINT ) == 0 ) || ( ( $AC & SIGN ) != 0 ) ) )
+      ;                                                       # sza | sma
+    $skip = 1 if ( ( $i == 4 ) && ($LINK) );                         # snl
+    $skip = 1 if ( ( $i == 5 ) && ( $LINK || ( $AC >= SIGN ) ) );    # snl | sma
+    $skip = 1 if ( ( $i == 6 ) && ( $LINK || ( $AC == 0 ) ) );       # snl | sza
+    $skip = 1 if ( ( $i == 7 )
+        && ( $LINK || ( $AC >= SIGN ) || ( $AC == 0 ) ) );    # snl | sza | sma
+    $skip = 1 if ( $i == 010 );                                     # skp
+    $skip = 1 if ( ( $i == 011 ) && ( ( $AC & SIGN ) == 0 ) );      # spa
+    $skip = 1 if ( ( $i == 012 ) && ( ( $AC & MAXINT ) != 0 ) );    # sna
+    $skip = 1 if ( ( $i == 013 )
+        && ( ( $AC & MAXINT ) != 0 )
+        && ( ( $AC & SIGN ) == 0 ) );                               # sna & spa
+    $skip = 1 if ( ( $i == 014 ) && ( $LINK == 0 ) );               # szl
+    $skip = 1
+      if ( ( $i == 015 ) && ( $LINK == 0 ) && ( $AC < SIGN ) );     # szl & spa
+    $skip = 1
+      if ( ( $i == 016 ) && ( $LINK == 0 ) && ( $AC != 0 ) );       # szl & sna
+    $skip = 1 if ( ( $i == 017 )
+        && ( $LINK == 0 )
+        && ( $AC != 0 )
+        && ( $AC != 0 ) );    # szl & sna & spa
+
+    # Clear operations
+    if ( $instruction & 010000 ) {    # cla
+        dprintf(" cla"); $AC = 0;
+    }
+    if ( $instruction & 004000 ) {    # cli
+        dprintf(" cli"); $LINK = 0;
+    }
+    if ( $instruction & 000002 ) {    # cmi
+        dprintf(" cmi");
+        $LINK = ($LINK) ? 0 : LINKMASK;
+    }
+    if ( $instruction & 000001 ) {    # cma
+        dprintf(" cma");
+        $AC = ( $AC ^ MAXINT ) & MAXINT;
+    }
+
+    # Rotate instructions
+    $i = $instruction & 02030;
+
+    # Single rotate right
+    if ( $i == 020 ) {
+        dprintf(" rar");
+        my $newlink = ( $AC & 1 ) ? LINKMASK : 0;
+        $AC   = ( $LINK | $AC ) >> 1;
+        $LINK = $newlink;
+    }
+
+    # Double rotate right
+    if ( $i == 02020 ) {
+        dprintf(" rtr");
+        my $msb = ( $AC & 1 ) << 17;
+        my $newlink = ( $AC & 2 ) ? LINKMASK : 0;
+        $AC = ( ( $LINK | $AC ) >> 2 ) | $msb;
+        $LINK = $newlink;
+    }
+
+    # Single rotate left
+    if ( $i == 010 ) {
+        dprintf(" ral");
+        my $newlink = ( $AC & SIGN ) ? LINKMASK : 0;
+        my $lsb     = $LINK          ? 1        : 0;
+        $AC = ( ( $AC << 1 ) | $lsb ) & MAXINT;
+        $LINK = $newlink;
+    }
+
+    # Double rotate left
+    if ( $i == 02010 ) {
+        dprintf(" rtl");
+        my $newlink = ( $AC & 0200000 ) ? LINKMASK : 0;
+        my $lsb     = ( $AC & SIGN )    ? 1        : 0;
+        my $twolsb  = $LINK             ? 2        : 0;
+        $AC = ( ( $AC << 2 ) | $twolsb | $lsb ) & MAXINT;
+        $LINK = $newlink;
+    }
+
+    # Impossible left and right rotates: 02030 or 00030. Do nothing!
+
+    # Note: We didn't do the oas instruction above.
+    $PC += 1 + $skip;
+    dprintf("\n");
+    return;
 }
 
 # cal: used for system calls
@@ -397,6 +454,7 @@ sub cal {
         3  => \&sys_open,
         4  => \&sys_read,
         5  => \&sys_write,
+        6  => \&sys_creat,
         9  => \&sys_close,
         14 => \&sys_exit,
     );
@@ -414,25 +472,23 @@ sub cal {
 sub eae {
     my ( $instruction, $addr, $indaddr ) = @_;
     my $step = $instruction & EAESTEP;
+    $instruction &= EAEIMASK;
 
     if ( $instruction == 0660500 ) {    # lrss: long right shift, signed
+                                        # We ignore the MQ as it's not
+                                        # used by any user-mode programs
         dprintf( "lrss %06o AC step %d\n", $AC, $step );
 
         # Save the AC's sign into LINK
-        $LINK = ( $AC << 1 ) & LINKMASK;
-
-        # XXX: Do we need to preserve the AC sign?
-        $AC = $AC >> $step;
+        my $newlink = ( $AC << 1 ) & LINKMASK;
+        $AC = ( ( $LINK | $AC ) >> $step ) & MAXINT;
+        $LINK = $newlink;
         $PC++;
         return;
     }
-    if ( $instruction == 0660711 ) {    # alss: long left shift, signed
+    if ( $instruction == 0660700 ) {    # alss: long left shift, signed
+                                        # We don't fill the lsb with LINK yet
         dprintf( "alss %06o AC step %d\n", $AC, $step );
-
-        # Save the AC's sign into LINK
-        $LINK = ( $AC << 1 ) & LINKMASK;
-
-        # XXX: Do we need to preserve the AC sign?
         $AC = ( $AC << $step ) & MAXINT;
         $PC++;
         return;
@@ -470,8 +526,32 @@ sub sys_close {
     return;
 }
 
+# Common code for creat and open
+sub creatopen {
+    my ($filename, $readorwrite)= @_;
+
+    # Open the file
+    if ( open( my $FH, $readorwrite, $filename ) ) {
+
+        # Find a place in the @FD array to store this filehandle.
+        # 99 is arbitrary
+        foreach my $fd ( 0 .. 99 ) {
+            if ( !defined( $FD[$fd] ) ) {
+                $FD[$fd] = $FH;
+                $AC = $fd;
+                last;
+            }
+        }
+    } else {
+        # No filehandle, so it's an error
+        dprintf("open failed: $!\n");
+        $AC = MAXINT;
+    }
+}
+
 # Open system call
 sub sys_open {
+
     # Open seems to have 2 arguments: PC+1 is a pointer to the filename.
     # PC+2 seems to be 1 for write, 0 for read.
     # Some programs seem to have a third argument always set to 0.
@@ -480,31 +560,41 @@ sub sys_open {
     # Get the start address of the string
     my $start = $Mem[ $PC + 1 ];
 
+    # Convert this to a sensible ASCII filename
+    my $filename = mem2arg($start);
+
+    # Choose to open read-only or write-only
+    my $readorwrite = ( $Mem[ $PC + 2 ] ) ? ">" : "<";
+    dprintf( "open: base %06o, %s file %s\n", $start, $readorwrite, $filename );
+
     # Bump up the PC
     $PC += 3;
 
+    # Now open the file and return
+    creatopen($filename, $readorwrite);
+}
+
+# Creat system call
+sub sys_creat {
+    # Open seems to have 1 arguments: PC+1 is a pointer to the filename.
+    # Some programs seem to have a second argument always set to 0.
+    # AC is the opened fd on success, or -1 on error
+
+    # Get the start address of the string
+    my $start = $Mem[ $PC + 1 ];
+
     # Convert this to a sensible ASCII filename
     my $filename = mem2arg($start);
-    dprintf( "open: base %06o, file %s\n", $start, $filename );
 
-    # Open the file
-    if ( open( my $FH, "<", $filename ) ) {
+    # Choose to open write-only
+    my $readorwrite = ">";
+    dprintf( "creat: base %06o, file %s\n", $start, $filename );
 
-       # Find a place in the @FD array to store this filehandle. 99 is arbitrary
-        foreach my $fd ( 0 .. 99 ) {
-            if ( !defined( $FD[$fd] ) ) {
-                $FD[$fd] = $FH;
-                $AC = $fd;
-                last;
-            }
-        }
-        return;
-    } else {
-        # No filehandle, so it's an error
-        dprintf("open failed: $!\n");
-        $AC = MAXINT;
-        return;
-    }
+    # Bump up the PC
+    $PC += 2;
+
+    # Now open the file and return
+    creatopen($filename, $readorwrite);
 }
 
 # Read system call
@@ -537,22 +627,12 @@ sub sys_read {
     $count = 0;
     foreach my $addr ( $start .. $end ) {
 
-        # It's a terminal, so convert from ASCII
-        if ( -t $FH ) {
-            my $c1 = getc($FH);
-            last if ( !defined($c1) );    # No character, leave the loop
-            my $c2 = getc($FH) || "";     # No character, make it a NUL
-            $Mem[$addr] =
-              ( ord($c1) << 9 ) | ord($c2);    # Pack both into one word
-            $count++;
-        } else {
-            # otherwise (for now) read in one line and convert to octal
-            my $line = <$FH>;
-            last if ( !defined($line) );       # No line, leave the loop
-            chomp($line);
-            $Mem[$addr] = oct($line) & MAXINT;
-            $count++;
-        }
+        my $c1 = getc($FH);
+        last if ( !defined($c1) );    # No character, leave the loop
+        my $c2 = getc($FH) || "";     # No character, make it a NUL
+        $Mem[$addr] =
+          ( ord($c1) << 9 ) | ord($c2);    # Pack both into one word
+        $count++;
     }
 
     # No error
@@ -573,7 +653,7 @@ sub sys_write {
     my $end   = ( $start + $count - 1 ) & MAXADDR;
     die("sys_write: bad start/end addresses $start $end\n")
       if ( $end < $start );
-    dprintf( "write: %d words from %o to fd %d\n", $count, $start, $fd );
+    dprintf( "write: %d words from %06o to fd %d\n", $count, $start, $fd );
 
     # Bump up the PC
     $PC += 3;
@@ -589,13 +669,7 @@ sub sys_write {
     my $FH = $FD[$fd];
     foreach my $addr ( $start .. $end ) {
 
-        # It's a terminal, so convert to ASCII
-        # otherwise (for now) print in octal
-        if ( -t $FH ) {
-            print( $FH word2ascii( $Mem[$addr] ) );
-        } else {
-            printf( $FH "%06o\n", $Mem[$addr] );
-        }
+        print( $FH word2ascii( $Mem[$addr] ) );
     }
 
     # No error

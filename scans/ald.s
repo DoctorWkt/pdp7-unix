@@ -1,3 +1,4 @@
+"** 05-1-4.pdf page 13
 " ald
 
    law 17
@@ -60,6 +61,7 @@ cloop:
    tad buf+2
    cma
    dac c1
+"** 05-1-4.pdf page 14
    law buf+3
    dac 10
 1:
@@ -86,7 +88,7 @@ cloop:
 holcard: 0
    jms rawcard
    lac 1f
-   dac buff
+   dac buf
    lac 1f+1
    dac buf+1
    lac 1f+2
@@ -121,6 +123,7 @@ bincard: 0
    xor 1f+2
    dac 9 i
    isz c
+"** 05-1-4.pdf page 15
    jmp 1b
    jmp bincard i
 1: 0;0;0
@@ -160,7 +163,7 @@ badcksum:
    lac d1
    sys write; m1; m1s
    jms wait
-   cmp cloop
+   jmp cloop
 
 badseq:
    lac d1
@@ -182,6 +185,7 @@ timeout:
 
 m1:
   <ba>;<d 040; <ch>;<ec>;<ks>;<um>; 012
+"** 05-1-4.pdf page 16
 m1s = .-m1
 
 m2:
@@ -242,6 +246,7 @@ sum: .=.+1
 obuf: .=.+2048
 noc: .=.+1
 opt: .=.+1
+"** 05-1-4.pdf page 17
 systime: .=.+1
 crread: .=.+1
 crchar: .=.+1

@@ -1,3 +1,4 @@
+/* ** 08-rest.pdf page 4 */
 main $(
    auto ch;
    extrn read, write;
@@ -8,6 +9,7 @@ main $(
             ch = ch + 040;
       if (ch==015) goto loop;
       if (ch==014) goto loop;
+/*  -->------------------------> if (ch == 0177) goto loop; */
       if (ch==011)
        $( ch = 040040;
           write(040040);

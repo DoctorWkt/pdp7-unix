@@ -1,14 +1,4 @@
 " Warren's cat program: cat [arg1 arg2 ...]
-"
-" Because the a7out simulator currently doesn't deal with ASCII files,
-" here is how you can test it:
-" ./as7 wktcat.s > a.out
-"
-" ./a7out a.out > z1
-" <type some lines and end in ctrl-D>
-"
-" ./a7out a.out z1 z1
-" <the text you typed in will be displayed twice>
 
 main:
    " Load the pointer pointer in 017777 to see if we have any arguments
@@ -32,10 +22,9 @@ catfiles:
    dac fd		" Save the file descriptor
 
 fileloop:
-   " Read five words into the buffer from the input file
-   " Five was chosen arbitrarily
+   " Read 64 words into the buffer from the input file
    lac fd
-   sys read; buf; 5
+   sys read; buf; 64
    spa			" Skip if result was >= 0
      jmp error		" Result was -ve, so error result
    sna			" Skip if result was >0
@@ -57,7 +46,7 @@ fileend:
    sys close
 
    " Subtract 4 from the count of argument words
-   lac minus4
+   -4
    tad 017777 i
    dac 017777 i
    sad d4		" Is the value 4, i.e. no args left?
@@ -113,4 +102,4 @@ d8: 8		" stderr seems to have fd 8
 minus4:	0777774	" Constant -4
 
 " Input buffer for read
-buf: 0; 0; 0; 0; 0
+buf: .=.+64
