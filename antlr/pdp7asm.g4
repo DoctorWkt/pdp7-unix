@@ -45,17 +45,19 @@ declarations
     ;
 
 declaration
-    : instruction
-    | label
-    | expression 
+    : label? (instruction | assignment | expression)?
     ;
 
 instruction
-    : opcode argument+
+    : opcode argument*
     ;
 
 argument
     : expression
+    ;
+
+assignment
+    : variable '=' expression
     ;
 
 expression 
@@ -87,7 +89,7 @@ comment
     ;
 
 label
-    : LABEL argument?
+    : LABEL
     ;
 
 variable
