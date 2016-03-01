@@ -77,7 +77,11 @@ atom
     | DECIMAL_MINUS
     | OCTAL
     | OCTAL_LITERAL
-    | DECIMAL_LITERAL
+    | d
+    ;
+
+d
+    : '-'? DECIMAL_LITERAL
     ;
 
 eol
@@ -146,19 +150,19 @@ DIV
     ;
 
 LABEL
-    : IDENTIFIER ':'
+    : [a-zA-Z0-9]+ ':'
     ;
 
 IDENTIFIER
-    : [a-zA-Z0-9]+
+    : [a-zA-Z] [a-zA-Z0-9]*
     ;
 
 OCTAL_LITERAL
-    : [0] [0-7]+
+    : '0' [0-7]*
     ;
 
 DECIMAL_LITERAL
-    : [1-9] [0-9]+
+    : [1-9] [0-9]*
     ;
 
 DECIMAL
