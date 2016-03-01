@@ -4,7 +4,7 @@
 # and convert them into PDP-7 machine code
 #
 # (c) 2016 Warren Toomey, GPL3
-# Tweaked by Phil Budne (expression parsing, "list" format)
+# Tweaked by Phil Budne (line, expression parsing, "list" format)
 #
 use strict;
 use warnings;
@@ -25,7 +25,6 @@ my $origline;  # The original current input line of code
 my $line;      # line being parsed
 my $stage = 1; # Pass one or pass two
 my $errors = 0; # set to non-zero on error
-my %Undef;	# undefined symbols: only complain once
 my $line_error = ' ';
 my $file;	# current file name
 my $lineno;	# current line number
@@ -149,7 +148,7 @@ usage() if ( @ARGV < 1 );
     rsb    => 0700144,		# select PTR in binary mode
 
     psf    => 0700201,		# skip if PTP flag set
-    pcf    => 0700202,		# clear PTP clag
+    pcf    => 0700202,		# clear PTP flag
     psa    => 0700204,		# punch PTP in alphanumeric mode
     psb    => 0700244,		# punch PTP in binary mode
 
@@ -157,7 +156,7 @@ usage() if ( @ARGV < 1 );
     krb    => 0700312,		# read KBD buffer
     iors   => 0700314,		# input/output read status
 
-    tsf    => 0700401,		# if if TTY output flag set
+    tsf    => 0700401,		# skip if if TTY output flag set
     tcf    => 0700402,		# clear TTY output flag
     tls    => 0700406,		# load TTY output buffer and select
 
@@ -272,8 +271,9 @@ sub parse_file {
     close($IN);
 }
 
-# process a label and set its value to the location counter (only called on pass 1)
-# (if called on pass 2, should check if values are identical)
+# process a label and set its value to the location counter
+# only called on pass 1;
+# if called on pass 2, should check if values are identical
 sub process_label {
     my $label = shift;
 
@@ -294,25 +294,21 @@ sub process_label {
 }
 
 # Blame Phil for this....
-# parses global $line based on prefixes
-# (nibbling of a bit at a time)
+# parses global $line based on prefixes, nibbling of a bit at a time
+# (: and ; can appear in char literals)
 # handles multiple ';' separated words per line
 sub parse_line {
-    $line_error = ' ';
-    
     while (1) {
+	$line_error = ' ';	# clear listing error indicator
+
+	return if ($line eq '' || $line =~ m{^"}); # empty or comment: quit
+
 	# Lose any leading whitespace
 	$line =~ s{^\s*}{};
 
 	print "parse_line: '$line'\n" if ($debug);
 
-	return if ($line eq '');
-
-	if ($line =~ m{^"}) { # remainder of line is comment
-	    return;
-        }
-
-	if ($line =~ s{^([a-z0-9\.]+):}{}) { # label
+	while ($line =~ s{^([a-z0-9\.]+):\s*}{}) { # labels
 	    my $label = $1;
 
             # First pass: parse the labels
@@ -321,44 +317,40 @@ sub parse_line {
 		process_label($1);
 	    }
 	}
-	else {
-	    my $lhs = undef;
-	    if ( $line =~ s{^(\S+)\s*=}{}) { # assignment
-		$lhs = $1;
-            }
+
+	if ( $line =~ s{^(\S+)\s*=}{}) { # assignment
+	    my $lhs = $1;
 	    my $word = parse_expression();
-	    if ($lhs) {
-	        printf( "Setting variable %s to 0%o\n", $lhs, $word ) if ($debug);
-	        $Var{$lhs} = $word;
-	        printf("\t%06o %s\n", $word, $line_error) if ($stage == 2 && $format eq 'list');
-	    }
-	    else {	# bare expression
-		# Get its value on pass two and save to memory
-		# Also save the input line that altered memory
-		if ( $stage == 2 ) {
-		    my $location  = $Var{'.'};
-		    $Mem[$location]   = $word;
-		    $Mline[$location] = $origline;
-		    $origline = '';
-		    if ($format eq 'list') {
-			printf( "%06o: %06o %s\n", $location, $word, $line_error);
-		    }
+	    printf( "Setting variable %s to 0%o\n", $lhs, $word ) if ($debug);
+	    $Var{$lhs} = $word;
+	    printf("\t%06o %s\n", $word, $line_error) if ($stage == 2 && $format eq 'list');
+	}
+	else {	# bare expression
+	    # Get its value on pass two and save to memory
+	    # Also save the input line that altered memory
+	    my $word = parse_expression();
+	    if ( $stage == 2 ) {
+		my $location  = $Var{'.'};
+		$Mem[$location]   = $word;
+		$Mline[$location] = $origline;
+		$origline = '';
+		if ($format eq 'list') {
+		    printf( "%06o: %06o %s\n", $location, $word, $line_error);
 		}
-		# Move up to the next location in both passes
-		$Var{'.'}++;
-	    } # expr
-        } # assignment or expression
+	    }
+	    # Move up to the next location in both passes
+	    $Var{'.'}++;
+	} # expr
 
 	# eat trailing whitespace and ";", if any
-	$line =~ s{^\s*}{};
-	$line =~ s{^;}{};
+	$line =~ s{^\s*;?}{};
     } # while
 }
 
 # Blame Phil for this bit too...
 # Parse an expression off $line and return a PDP-7 word
 # as a series of whitespace separated "syllables"
-# and adds them together.
+# ORed, added, or subtracted
 sub parse_expression {
     my $word = 0;
 
@@ -366,23 +358,22 @@ sub parse_expression {
 
     while (1) {
 	my $syllable = 0;
-	my $sign = 1;
+	my $op = '|';
 
 	$line =~ s{^\s+}{};
-	print "    '$line'\n" if ($debug);
 
 	if ($line eq '' || $line =~ m{^[";]}) { # EOL ; and " terminate expr
 	    printf("\tparse_expression => %#o\n", $word) if ($debug);
 	    return $word;
 	}
 
+	print "    '$line'\n" if ($debug);
+
 	if ($line =~ s{^-}{}) {
-	    # leading '-' negates upcomming syllable.
-	    $sign = -$sign;
+	    $op = '-';
 	}
-	else {
-	    # ignore leading '+'
-	    $line =~ s{^\+}{};
+        elsif ($line =~ s{^\+}{}) {
+	    $op = '+';
 	}
 
 	if ($line =~ s{^<(.)}{}) { # <char
@@ -406,8 +397,7 @@ sub parse_expression {
 		printf("\tlbl: %s: %#o\n", $sym, $syllable) if ($debug);
 	    }
 	    elsif ($stage == 2) {
-		err('U', "$sym not defined") unless (defined $Undef{$sym});
-		$Undef{$sym} = 1; # only complain once
+		err('U', "$sym not defined")
 	    } # pass 2
 	} # symbol
 	elsif ( $line =~ s{^(\d+)([fb])}{} ) { # relative label
@@ -421,14 +411,31 @@ sub parse_expression {
 	    else {
 		$syllable = $value + 0;
 	    }
+	    $syllable &= 0777777;
 	}
 	else {
+	    # From the BSD fortune file:
+	    # Ken Thompson has an automobile which he helped design.
+	    # Unlike most automobiles, it has neither speedometer,
+	    # nor gas gauge, nor any of the numerous idiot lights
+	    # which plague the modern driver. Rather, if the driver
+	    # makes any mistake, a giant "?" lights up in the center
+	    # of the dashboard. "The experienced driver",
+	    # he says, "will usually know what's wrong.
 	    err('?', "huh? '$line'");
-	    $line = '';
+	    $line = '';		# abort processing
 	    return $word;
 	}
-	$syllable = ($syllable * $sign) & 0777777;
-	$word = ($word + $syllable) & 0777777;
+	if ($op eq '+') {
+	    $word += $syllable;
+	}
+	elsif ($op eq '-') {
+	    $word -= $syllable;
+	}
+	else {
+	    $word |= $syllable;
+	}
+	$word &= 0777777;
 	printf("\tsyllable: %#o word: %#o\n", $syllable, $word) if ($debug);
     }
 }

@@ -211,7 +211,7 @@ proc1:
    jmp proc2
    jms bufwr
    jms copyz; buf; 64
-   lac lyrand
+   lac lvrand
    and o17700
    dac bufadd
    dac 1f
@@ -277,7 +277,7 @@ bufwr: 0
    lacq
    tad o60
    dac i 8
-   iac 2b
+   lac 2b
    cll
    idiv; 10
    lacq
@@ -454,7 +454,7 @@ nf1:
    lac fname
    tad d4
    dac fname
-   sys open; frame: 0; 0
+   sys open; fname: 0; 0
    dac iof
    sma
    lac passno
@@ -513,7 +513,7 @@ gchar: 0
 
 gch3:
    dac char
-   jms betwn; d0; o200
+   jms betwen; d0; o200
    cla
    tad lactab
    dac .+1
@@ -814,12 +814,12 @@ exp2:
    dac srand
    lac r+1
    dac srand+1
-   jmp expb
+   jmp exp5
 exp3:
    sad d5
    jmp exp4
    jms error; x>
-   smp skip
+   jmp skip
 exp4:
    jms pickup
    jmp i expr
@@ -939,7 +939,7 @@ o74: 074
 o76: 076
 
 namsiz: -2
-namistp: namlst
+namlstp: namlst
 fnamep: fakename
 lactab: lac .+1
 8;8;8;8;8;8;8;8

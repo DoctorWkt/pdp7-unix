@@ -1,7 +1,7 @@
 "** 01-s1.pdf page 41
 " s7
 
-pibreak:
+pibreak:			" priority interrupt processing "chain"
    dac .ac	"** CROSSED OUT....
 
    dpsf
@@ -25,15 +25,15 @@ pibreak:
    dac dpwrite
    jmp piret	"** END OF CROSSOUT
 
-1: clsf
-   jmp 1f
+1: clsf			" clock overflow (line frequency ticks)?
+   jmp 1f		"  no
 
-   lpb
-   dac pbsflgs
-   isz s.tim+1
-   skp
-   isz s.tim
-   isz uquant
+   lpb			" load display push buttons
+   dac pbsflgs		" save
+   isz s.tim+1		" increment low order tick count
+   skp			"  no overflow, skip second increment
+   isz s.tim		"   low order overflowed, increment high order count
+   isz uquant		"    increment user quantum counter
 	"** written: ttydelay -> ttyd1
 	"** written: ttyrestart -> ttyres1
 cnop:
