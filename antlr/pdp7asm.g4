@@ -123,6 +123,10 @@ opcode
     | 'sma'
     | 'skp'
     | 'law'
+    | 'xor'
+    | 'alss'
+    | 'sac'
+    | 'add'
     ;
 
 LOC
