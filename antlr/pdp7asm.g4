@@ -45,6 +45,10 @@ declarations
     ;
 
 declaration
+    : instruction
+    ;
+
+instruction
     : opcode argument+
     ;
 
