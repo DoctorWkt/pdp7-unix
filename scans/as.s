@@ -208,7 +208,7 @@ proc1:
    jmp proc2
    jms bufwr
    jms copyz; buf; 64
-   lac lyrand
+   lac lvrand
    and o17700
    dac bufadd
    dac 1f
@@ -220,7 +220,7 @@ proc1:
    sys read; buf; 64
 
 proc2:
-   lac lyrand
+   lac lvrand
    and o77
    jms betwen; dm1; maxsto
    dac maxsto
@@ -256,12 +256,12 @@ bufwr: 0
    sys seek; bufadd: 0; 0
    isz maxsto
    lac bfo
-   sys write; bufp: buf; maxstp: -1
+   sys write; bufp: buf; maxsto: -1
    -1
    dac maxsto
    jmp i bufwr
 
-Xnumber: 0
+number: 0
    dac 3f
    lac d1000
    dac 2f
@@ -273,7 +273,7 @@ Xnumber: 0
    lacq
    tad o60
    dac i 8
-   iac 2b
+   lac 2b
    cll
    idiv; 10
    lacq
@@ -334,7 +334,7 @@ betwen: 0
    cma
    tad 2f
    spa
-   jmp 2f
+   jmp 1f
    lac i betwen
    dac 3f
    isz betwen
@@ -447,7 +447,7 @@ nf1:
    lac fname
    tad d4
    dac fname
-   sys open; frame: 0; 0
+   sys open; fname: 0; 0
    dac iof
    sma
    lac passno
@@ -492,20 +492,20 @@ gchar: 0
    sad o12
    skp
    jmp 1f
-   dzm comflc
+   dzm comflg
    isz lineno
 1:
    sad o42
-   dac comflc
+   dac comflg
    dac char
-   lac comflc
+   lac comflg
    sza
    jmp gchar+1
    lac char
 
 gch3:
    dac char
-   jms betwn; d0; o200
+   jms betwen; d0; o200
    cla
    tad lactab
    dac .+1
@@ -801,12 +801,12 @@ exp2:
    dac srand
    lac r+1
    dac srand+1
-   jmp expb
+   jmp exp5
 exp3:
    sad d5
    jmp exp4
    jms error; x>
-   smp skip
+   jmp skip
 exp4:
    jms pickup
    jmp i expr
@@ -924,7 +924,7 @@ o74: 074
 o76: 076
 
 namsiz: -2
-namistp: namlst
+namlstp: namlst
 fnamep: fakename
 lactab: lac .+1
 8;8;8;8;8;8;8;8
