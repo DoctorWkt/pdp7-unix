@@ -47,6 +47,7 @@ declarations
 declaration
     : instruction
     | label
+    | expression 
     ;
 
 instruction
@@ -114,6 +115,8 @@ opcode
     | 'omq'
     | 'isz'
     | 'sma'
+    | 'skp'
+    | 'law'
     ;
 
 LOC
