@@ -48,10 +48,12 @@ GetOptions(
 
 usage() if ( @ARGV < 1 );
 
-# predefine syscall and opcodes as variables
 # start with the location counter at zero
+# predefine syscall and opcodes as variables
 %Var = (
     '.'    => 0,
+    '..'   => 0,
+
     save   => 1,		# saves core dump & user area!
     getuid => 2,
     open   => 3,
@@ -293,6 +295,10 @@ sub process_label {
     printf( "Set label %s to %#o\n", $label, $Label{$label} ) if ($debug);
 }
 
+sub eol {
+    return $line eq '' || $line =~ m{^"}; # empty or comment
+}
+
 # Blame Phil for this....
 # parses global $line based on prefixes, nibbling of a bit at a time
 # (: and ; can appear in char literals)
@@ -301,7 +307,7 @@ sub parse_line {
     while (1) {
 	$line_error = ' ';	# clear listing error indicator
 
-	return if ($line eq '' || $line =~ m{^"}); # empty or comment: quit
+	return if (eol());
 
 	# Lose any leading whitespace
 	$line =~ s{^\s*}{};
@@ -318,6 +324,8 @@ sub parse_line {
 	    }
 	}
 
+	return if (eol());
+
 	if ( $line =~ s{^(\S+)\s*=}{}) { # assignment
 	    my $lhs = $1;
 	    my $word = parse_expression();
@@ -325,7 +333,7 @@ sub parse_line {
 	    $Var{$lhs} = $word;
 	    printf("\t%06o %s\n", $word, $line_error) if ($stage == 2 && $format eq 'list');
 	}
-	else {	# bare expression
+	else {	# bare expression (not assignment)
 	    # Get its value on pass two and save to memory
 	    # Also save the input line that altered memory
 	    my $word = parse_expression();
