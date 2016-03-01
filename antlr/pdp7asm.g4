@@ -37,7 +37,7 @@ prog
     ;
 
 line
-    : ( label | declarations)* comment? eol
+    : declarations? comment? eol
     ;
 
 declarations
@@ -46,6 +46,7 @@ declarations
 
 declaration
     : instruction
+    | label
     ;
 
 instruction
@@ -85,7 +86,7 @@ comment
     ;
 
 label
-    : IDENTIFIER ':'
+    : LABEL argument?
     ;
 
 variable
@@ -103,6 +104,16 @@ opcode
     | 'sys'
     | 'sna'
     | 'spa'
+    | 'lacq'
+    | 'lrss'
+    | 'dzm'
+    | 'sza'
+    | 'lmq'
+    | 'cll'
+    | 'als'
+    | 'omq'
+    | 'isz'
+    | 'sma'
     ;
 
 LOC
@@ -129,8 +140,12 @@ DIV
     : '/'
     ;
 
+LABEL
+    : IDENTIFIER ':'
+    ;
+
 IDENTIFIER
-    : [a-zA-Z]+
+    : [a-zA-Z0-9]+
     ;
 
 OCTAL_LITERAL
