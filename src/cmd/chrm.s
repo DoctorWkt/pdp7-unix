@@ -15,7 +15,7 @@
    dac 017777 i			" and save in the argc
 
    sys chdir; dd		" chdir to dd
-   sys chdir; 1;0		" and then into the first argument
+   sys chdir; 1:0		" and then into the first argument
 1:
    lac 017777 i			" Any arguments left?
    sad d4
