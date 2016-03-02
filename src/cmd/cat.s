@@ -1,4 +1,4 @@
-" cat: cat [arg1 arg2 ...]
+" cat: cat arg1 [arg2 ...]
 
    " Load the pointer pointer in 017777 to see if we have any arguments
    lac 017777 i
