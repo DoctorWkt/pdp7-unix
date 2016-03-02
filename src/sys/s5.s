@@ -22,7 +22,7 @@ access: 0
    sad i.uid
    lrs 2
    lacq
-   and mode
+   and mode				" mode from system call
    sza
    jmp access i
    jms error
@@ -138,6 +138,8 @@ dslot: 0
    jmp 1b
    jmp dslot i
 
+	" called with:
+	" AC/ mode
 icreat: 0
    dac 9f+t
    jms dslot

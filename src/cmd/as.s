@@ -193,8 +193,8 @@ process: 0
    lac dot+1			" get "." value
    dac lvrand
    lac dot			" get "." type??
-   sad d3			" three?
-   jmp proc4			"  no, give "." error
+   sad d3			" three (user defined symbol?)?
+   jmp proc4			"  yes, give "." error
    sza				" zero?
    jmp proc1			"  no
    -1				" yes (".." type)

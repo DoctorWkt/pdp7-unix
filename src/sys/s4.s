@@ -280,6 +280,9 @@ dskwr: 0
    jmp dskwr i
 t = t+3
 
+	" called with:
+	" AC/ block
+	"   jms dskio; dsld_bits
 dskio: 0
    dac dskaddr
    cll; idiv; 80
@@ -304,6 +307,8 @@ dskio: 0
    jmp dskio i
 t = t+1
 
+	" called with:
+	"   jms dsktrans; -WC; MAC; addr_ptr?; dsld_ptr
 dsktrans: 0
    -10
    dac 9f+t
@@ -312,25 +317,25 @@ dsktrans: 0
    tad dsktrans
    dac 12
 "** 01-s1.pdf page 26
-   dscs
+   dscs				" clear status register
    lac 12 i
-   dslw
+   dslw				" load WC
    lac 12 i
-   dslm
+   dslm				" load MAC
    lac 12 i
    jms laci
-   dsld
+   dsld				" load TA & SA
    dzm .dskb
    lac 12 i
    jms laci
    jms laci
-   dsls
-   lac .dskb
+   dsls				" load status
+   lac .dskb			" check for interrupt
    sna
    jmp .-2
-   lac .dske
+   lac .dske			" get status from interrupt
    sma
-   jmp 12 i
+   jmp 12 i			" return
    isz 9f+t
    jmp 1b
    jms halt " 10 disk errors
