@@ -4,7 +4,10 @@ to cache my Github username
 git config --global user.name "Warren Toomey"
 git config --global user.email wkt@tuhs.org
 
-To bring your own ocal repository up to date with Github:
+To bring your own local repository up to date with Github:
  git fetch origin 
  git diff master origin/master
  git merge origin/master
+
+To recover a delete file $file:
+ git checkout $(git rev-list -n 1 HEAD -- "$file")^ -- "$file"
