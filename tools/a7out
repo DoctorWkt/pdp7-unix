@@ -531,7 +531,9 @@ sub cal {
         5  => \&sys_write,
         6  => \&sys_creat,
         9  => \&sys_close,
+        11 => \&sys_unlink,
         14 => \&sys_exit,
+        17 => \&sys_chdir,
         18 => \&sys_chmod,
         19 => \&sys_chown,
     );
@@ -763,7 +765,6 @@ sub sys_chown {
     my $filename = mem2arg($start);
     dprintf( "chown file %s to uid %06o\n", $filename, $AC);
 
-
     # Do the chown, leave group-id untouched. Get number of files changed
     my $result= chown($AC, -1, $filename);
 
@@ -771,6 +772,39 @@ sub sys_chown {
     $AC= ($result == 0) ? MAXINT : 0;
     $PC += 2;
     return;
+}
+
+# Chdir system call
+sub sys_chdir {
+    # Chdir gets the directory name in PC+1
+    # Return 0 on success, -1 on error
+    # Convert this to a sensible ASCII filename
+    my $start = $Mem[ $PC + 1 ];
+    my $filename = mem2arg($start);
+    dprintf( "chdir %s\n", $filename);
+
+    # Bump up the PC
+    $PC += 2;
+
+    # Do nothing on chdir to "dd"
+    return(0) if ($filename eq "dd");
+
+    # Do the chdir
+    return( chdir($filename) ? 0 : MAXINT);
+}
+
+# Unlink system call
+sub sys_unlink {
+    # Unlink gets the file name in PC+1
+    # Return 0 on success, -1 on error
+    # Convert this to a sensible ASCII filename
+    my $start = $Mem[ $PC + 1 ];
+    my $filename = mem2arg($start);
+    dprintf( "unlink %s\n", $filename);
+
+    # Bump up the PC and do the unlink
+    $PC += 2;
+    return( unlink($filename) ? 0 : MAXINT);
 }
 
 # Convert an 18-bit word into two ASCII characters and return them.
