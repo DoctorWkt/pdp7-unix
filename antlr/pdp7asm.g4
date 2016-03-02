@@ -44,8 +44,9 @@ declarations
    : declaration (';' declaration)*
    ;
 
+//  multiple labels can occur on the same line
 declaration
-   : label? (instruction | assignment | expression)?
+   : label* (instruction | assignment | expression)?
    ;
 
 instruction
@@ -200,6 +201,7 @@ opcode
    | 'crrb'
    | 'sys'
    | 'czm'
+   | 'irss'
    ;
 
 LOC
