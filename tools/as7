@@ -4,7 +4,7 @@
 # and convert them into PDP-7 machine code
 #
 # (c) 2016 Warren Toomey, GPL3
-# Tweaked by Phil Budne (line, expression parsing, "list", "ptr" formats)
+# Tweaked by Phil Budne (line, expression parsing, output formats)
 #
 use strict;
 use warnings;
@@ -28,21 +28,26 @@ my $errors = 0; # set to non-zero on error
 my $line_error = ' ';
 my $file;	# current file name
 my $lineno;	# current line number
+my $OUTPUT;	# output file
+
+### Main program ###
 
 ## command line options
 my $debug = 0;		# Run in debug mode
 my $format = 'a7out';	# output format
+my $namelist = 0;	# output n.out file
+my $output = 'a.out';	# output file
 
 # keep this near the GetOptions call to make it easy to add documentation!
 sub usage {
-    die("Usage: $0 [--debug] [--format=a7out|list|ptr ] file1.s [file2.s ...]\n")
+    die("Usage: $0 [--debug] [--format=a7out|list|ptr|rim ] [--out file] file1.s [file2.s ...]\n")
 }
 
-### Main program ###
-
 GetOptions(
-    'debug|d' => \$debug,
+    'debug|d'    => \$debug,
     'format|f=s' => \$format,
+    'namelist|n' => \$namelist,
+    'output|o=s' => \$output,
 ) or usage();
 
 usage() if ( @ARGV < 1 );
@@ -179,14 +184,17 @@ usage() if ( @ARGV < 1 );
 
 # Parse all the files
 foreach my $file (@ARGV) {
+    print STDERR "I $file\n";	# like the real as
     parse_file($file);
 }
 
 # Now do it all again, pass two
 $Var{'.'} = 0;
 $stage = 2;
-print("PASS 2\n") if ($debug);
+open(my $OUT, ">$output") || die "$output";
+
 foreach my $file (@ARGV) {
+    print STDERR "II $file\n";	# like the real as
     parse_file($file);
 }
 
@@ -194,33 +202,44 @@ if ($format eq 'a7out') {
     # print out the contents of memory
     for my $i ( 0 .. $#Mem ) {
 	if ( defined( $Mem[$i] ) ) {
-	    printf( "%06o: %06o\t%s\n", $i, $Mem[$i], $Mline[$i] || "" );
+	    printf $OUT "%06o: %06o\t%s\n", $i, $Mem[$i], ($Mline[$i] || "");
 	}
     }
 }
 elsif ($format eq 'list') {
-    print "\n";
-    print "Labels:\n";
+    print $OUT "\n";
+    print $OUT "Labels:\n";
     foreach my $key (sort keys %Label) {
-	printf("%-8.8s %#06o\n", $key, $Label{$key});
+	printf $OUT "%-8.8s %#06o\n", $key, $Label{$key};
     }
 }
 elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
     for my $loc ( 0 .. $#Mem ) {
-	my $m = $Mem[$loc] || 0;
-	printf("%c%c%c", ($m >> 12) & 077, ($m >> 6) & 077, $m & 077);
+	punch($Mem[$loc] || 0);
     }
+}
+elsif ($format eq 'rim') {	# PDP-7 Read In Mode
+    for my $loc ( 0 .. $#Mem ) {
+	if (defined($Mem[$loc])) {
+	    punch(0200000 | $loc ); # LAC addr
+	    punch($Mem[$loc] || 0);
+	}
+    }
+    punch($OUT, 0740040 );	# HLT
 }
 else {
     die("unknown format $format");
 }
+close($OUT);
 
-# as.s writes a binary file named n.out, ours is ascii
-open (my $NOUT, ">n.out") || die "n.out";
-foreach my $key (sort keys %Label) {
-    printf $NOUT "%-8.8s %#06o\n", $key, $Label{$key};
+if ($namelist) {
+    # as.s writes a binary file named n.out, ours is ascii
+    open (my $NOUT, ">", "n.out") || die "n.out";
+    foreach my $key (sort keys %Label) {
+	printf $NOUT "%-8.8s %#06o\n", $key, $Label{$key};
+    }
+    close($NOUT);
 }
-close($NOUT);
 
 exit($errors);
 
@@ -234,7 +253,7 @@ sub err {
     $errors = 1;		# exit status
     if ($stage == 2) {
 	print STDERR "$file:$lineno: $msg\n";
-	print "$file:$lineno: $msg\n" if (! -t STDOUT && $format ne 'ptr');
+	print $OUT "$file:$lineno: $msg\n" if ($format eq 'list');
     }
     return 0;			# expression value
 }
@@ -248,7 +267,8 @@ sub parse_file {
 	$lineno++;
         chomp($line);		# Lose the end of line
         $origline = $line;
-	print "\t\t$line\n" if ($stage == 2 && $line ne '' && $format eq 'list');
+	print $OUT "\t\t$line\n"
+	    if ($stage == 2 && $line ne '' && $format eq 'list');
 	parse_line();
     }
     close($IN);
@@ -312,7 +332,8 @@ sub parse_line {
 	    my $word = parse_expression();
 	    printf( "Setting variable %s to 0%o\n", $lhs, $word ) if ($debug);
 	    $Var{$lhs} = $word;
-	    printf("\t%06o %s\n", $word, $line_error) if ($stage == 2 && $format eq 'list');
+	    printf $OUT "\t%06o %s\n", $word, $line_error
+		if ($stage == 2 && $format eq 'list');
 	}
 	else {	# bare expression (not assignment)
 	    # Get its value on pass two and save to memory
@@ -324,7 +345,8 @@ sub parse_line {
 		$Mline[$location] = $origline;
 		$origline = '';
 		if ($format eq 'list' and defined($word)) {
-		    printf( "%06o: %06o %s\n", $location, $word, $line_error);
+		    printf $OUT "%06o: %06o %s\n",
+			$location, $word, $line_error;
 		}
 	    }
 	    # Move up to the next location in both passes
@@ -470,4 +492,13 @@ sub find_relative_label {
         }
     }
     return err('U', "undefined relative reference $label$direction");
+}
+
+sub punch {			# output a word in paper tabe binary format
+    my $word = shift;
+
+    printf $OUT "%c%c%c",
+	(($word >> 12) & 077) | 0200,
+	(($word >>  6) & 077) | 0200,
+	 ($word        & 077) | 0200;
 }

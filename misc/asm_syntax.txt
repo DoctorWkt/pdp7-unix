@@ -225,7 +225,7 @@ bits:
     sza = 0740200		" OPR: skip on zero AC
     snl = 0740400		" OPR: skip on non-zero link
     skp = 0741000		" OPR: skip unconditionally
-    sna = 0741200		" OPR: skip on negative AC
+    sna = 0741200		" OPR: skip on non-zero AC
     szl = 0741400		" OPR: skip on zero link
     rtl = 0742010		" OPR: rotate two left
     rtr = 0742020		" OPR: rotate two right
@@ -240,8 +240,8 @@ With some limitations, OPR instructions can be OR-ed together.
 order in the source!!):
 
   sna cla		" skip on negative AC, clear AC
-  sna spa		" skip on negative or positive AC
-  sna ral		" skip on negative AC, rotate AC left
+  sna spa		" skip on non-zero or positive AC(??)
+  sna ral		" skip on non-zero AC, rotate AC left
   cla cll sza		" skip on AC zero, clear AC, clear LINK
 
 The last "operate" instruction is not microcoded:
