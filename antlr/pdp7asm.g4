@@ -33,229 +33,246 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 grammar pdp7asm;
 
 prog
-    : line+
-    ;
+   : line +
+   ;
 
 line
-    : declarations? comment? eol
-    ;
+   : declarations? comment? eol
+   ;
 
 declarations
-    : declaration (';' declaration)*
-    ;
+   : declaration (';' declaration)*
+   ;
 
 declaration
-    : label? (instruction | assignment | expression)?
-    ;
+   : label? (instruction | assignment | expression)?
+   ;
 
 instruction
-    : opcode argument*
-    ;
+   : opcode argument*
+   ;
 
 argument
-    : expression
-    ;
+   : expression
+   ;
 
 assignment
-    : (variable | LOC | RELOC) '=' expression
-    ;
+   : (variable | LOC | RELOC) '=' expression
+   ;
 
-expression 
-    : multiplyingExpression ((PLUS|MINUS) multiplyingExpression)*
-    ;
+expression
+   : multiplyingExpression ((PLUS | MINUS) multiplyingExpression)*
+   ;
 
-multiplyingExpression  
-    : atom ((TIMES|DIV) atom)*
-    ;
+multiplyingExpression
+   : atom ((TIMES | DIV) atom)*
+   ;
 
-atom 
-    : variable
-    | LOC
-    | RELOC
-    | STRING
-    | DECIMAL
-    | DECIMAL_MINUS
-    | OCTAL
-    | OCTAL_LITERAL
-    | d
-    ;
+atom
+   : variable
+   | LOC
+   | RELOC
+   | STRING
+   | DECIMAL
+   | DECIMAL_MINUS
+   | OCTAL
+   | OCTAL_LITERAL
+   | d
+   ;
 
 d
-    : '-'? DECIMAL_LITERAL
-    ;
+   : '-'? DECIMAL_LITERAL
+   ;
 
 eol
-    : EOL
-    ;
+   : EOL
+   ;
 
 comment
-    : COMMENT
-    ;
+   : COMMENT
+   ;
 
 label
-    : LABEL
-    ;
+   : LABEL
+   ;
 
 variable
-    : IDENTIFIER
-    ;
+   : IDENTIFIER
+   ;
 
 opcode
-    : 'dac'
-    | 'jms'
-    | 'dzm'
-    | 'lac'
-    | 'xor'
-    | 'add'
-    | 'tad'
-    | 'xct'
-    | 'isz'
-    | 'and'
-    | 'sad'
-    | 'jmp'
-    | 'nop'
-    | 'i'
-    | 'law'
-    | 'cma'
-    | 'las'
-    | 'ral'
-    | 'rar'
-    | 'hlt'
-    | 'sma'
-    | 'sza'
-    | 'snl'
-    | 'skp'
-    | 'sna'
-    | 'szl'
-    | 'rtl'
-    | 'rtr'
-    | 'cil'
-    | 'rcl'
-    | 'rcr'
-    | 'cia'
-    | 'lrs'
-    | 'lrss'
-    | 'lls'
-    | 'llss'
-    | 'als'
-    | 'alss'
-    | 'mul'
-    | 'idiv'
-    | 'lacq'
-    | 'clq'
-    | 'omq'
-    | 'cmq'
-    | 'lmq'
-    | 'dscs'
-    | 'dslw'
-    | 'dslm'
-    | 'dsld'
-    | 'dsls'
-    | 'dssf'
-    | 'dsrs'
-    | 'iof'
-    | 'ion'
-    | 'caf'
-    | 'clon'
-    | 'clsf'
-    | 'clof'
-    | 'ksf'
-    | 'krb'
-    | 'tsf'
-    | 'tcf'
-    | 'tls'
-    | 'sck'
-    | 'cck'
-    | 'lck'
-    | 'rsf'
-    | 'rsa'
-    | 'rrb'
-    | 'psf'
-    | 'pcf'
-    | 'psa'
-    | 'cdf'
-    | 'rlpd'
-    | 'lda'
-    | 'wcga'
-    | 'raef'
-    | 'rlpd'
-    | 'beg'
-    | 'spb'
-    | 'cpb'
-    | 'lpb'
-    | 'wbl'
-    | 'dprs'
-    | 'dpsf'
-    | 'dpcf'
-    | 'dprc'
-    | 'crsf'
-    | 'crrb'
-    ;
+   : 'dac'
+   | 'jms'
+   | 'dzm'
+   | 'lac'
+   | 'xor'
+   | 'add'
+   | 'tad'
+   | 'xct'
+   | 'isz'
+   | 'and'
+   | 'sad'
+   | 'jmp'
+   | 'nop'
+   | 'i'
+   | 'law'
+   | 'cma'
+   | 'las'
+   | 'ral'
+   | 'rar'
+   | 'hlt'
+   | 'sma'
+   | 'sza'
+   | 'snl'
+   | 'skp'
+   | 'sna'
+   | 'szl'
+   | 'rtl'
+   | 'rtr'
+   | 'cil'
+   | 'rcl'
+   | 'rcr'
+   | 'cia'
+   | 'lrs'
+   | 'lrss'
+   | 'lls'
+   | 'llss'
+   | 'als'
+   | 'alss'
+   | 'mul'
+   | 'idiv'
+   | 'lacq'
+   | 'clq'
+   | 'omq'
+   | 'cmq'
+   | 'lmq'
+   | 'dscs'
+   | 'dslw'
+   | 'dslm'
+   | 'dsld'
+   | 'dsls'
+   | 'dssf'
+   | 'dsrs'
+   | 'iof'
+   | 'ion'
+   | 'caf'
+   | 'clon'
+   | 'clsf'
+   | 'clof'
+   | 'ksf'
+   | 'krb'
+   | 'tsf'
+   | 'tcf'
+   | 'tls'
+   | 'sck'
+   | 'cck'
+   | 'lck'
+   | 'rsf'
+   | 'rsa'
+   | 'rrb'
+   | 'psf'
+   | 'pcf'
+   | 'psa'
+   | 'cdf'
+   | 'rlpd'
+   | 'lda'
+   | 'wcga'
+   | 'raef'
+   | 'rlpd'
+   | 'beg'
+   | 'spb'
+   | 'cpb'
+   | 'lpb'
+   | 'wbl'
+   | 'dprs'
+   | 'dpsf'
+   | 'dpcf'
+   | 'dprc'
+   | 'crsf'
+   | 'crrb'
+   ;
+
 
 LOC
-    : '.'
-    ;
+   : '.'
+   ;
+
 
 RELOC
-    : '..'
-    ;
+   : '..'
+   ;
 
-PLUS 
-    : '+'
-    ;
 
-MINUS 
-    : '-'
-    ;
+PLUS
+   : '+'
+   ;
 
-TIMES 
-    : '*'
-    ;
 
-DIV 
-    : '/'
-    ;
+MINUS
+   : '-'
+   ;
+
+
+TIMES
+   : '*'
+   ;
+
+
+DIV
+   : '/'
+   ;
+
 
 LABEL
-    : [a-zA-Z0-9]+ ':'
-    ;
+   : [a-zA-Z0-9] + ':'
+   ;
+
 
 IDENTIFIER
-    : [a-zA-Z] [a-zA-Z0-9]*
-    ;
+   : [a-zA-Z] [a-zA-Z0-9]*
+   ;
+
 
 OCTAL_LITERAL
-    : '0' [0-7]*
-    ;
+   : '0' [0-7]*
+   ;
+
 
 DECIMAL_LITERAL
-    : [1-9] [0-9]*
-    ;
+   : [1-9] [0-9]*
+   ;
+
 
 DECIMAL
-    : 'd' [0-9]+
-    ;
+   : 'd' [0-9] +
+   ;
+
 
 OCTAL
-    : 'o' [0-7]+
-    ;
+   : 'o' [0-7] +
+   ;
+
 
 DECIMAL_MINUS
-    : 'dm' [0-9]+
-    ;
+   : 'dm' [0-9] +
+   ;
+
 
 STRING
-    : '<' [a-zA-Z0-9$*,%/]+ '>'
-    ;
+   : '<' [a-zA-Z0-9$*,%/] + '>'
+   ;
+
 
 COMMENT
-    : '"' ~[\r\n]*
-    ;
+   : '"' ~ [\r\n]*
+   ;
+
 
 EOL
-    : [\r\n]+
-    ;
+   : [\r\n] +
+   ;
+
 
 WS
-    : [ \t] -> skip
-    ;
+   : [ \t] -> skip
+   ;
