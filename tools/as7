@@ -50,7 +50,7 @@ usage() if ( @ARGV < 1 );
 # start with the location counter at zero
 # predefine syscall and opcodes as variables
 %Var = (
-    '.'    => 0,
+    '.'    => 020,
     '..'   => 4096,		# output base addr?
 
     # as.s does not have an initial symbol table
@@ -183,7 +183,7 @@ foreach my $file (@ARGV) {
 }
 
 # Now do it all again, pass two
-$Var{'.'} = 0;
+$Var{'.'} = 020;
 $stage = 2;
 print("PASS 2\n") if ($debug);
 foreach my $file (@ARGV) {
@@ -464,7 +464,7 @@ sub find_relative_label {
     }
     else {
         # Search backwards for first location smaller than the current one
-        foreach my $reflocation ( sort( { $b <=> $b } @{$locarray} ) ) {
+        foreach my $reflocation ( sort( { $b <=> $a } @{$locarray} ) ) {
 	    printf("backward %#o %#o\n", $reflocation, $curlocation) if ($debug);
             return ($reflocation) if ( $reflocation < $curlocation );
         }
