@@ -533,9 +533,11 @@ sub cal {
         9  => \&sys_close,
         11 => \&sys_unlink,
         14 => \&sys_exit,
+        16 => \&sys_intrp,
         17 => \&sys_chdir,
         18 => \&sys_chmod,
         19 => \&sys_chown,
+        29 => \&sys_fork,
     );
 
     # Simulate the syscall. Each syscall updates the $PC
@@ -551,6 +553,26 @@ sub cal {
 sub sys_exit {
     dprintf("exit system call\n");
     exit(0);
+}
+
+# Intrp system call
+sub sys_intrp {
+    # For now, do nothing
+    dprint("intrp system call\n");
+    $PC += 1;
+    return;
+}
+
+# Fork system call
+sub sys_fork {
+
+    # Fork and get the child's process-id back, or zero if we are the child
+    my $pid= fork();
+    $AC= $pid;
+
+    # The parent returns back to PC+1, the child returns to PC+2
+    $PC += ($pid) ? 1 : 2;
+    return;
 }
 
 # Close system call
