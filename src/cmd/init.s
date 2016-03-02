@@ -152,7 +152,7 @@ login:
    jmp 017701		" and then jump to the code
 
 boot:
-   lac d2
+   lac d2			" Load fd2 (the opened shell file)
    lmq				" Save the fd into MQ
    sys read; 4096; 07700	" Read 4,032 words into locations 4096 onwards
 				" leaving the top 64 words for this boot code.
