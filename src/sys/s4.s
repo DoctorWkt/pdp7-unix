@@ -63,27 +63,33 @@ laci: 0
 
 "** 01-s1.pdf page 22
 
+	" skip if AC between two values (inclusive)
+	"   jms betwen; low_ptr; high_ptr
+	"    <not between>
+	"  <between>
+	" listing has an alternate written in
+	"  (which would require 'lac ptr' instead of 'ptr' args?)
 betwen: 0
-   lmq cmq
-   lac betwen i
+   lmq cmq			" get ~AC in MQ
+   lac betwen i			" get low_ptr
    dac 9f+t
-   isz betwen
-   lacq
-   tad 9f+t i
-   sma
-   jmp 1f
-   lac betwen i
+   isz betwen			" skip low_ptr
+   lacq				" get ~AC (-AC-1) from MQ
+   tad 9f+t i			" get low-AC-1
+   sma				" negative (AC >= low)?
+   jmp 1f			"  no, return w/o skip
+   lac betwen i			" fetch high_ptr
    dac 9f+t
-   isz betwen
-   lacq
-   tad 9f+t i
-   cma
-   spa sna
+   isz betwen			" skip high_ptr
+   lacq				" get -AC-1
+   tad 9f+t i			" add to high value (high-AC-1)
+   cma				" complement (AC-high)
+   spa sna			" AC-high <= 0?
 1:
-   isz betwen
-   lacq
-   cma
-   jmp betwen i
+   isz betwen			"  no: give happy return
+   lacq				" restore ~AC
+   cma				" restore AC
+   jmp betwen i			" return w/o skip
 
 copy: 0
    -1
