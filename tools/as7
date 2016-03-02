@@ -29,7 +29,8 @@ my $line_error = ' ';
 my $file;	# current file name
 my $lineno;	# current line number
 my $OUTPUT;	# output file
-
+my $RELATIVE = 01000000; # set on non-absolute symbol values
+my $BASE = 0|$RELATIVE;  # starting value for "."
 ### Main program ###
 
 ## command line options
@@ -55,7 +56,7 @@ usage() if ( @ARGV < 1 );
 # start with the location counter at zero
 # predefine syscall and opcodes as variables
 %Var = (
-    '.'    => 4096,
+    '.'    => $BASE,
     '..'   => 4096,		# output base addr?
 
     # as.s does not have an initial symbol table
@@ -189,7 +190,7 @@ foreach my $file (@ARGV) {
 }
 
 # Now do it all again, pass two
-$Var{'.'} = 4096;
+$Var{'.'} = $BASE;
 $stage = 2;
 open(my $OUT, ">$output") || die "$output";
 
@@ -209,9 +210,7 @@ if ($format eq 'a7out') {
 elsif ($format eq 'list') {
     print $OUT "\n";
     print $OUT "Labels:\n";
-    foreach my $key (sort keys %Label) {
-	printf $OUT "%-8.8s %#06o\n", $key, $Label{$key};
-    }
+    dump_labels($OUT);
 }
 elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
     for my $loc ( 0 .. $#Mem ) {
@@ -235,9 +234,7 @@ close($OUT);
 if ($namelist) {
     # as.s writes a binary file named n.out, ours is ascii
     open (my $NOUT, ">", "n.out") || die "n.out";
-    foreach my $key (sort keys %Label) {
-	printf $NOUT "%-8.8s %#06o\n", $key, $Label{$key};
-    }
+    dump_labels($NOUT);
     close($NOUT);
 }
 
@@ -341,10 +338,26 @@ sub parse_line {
 	    my $word = parse_expression();
 	    if ( $stage == 2 ) {
 		my $location  = $Var{'.'};
-		$Mem[$location]   = $word;
+		if ($location & $RELATIVE) { # non-absolute location?
+		    $location &= 0777777;
+		    $location += $Var{'..'} & 0777777; # relocate
+		    # XXX check for overflow?
+		}
+		if ($word & $RELATIVE) { # word created from relative addresses?
+		    $word &= 0777777;
+		    $word += $Var{'..'} & 0777777; # relocate
+		    # XXX check for overflow?
+		}
+		if ($location < 0) {
+		    err('.', 'below base');
+		}
+		else {
+		    $Mem[$location]   = $word;
+		}
 		$Mline[$location] = $origline;
 		$origline = '';
 		if ($format eq 'list' and defined($word)) {
+		    # show flags??
 		    printf $OUT "%06o: %06o %s\n",
 			$location, $word, $line_error;
 		}
@@ -364,6 +377,7 @@ sub parse_line {
 # ORed, added, or subtracted
 sub parse_expression {
     my $word = 0;
+    my $flags = 0;
 
     print "expression: '$line'\n" if ($debug);
 
@@ -374,6 +388,7 @@ sub parse_expression {
 	$line =~ s{^\s+}{};	# as.s accepts ",' as whitespace too!
 
 	if ($line eq '' || $line =~ m{^[";]}) { # EOL ; and " terminate expr
+	    $word |= $flags;
 	    printf("\tparse_expression => %#o\n", $word) if ($debug);
 	    return $word;
 	}
@@ -391,15 +406,15 @@ sub parse_expression {
 
 	if ($line =~ s{^<(.)}{}) { # <char
 	    print "\tfound <x\n" if ($debug);
-	    $syllable = ord($1) << 9;
+	    $syllable = ord($1) << 9; # absolute
 	}
 	elsif ($line =~ s{^(.)>}{}) { # char>
 	    print "\tfound x>\n" if ($debug);
-	    $syllable = ord($1)
+	    $syllable = ord($1)	# absolute
 	}
 	elsif ($line =~ s{^>(.)}{}) { # >char !!
 	    print "\tfound >x\n" if ($debug);
-	    $syllable = ord($1)
+	    $syllable = ord($1)	# absolute
 	}
 	elsif ($line =~ s{^([a-z\.][a-z0-9\.]*)}{}) {
 	    my $sym = $1;
@@ -429,7 +444,7 @@ sub parse_expression {
 	    else {
 		$syllable = $value + 0;
 	    }
-	    $syllable &= 0777777;
+	    $syllable &= 0777777; # absolute
 	}
 	else {
 	    # From the BSD fortune file:
@@ -445,6 +460,9 @@ sub parse_expression {
 	    return undef;
 	}
 
+	my $sylflags = $syllable & $RELATIVE;
+	$syllable &= 0777777;
+
 	if ($op eq '+') {
 	    $word += $syllable;
 	}
@@ -455,6 +473,7 @@ sub parse_expression {
 	    $word |= $syllable;
 	}
 	$word &= 0777777;
+	$flags |= $sylflags;
 	printf("\tsyllable: %#o word: %#o\n", $syllable, $word) if ($debug);
     }
 }
@@ -486,7 +505,7 @@ sub find_relative_label {
     }
     else {
         # Search backwards for first location smaller than the current one
-        foreach my $reflocation ( sort( { $b <=> $b } @{$locarray} ) ) {
+        foreach my $reflocation ( sort( { $b <=> $a } @{$locarray} ) ) {
 	    printf("backward %#o %#o\n", $reflocation, $curlocation) if ($debug);
             return ($reflocation) if ( $reflocation < $curlocation );
         }
@@ -494,11 +513,25 @@ sub find_relative_label {
     return err('U', "undefined relative reference $label$direction");
 }
 
-sub punch {			# output a word in paper tabe binary format
+sub punch {			# output a word in paper tape binary format
     my $word = shift;
 
     printf $OUT "%c%c%c",
 	(($word >> 12) & 077) | 0200,
 	(($word >>  6) & 077) | 0200,
 	 ($word        & 077) | 0200;
+}
+
+sub dump_labels {		# for 'list' and --namelist
+    my $file = shift;
+
+    foreach my $key (sort keys %Label) {
+	my $addr =  $Label{$key};
+	my $flags = ($addr & $RELATIVE) ? "r" : "";
+	if ($addr & $RELATIVE) {
+	    $addr &= 0777777;
+	    $addr += $Var{'..'};
+	}
+	printf $file "%-8.8s %#06o %s\n", $key, $addr & 0777777, $flags;
+    }
 }
