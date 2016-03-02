@@ -76,17 +76,21 @@ atom
    | DECIMAL
    | DECIMAL_MINUS
    | OCTAL
-   | OCTAL_LITERAL
-   | d
+   | signeddecimal
+   | signedoctal
    ;
 
 string
-    : STRING '>'?
+    : STRING OCTAL_LITERAL* '>'?
     ;
 
-d
+signeddecimal
    : '-'? DECIMAL_LITERAL
    ;
+
+signedoctal
+     : '-'? OCTAL_LITERAL
+     ;
 
 eol
    : EOL
