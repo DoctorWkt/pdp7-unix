@@ -55,7 +55,7 @@ usage() if ( @ARGV < 1 );
 # start with the location counter at zero
 # predefine syscall and opcodes as variables
 %Var = (
-    '.'    => 0,
+    '.'    => 4096,
     '..'   => 4096,		# output base addr?
 
     # as.s does not have an initial symbol table
@@ -189,7 +189,7 @@ foreach my $file (@ARGV) {
 }
 
 # Now do it all again, pass two
-$Var{'.'} = 0;
+$Var{'.'} = 4096;
 $stage = 2;
 open(my $OUT, ">$output") || die "$output";
 
