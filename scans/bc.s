@@ -59,7 +59,7 @@ trace: 0
    jmp stop
    jmp trace i
 
-itrace: 0
+dtrace: 0
    lac pc
    dac 8
    lac 8 i

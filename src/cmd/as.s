@@ -1,18 +1,18 @@
 "** 05-1-4.pdf page 32
 " as
 
-   jms init1			" initialize
+   jms init1			" initialize for pass 1
 
 assm1:
    lac eofflg
    sza				" saw EOF?
-   jmp assm2			" no.
-   lac passno
+   jmp assm2			"  no.
+   lac passno			" yes
    sza				" pass==0?
    jmp finis			"  no, pass 2: done
-   jms init2			" pass 1: init for pass2
+   jms init2			" initialize for pass 2
 
-assm2:
+assm2:				" main loop
    jms gchar			" get character
    sad d4			" comma space or tab?
    jmp assm1			"  yes, ignore
@@ -41,7 +41,7 @@ assm2:
 assm3:
    lac rand
    sad d2
-   jmp assm4
+   jmp assm4			"  yes
    sza
    jmp assm6
    lac rator			" fetch operator
@@ -67,9 +67,9 @@ assm4:
    lac rand+1
    tad d4
    dac lvrand
-   lac rator
-   sza
-   jmp assm5
+   lac rator			" get operator
+   sza				" ':'?
+   jmp assm5			"  no
    lac dot			" load dot type
    dac r			" save as r type
    lac dot+1			" get dot value
@@ -171,13 +171,13 @@ finis:
    sys close
    -1
    tad namsiz
-   cma
-   rcl
+   cma				" get positive count of namelist entries
+   rcl				" multiply by 6 to get words
    dac char
    rcl
    tad char
    dac 1f
-   lac o17
+   lac o17			" ?? creat mode bits??
    sys creat; n.out		" create "n.out"
    dac bfi
    sys write; namlst; 1: 0	" write name list
@@ -197,16 +197,16 @@ process: 0
    jmp proc4			"  no, give "." error
    sza				" zero?
    jmp proc1			"  no
-   -1
-   tad cmflx+1			" '..' - 1
+   -1				" yes (".." type)
+   tad cmflx+1
    cma
-   tad lvrand
+   tad lvrand			" get "." - ".."
    dac lvrand
 
 proc1:
    lac lvrand
-   spa
-   jmp proc4
+   spa				" is relocated value positive?
+   jmp proc4			"  no, give "." error
    and o17700			" mask to block
    sad bufadd			" same block as buffer?
    jmp proc2			"  yes, same block
@@ -224,25 +224,25 @@ proc1:
    sys read; buf; 64
 
 proc2:
-   lac lvrand
-   and o77			" get word within block
-   jms betwen; dm1; maxsto
-   dac maxsto
-   tad bufp
-   dac lvrand
-   lac r
-   sna
-   jmp proc3
-   sad d3
-   jmp proc5
+   lac lvrand			" destination address
+   and o77			" word within block
+   jms betwen; dm1; maxsto	" inside buffer?
+   dac maxsto			"  no, increment buffer size
+   tad bufp			" add pointer to buffer
+   dac lvrand			" save buffer pointer
+   lac r			" get r type?
+   sna				" non-zero ("." or label)?
+   jmp proc3			"  no: zero (..)
+   sad d3			" three (user label)?
+   jmp proc5			"  yes
    lac cmflx+1			" get ".." value
-   tad r+1
+   tad r+1			" add to r value
    dac r+1
 
 proc3:
-   lac r+1
-   dac i lvrand
-   jmp i process
+   lac r+1			" get r value
+   dac i lvrand			" save in buffer
+   jmp i process		" return
 
 proc4:
    jms error; .>
@@ -266,18 +266,18 @@ bufwr: 0		" write current buffer to a.out file
    dac maxsto
    jmp i bufwr
 
-number: 0		" print decimal number?
-   dac 3f
+number: 0		" print decimal number: append to buffer at index 8
+   dac 3f		" save number
    lac d1000
-   dac 2f
+   dac 2f		" save divisor
 1:
    lac 3f
    cll
    idiv; 2: 0
    dac 3f
    lacq
-   tad o60
-   dac i 8
+   tad o60		" add ascii '0'
+   dac i 8		" save char
    lac 2b
    cll
    idiv; 10
@@ -288,17 +288,18 @@ number: 0		" print decimal number?
    jmp i number
 3: 0
 
-	" get character from buffer
+	" get character from buffer (two characters per word)
 	" call with:
 	"   jms getsc; pointer_pointer
-	" where pointer_pointer contains a pointer to buffer
+	" where pointer_pointer refers to a pointer to buffer
+	" high bit in pointer indicates low char is next
 getsc: 0
    lac i getsc			" get pointer pointer
    dac sctalp			" save
    isz getsc			" skip pointer pointer
    lac i sctalp			" fetch pointer
    dac sctal			" save
-   add o400000			" toggle high bit of pointer
+   add o400000			" toggle high bit, increment on wrap
    dac i sctalp			" save pointer back
    ral				" rotate high bit into link reg
    lac i sctal			" load word from buffer
@@ -308,7 +309,7 @@ getsc: 0
    jmp i getsc			" return
 
 	" save characters: word after call is addr of pointer, -count pair
-	" high bit in pointer used to indicate high or low byte next?
+	" high bit in pointer used to indicate high/low
 putsc: 0
    and o177			" strip character to 7 bits
    lmq				" save in MQ
@@ -318,7 +319,7 @@ putsc: 0
 "** 05-1-4.pdf page 37
    lac i sctalp			" get pointer
    dac sctal			" save
-   add o400000			" toggle sign bit by adding -0
+   add o400000			" toggle pointer sign bit, increment on wrap
    dac i sctalp			" save pointer
    sma cla			" skip if minus & clear AC
    jmp 1f			"  AC positive
@@ -329,7 +330,7 @@ putsc: 0
 
 1:
    lac i sctal			" load target word
-   omq				" or in char from MQ
+   omq				" or in low char from MQ
    dac i sctal			" save word back
    lacq				" restore character
    jmp i putsc			" return
@@ -400,27 +401,27 @@ error: 0
    jmp i error			" return
 1:
    -1
-   tad mesp
-   dac 8
-   lac i error
-   dac i 8
-   lac o40
-   dac i 8
-   lac rator
-   sad d5
-   jmp 1f
-   lac savchr
-   sad o12				
-   jmp 1f
-   lac lineno
+   tad mesp			" get mes-1
+   dac 8			" save as index
+   lac i error			" get error
+   dac i 8			" save in mess
+   lac o40			" get space
+   dac i 8			" save in mess
+   lac rator			" get operator
+   sad d5			" word break (semi, newline)?
+   jmp 1f			"  yes
+   lac savchr			" no, get saved char
+   sad o12			" newline?
+   jmp 1f			"  yes
+   lac lineno			" get lineno
    jmp 2f
 1:
    -1
-   tad lineno
+   tad lineno			" get lineno -1
 2:
-   jms number
-   lac o12
-   dac i 8
+   jms number			" convert line number to ascii
+   lac o12			" get newline
+   dac i 8			" append to mess
    -2
    tad mesp
    cma
@@ -591,8 +592,8 @@ lqot:				" left quote (<)
 rqot:				" right quote (>)
    lac namc			" get previous(?) char
 1:
-   dac rand+1
-   lac d7
+   dac rand+1			" save value
+   lac d7			" return as literal
    dac rator
    jmp i gsymb
 
@@ -770,20 +771,20 @@ lu2:
 namep: name
 
 gpair: 0
-   jms gsymb
+   jms gsymb			" get a symbol
    lac rator			" get operator
    sad d4			" space tab or comma?
    jmp gpair+1			"  yes, get another
-   jms betwen; dm1; d6		" anything but a digit?
-   jmp gp1			"  no-- a digit
-   dzm rand
+   jms betwen; dm1; d6		" plus, minus, comma, semi?
+   jmp gp1			"  no
+   dzm rand			" clear "rand"
    dzm rand+1
-   jmp i gpair
-gp1:				" here with digit
-   sad d7
-   lac d4
-   tad dm4
-   dac rand
+   jmp i gpair			" return
+gp1:
+   sad d7			" digit??
+   lac d4			"  yes: switch to space??
+   tad dm4			" subtract 4??
+   dac rand			" save as operand??
    jms gsymb
    lac rator
    sad d4			" whitespace?
@@ -867,13 +868,15 @@ grand: 0
    dac rand+1
    jmp i grand
 
+	" called with
+	"    jms oper; argument
 oper: 0
    tad opsw
    dac oper1
    -1
-   tad i oper
-   dac 8
-   isz oper
+   tad i oper		" pick up argument
+   dac 8		" store as index
+   isz oper		" skip argument
    lac r
    sad d3
    jmp oper2
@@ -958,10 +961,10 @@ o77: 077
 o74: 074
 o76: 076
 
-namsiz: -2
-namlstp: namlst
-fnamep: fakename
-lactab: lac .+1		" character class table (8 unless noted)
+namsiz: -2		" negative numberof namelist entries
+namlstp: namlst		" pointer to namelist
+fnamep: fakename	" pointer to fake namelist entry
+lactab: lac .+1		" character (operator) class table (8 unless noted)
 8;8;8;8;8;8;8;8
 8;4;5;8;8;8;8;8		" TAB=4 NL=5
 8;8;8;8;8;8;8;8
@@ -979,44 +982,44 @@ lactab: lac .+1		" character class table (8 unless noted)
 6;6;6;6;6;6;6;6
 6;6;6;8;8;8;8;8
 
-fbflg: .=.+1
-tal: .=.+1
-talc: .=.+1
-tal1: .=.+1
-tal1c: .=.+1
-narg: .=.+1
-lvrand: .=.+1
-eofflg: .=.+1
-namc: .=.+1
-passno: .=.+1
-char: .=.+1
-savchr: .=.+1
-comflg: .=.+1
-rator: .=.+1
-orator: .=.+1
-rand: .=.+2
-srand: .=.+2
-r: .=.+2
-name: .=.+4
-buf: .=.+64
-iobuf: .=.+64
-fbx: .=.+10			" forward/backward pointers?
-mes: .=.+20
-iof: .=.+1
-bfi: .=.+1
-bfo: .=.+1
-lineno: .=.+1
+fbflg: .=.+1		" f/b label flag
+tal: .=.+1		" iobuf pointer
+talc: .=.+1		" -bytecount-1
+tal1: .=.+1		" namebuf pointer
+tal1c: .=.+1		" -bytecount-1
+narg: .=.+1		" argc
+lvrand: .=.+1		" numeric constant, word address
+eofflg: .=.+1		" 0 on EOF??
+namc: .=.+1		" saved char, temporary
+passno: .=.+1		" 0=pass1, 1=pass2
+char: .=.+1		" current character
+savchr: .=.+1		" pushed back char
+comflg: .=.+1		" comment flag
+rator: .=.+1		" (opo)rator (char type)
+orator: .=.+1		" ?? (op)orator
+rand: .=.+2		" ?? (ope)rand (type/address pair)
+srand: .=.+2		" ?? another operand
+r: .=.+2		" ?? yet another??
+name: .=.+4		" buffer for accumulating names
+buf: .=.+64		" a.out output buffer
+iobuf: .=.+64		" input buffer
+fbx: .=.+10		" forward/backward counters
+mes: .=.+20		" (error) message buffer
+iof: .=.+1		" source file fd
+bfi: .=.+1		" a.out input fd
+bfo: .=.+1		" a.out output fd
+lineno: .=.+1		" source file line number
 
-fakename: .=.+6	" dummy entry returned by tlookup??
-namlst:
-.=.+4
-dot:		" dot type, value
-.=.+6
-cmflx:		" dotdot type, value
-
-		" first four words of name list are symbol (space padded)
+fakename: .=.+6		" dummy namelist entry returned by tlookup??
+namlst:			" symbol table
+.=.+4			" dot name
+dot:			" dot type, value
+.=.+6			" dot dot name
+cmflx:			" dotdot type, value
+		" namelist (symbol table) entries are 6 words.
+		" four words of symbol (space padded) name
 		" next word is type??
 		"   0: initial dotdot type
-		"   1: initial dot type
-		"   3: set by "lookup"
+		"   1: initial dot type (reset on error)
+		"   3: set by "lookup" (user symbol)
 		" last word is value??
