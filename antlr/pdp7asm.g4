@@ -77,21 +77,17 @@ atom
    | DECIMAL
    | DECIMAL_MINUS
    | OCTAL
-   | signeddecimal
-   | signedoctal
+   | signednumber
    ;
 
+// string chars, then potentially more than 1 octal constant, then potentially '>'
 string
-    : STRING OCTAL_LITERAL* '>'?
+    : STRING NUMERIC_LITERAL* '>'?
     ;
 
-signeddecimal
-   : '-'? DECIMAL_LITERAL
+signednumber
+   : '-'? NUMERIC_LITERAL
    ;
-
-signedoctal
-     : '-'? OCTAL_LITERAL
-     ;
 
 eol
    : EOL
@@ -235,7 +231,7 @@ DIV
 
 
 LABEL
-   : [a-zA-Z0-9] + ':'
+   : [a-zA-Z0-9.] + ':'
    ;
 
 
@@ -244,14 +240,9 @@ IDENTIFIER
    ;
 
 
-OCTAL_LITERAL
-   : '0' [0-7]*
+NUMERIC_LITERAL
+   : [0-9][0-9a-f]*
    ;
-
-DECIMAL_LITERAL
-   : [1-9] [0-9]*
-   ;
-
 
 DECIMAL
    : 'd' [0-9] +
