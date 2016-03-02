@@ -185,69 +185,73 @@ dput: 0
 
 t = t+3
 
+	" allocate a block for a file, returns disk block number
+	" AC/ file offset
+	"   jms pget
+	" AC/ disk block number
 pget: 0
-   lrss 6
-   dac 9f+t
+   lrss 6				" convert offset to block
+   dac 9f+t				" save as t0
    lac i.flags
 
 "** 01-s1.pdf page 37
 
    and o200000
-   sza
-   jmp 2f
-   lac 9f+t
-   jms betwen; d0; d6
-      jmp 1f
-   tad idskpp
-   dac 9f+t
-   lac 9f+t i
-   sna
-   jms alloc
-   dac 9f+t i
-   jmp pget i
-1:
-   jms alloc
-   dac 9f+t+1
-   jms copy; i.dskps; dskbuf; 7
-   jms copyz; dskbuf+7; 64-7
+   sza					" large file bit set?
+   jmp 2f				"  yes
+   lac 9f+t				" no: small file
+   jms betwen; d0; d6			" block 0..6?
+      jmp 1f				"  no
+   tad idskpp				" make into block number pointer
+   dac 9f+t				" save in t0
+   lac 9f+t i				" get disk block number
+   sna					" allocated?
+   jms alloc				"  no: allocate now
+   dac 9f+t i				" save (new) disk block number
+   jmp pget i				" return disk block number
+1:					" here when file block>=7, not "large"
+   jms alloc				" allocate indirect block
+   dac 9f+t+1				" save as t1
+   jms copy; i.dskps; dskbuf; 7		" copy all the disk block numbers
+   jms copyz; dskbuf+7; 64-7		" zero rest of indirect block
+   lac 9f+t+1				" get indirect block number back
+   jms dskwr				" write indirect block to disk
    lac 9f+t+1
-   jms dskwr
-   lac 9f+t+1
-   dac i.dskps
-   jms copyz; i.dskps+1; 6
+   dac i.dskps				" save indirect as new first block
+   jms copyz; i.dskps+1; 6		" zero rest of block pointers
    lac i.flags
-   xor o200000
+   xor o200000				" set "large file"
    dac i.flags
-2:
-   lac 9f+t
-   lrss 6
-   jms betwen; d0; d6
-      jms halt " file too big
-   tad idskpp
-   dac 9f+t+1
-   lac 9f+t+1 i
-   sna
-   jms alloc
-   dac 9f+t+1 i
-   dac 9f+t+2
-   jms dskrd
-   lac 9f+t
-   and o77
-   tad dskbufp
-   dac 9f+t+1
-   lac 9f+t+1 i
-   sza
-   jmp pget i
-   jms alloc
-   dac 9f+t
+2:					" here with "large file"
+   lac 9f+t				" get file block number
+   lrss 6				" divide by 64 (indirects/block)
+   jms betwen; d0; d6			" ok now?
+      jms halt " file too big		"  no, you lose!
+   tad idskpp				" yes: get indirect block pointer
+   dac 9f+t+1				" save in t1
+   lac 9f+t+1 i				" get indirect block number
+   sna					" allocated?
+   jms alloc				"  no, get it now
+   dac 9f+t+1 i				" save (new) indirect block
+   dac 9f+t+2				" save as t2
+   jms dskrd				" read indirect block
+   lac 9f+t				" get original block number
+   and o77				" mod by 64
+   tad dskbufp				" get pointer to disk block number
+   dac 9f+t+1				" save as t1
+   lac 9f+t+1 i				" fetch disk block number
+   sza					" allocated?
+   jmp pget i				"  yes: return
+   jms alloc				" no: allocate data block
+   dac 9f+t				" save as t0
+   lac 9f+t+2				" get indirect block number
+   jms dskrd				" read it in
+   lac 9f+t				" get data block number
+   dac 9f+t+1 i				" save data block number
    lac 9f+t+2
-   jms dskrd
-   lac 9f+t
-   dac 9f+t+1 i
-   lac 9f+t+2
-   jms dskwr
-   lac 9f+t
-   jmp pget i
+   jms dskwr				" write indirect block back
+   lac 9f+t				" get data block back
+   jmp pget i				" return it
 t = t+3
 
 iwrite: 0
