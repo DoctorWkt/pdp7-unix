@@ -1,0 +1,26 @@
+        11/3/70                                                      CHRM (I)
+
+
+NAME              chrm -- remove (unlink) files
+
+SYNOPSIS          chrm directory name1 ...
+
+DESCRIPTION       chrm removes the entries for one or more files from the
+                  named directory. If an entry was the last link to the file,
+	    	  the file is destroyed. Removal of a file requires write
+                  permission in its directory, but neither read nor write
+                  permission on the file itself.
+
+                  Directories cannot be removed by rm; cf. rmdir.
+
+FILES             none.
+
+SEE ALSO          rmdir, for removing directories.
+
+DIAGNOSTICS       If the file cannot be removed or does not exist, the name
+                  of the file followed by a question mark is typed.
+
+BUGS              rm probably should ask whether a read-only file is really
+                  to be removed.
+
+OWNER             ken, dmr

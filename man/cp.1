@@ -1,0 +1,23 @@
+11/3/70                                                             CP (I)
+
+
+NAME          cp -- copy
+
+SYNOPSIS      cp file11 file12 file21 file22 ...
+
+DESCRIPTION   Files are taken in pairs; the first is opened for reading,
+              the second created mode 17. Then the first is copied into
+              the second.
+
+FILES
+
+SEE ALSO      cat, pr
+
+DIAGNOSTICS   Error returns are checked at every system call, and
+              appropriate diagnostics are produced.
+
+BUGS          The second file should be created in the mode of the first.
+
+              A directory convention as used in mv should be adopted to cp.
+
+OWNER         ken, dmr

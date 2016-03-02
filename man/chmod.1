@@ -1,0 +1,28 @@
+        11/3/70                                                    CHMOD (I)
+
+
+NAME              chmod -- change mode
+
+SYNOPSIS          chmod octal file1 file2 file3 ...
+
+DESCRIPTION       The octal mode replaces the mode of each of the files. The
+                  mode is constructed from the OR of the following modes:
+
+                     01 write for non--owner
+                     02 read for non--owner
+                     04 write for owner
+                     10 read for owner
+                     20 executable
+                     40 set--UID
+
+                  Only the owner of a file may change its mode.
+
+FILES
+
+SEE ALSO          stat, ls
+
+DIAGNOSTICS
+
+BUGS
+
+OWNER             ken, dmr
