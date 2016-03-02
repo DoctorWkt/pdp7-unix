@@ -16,7 +16,7 @@ my @Mem;               # 8K 18-bit words of main memory
 my @FD;                # Array of open filehandles
 
 # Registers
-my $PC   = 020;        # Program counter
+my $PC   = 010000;     # Program counter
 my $AC   = 0;          # Accumulator
 my $LINK = 0;          # Link register, either 0 or LINKMASK
 my $MQ   = 0;          # MQ register
