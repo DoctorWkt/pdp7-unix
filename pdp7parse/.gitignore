@@ -1,0 +1,8 @@
+/**/*.log
+/**/.DS_Store
+/**/.project
+/**/.classpath
+/**/.settings/
+/**/target
+/**/test-output
+ANTLRv4Lexer.g4
