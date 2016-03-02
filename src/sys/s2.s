@@ -110,7 +110,7 @@
       skp
    jms error
    lac d1
-   dac mode
+   dac mode			" save mode bits for access
    jms access
    jms dslot
    lac u.base
@@ -131,8 +131,8 @@
 .unlink:
    jms argname
    dac u.base
-   lac d1
-   dac mode
+   lac d1			" mode bit 1 (write?)
+   dac mode			" save for access call
    jms access
    dac d.i
    jms dput
@@ -162,8 +162,8 @@
    lac u.cdir
    jms namei; 0:0
       jms error
-   lac d1
-   dac mode
+   lac d1				" mode bit 1 (write?)
+   dac mode				" save for access call
    jms access
    jms copy; 1:0; d.name; 4
    jmp okexit
@@ -197,8 +197,8 @@
    sza
    lac d1
    sna
-   lac d2
-   dac mode
+   lac d2			" mode bit 2 (read?)
+   dac mode			" save for access call
    lac u.cdir
    jms namei; 0:0
       jms error
@@ -218,8 +218,8 @@
    jmp open1
 
 .creat:
-   lac d1
-   dac mode
+   lac d1				" mode bit 1 (write?)
+   dac mode				" save for access call
    jms arg
    dac .+2
    jms copy; ..; name; 4
