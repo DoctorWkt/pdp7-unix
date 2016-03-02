@@ -4,12 +4,11 @@ AS= tools/as7
 all: utilities
 
 utilities:
-	$(AS) src/cmd/cat.s > bin/cat
-	$(AS) src/cmd/cp.s > bin/cp
-	$(AS) src/cmd/chmod.s > bin/chmod
-	$(AS) src/cmd/chown.s > bin/chown
-	$(AS) src/cmd/chrm.s > bin/chrm
-	rm -f n.out
+	$(AS) -o bin/cat   src/cmd/cat.s
+	$(AS) -o bin/cp    src/cmd/cp.s
+	$(AS) -o bin/chmod src/cmd/chmod.s
+	$(AS) -o bin/chown src/cmd/chown.s
+	$(AS) -o bin/chrm  src/cmd/chrm.s
 
 clean:
 	rm -f bin/*
