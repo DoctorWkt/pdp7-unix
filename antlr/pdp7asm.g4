@@ -46,7 +46,7 @@ declarations
 
 //  multiple labels can occur on the same line
 declaration
-   : label* (instruction | assignment | expression)?
+   : label* (instruction | assignment | expression)*
    ;
 
 instruction
@@ -198,6 +198,7 @@ opcode
    | 'sys'
    | 'czm'
    | 'irss'
+   | 'dsm'
    ;
 
 LOC
@@ -235,8 +236,9 @@ LABEL
    ;
 
 
+// the period is considered a letter
 IDENTIFIER
-   : [a-zA-Z] [a-zA-Z0-9]*
+   : [a-zA-Z] [a-zA-Z0-9.]*
    ;
 
 
