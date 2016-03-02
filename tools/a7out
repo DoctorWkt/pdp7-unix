@@ -736,7 +736,7 @@ sub sys_chmod {
     #   02 read for non-owner
     #   04 write for owner
     #   10 read for owner
-    my $mode;
+    my $mode=0;
     $mode|= 0002 if ($AC & 01);
     $mode|= 0004 if ($AC & 02);
     $mode|= 0220 if ($AC & 04);
