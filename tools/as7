@@ -465,15 +465,29 @@ sub parse_expression {
 
 	if ($op eq '+') {
 	    $word += $syllable;
+	    $flags |= $sylflags;
 	}
 	elsif ($op eq '-') {
 	    $word -= $syllable;
+	    if ($flags & $RELATIVE) {
+		# relative-relative => absolute!
+		if ($sylflags & $RELATIVE) {
+		    $flags &= ~$RELATIVE;
+		}
+		# else: relative-abs => relative (no change)
+	    }
+	    else {		# word is absolute
+		if ($sylflags & $RELATIVE) {
+		    err('A', 'absolute value minus relative??');
+		}
+		# else: absolute-absolute => absolute (no change)
+	    }
 	}
 	else {
 	    $word |= $syllable;
+	    $flags |= $sylflags;
 	}
 	$word &= 0777777;
-	$flags |= $sylflags;
 	printf("\tsyllable: %#o word: %#o\n", $syllable, $word) if ($debug);
     }
 }
