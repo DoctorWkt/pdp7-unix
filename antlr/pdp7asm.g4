@@ -72,13 +72,17 @@ atom
    : variable
    | LOC
    | RELOC
-   | STRING
+   | string
    | DECIMAL
    | DECIMAL_MINUS
    | OCTAL
    | OCTAL_LITERAL
    | d
    ;
+
+string
+    : STRING '>'?
+    ;
 
 d
    : '-'? DECIMAL_LITERAL
@@ -114,7 +118,7 @@ opcode
    | 'sad'
    | 'jmp'
    | 'nop'
-   | 'i'
+//   | 'i'
    | 'law'
    | 'cma'
    | 'las'
@@ -190,8 +194,9 @@ opcode
    | 'dprc'
    | 'crsf'
    | 'crrb'
+   | 'sys'
+   | 'czm'
    ;
-
 
 LOC
    : '.'
@@ -237,7 +242,6 @@ OCTAL_LITERAL
    : '0' [0-7]*
    ;
 
-
 DECIMAL_LITERAL
    : [1-9] [0-9]*
    ;
@@ -259,7 +263,7 @@ DECIMAL_MINUS
 
 
 STRING
-   : '<' [a-zA-Z0-9$*,%/] + '>'
+   : '<' [a-zA-Z0-9$*,%/]*
    ;
 
 
@@ -269,7 +273,7 @@ COMMENT
 
 
 EOL
-   : [\r\n] +
+   : [\r\n]+
    ;
 
 
