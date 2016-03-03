@@ -2,41 +2,41 @@
 " s6
 
 itrunc: 0
-   -7
-   dac 9f+t
-   lac idskpp
-   dac 9f+t+1
-1:
-   lac 9f+t+1 i
-   sna
-   jmp 4f
+   -7					" loop 7 times
+   dac 9f+t				" in t0
+   lac idskpp				" pointer to inode block numbers
+   dac 9f+t+1				" save in t1
+1:			" top of loop for inode blocks
+   lac 9f+t+1 i				" fetch next block number
+   sna					" allocated?
+   jmp 4f				"  no
+   lac i.flags				" check flags
+   and o200000				
+   sna					" large file?
+   jmp 3f				"  no
+   -64					" loop 64 times
+   dac 9f+t+2				" save count in t2
+   lac dskbufp				" get pointer to dskbuf
+   dac 9f+t+3				" in t3
+2:			" inner loop for indirect blocks
+   lac 9f+t+1 i				" get indirect block number
+   jms dskrd				" read it
+   lac 9f+t+3 i				" read block number from indirect
+   sza					" free?
+   jms free				"  no: free it
+   isz 9f+t+3				" increment pointer into indirect block
+   isz 9f+t+2				" increment loop counter, skip if done
+   jmp 2b				"  not done: loop
+3:			" here with small file
+   lac 9f+t+1 i				" load block number
+   jms free				" free it
+   dzm 9f+t+1 i				" clear block number
+4:			" bottom of loop for inode block ptrs
+   isz 9f+t+1				" increment block pointer
+   isz 9f+t				" increment count, skip if done
+   jmp 1b				"  not done
    lac i.flags
-   and o200000
-   sna
-   jmp 3f
-   -64
-   dac 9f+t+2
-   lac dskbufp
-   dac 9f+t+3
-2:
-   lac 9f+t+1 i
-   jms dskrd
-   lac 9f+t+3 i
-   sza
-   jms free
-   isz 9f+t+3
-   isz 9f+t+2
-   jmp 2b
-3:
-   lac 9f+t+1 i
-   jms free
-   dzm 9f+t+1 i
-4:
-   isz 9f+t+1
-   isz 9f+t
-   jmp 1b
-   lac i.flags
-   and o577777
+   and o577777				" clear large file flag
    dac i.flags
    jmp itrunc i
 t = t+4

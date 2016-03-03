@@ -160,10 +160,10 @@ crdata:
    crchar: .=.+1
 sysdata:
    s.nxfblk: .=.+1
-   s.nfblks: .=.+1
-   s.fblks: .=.+10
-   s.uniq: .=.+1
-   s.tim: .=.+2
+   s.nfblks: .=.+1			" number of free blocks
+   s.fblks: .=.+10			" free block numbers
+   s.uniq: .=.+1			" next unique value
+   s.tim: .=.+2				" (up)time(?) in 60Hz ticks (low, high)
 ulist:
    0131000;1;0;0
    0031040;0;0;0
@@ -176,12 +176,12 @@ ulist:
    0031400;0;0;0
    0031440;0;0;0
 userdata:
-   u.ac: 0
-   u.mq: 0
-   u.rq: .=.+9
-   u.uid: -1
-   u.pid: 1
-   u.cdir: 3
+   u.ac: 0			" user AC
+   u.mq: 0			" user MQ
+   u.rq: .=.+9			" user 010-017
+   u.uid: -1			" user id
+   u.pid: 1			" process id
+   u.cdir: 3			" connected directory (inode number?)
    u.ulistp: ulist
    u.swapret: 0
    u.base: 0
@@ -194,18 +194,23 @@ userdata:
       .=userdata+64
 ii: .=.+1
 inode:
-   i.flags: .=.+1
-   i.dskps: .=.+7
-   i.uid: .=.+1
-   i.nlks: .=.+1
+   i.flags: .=.+1		" inode flags
+				" 400000 free?? (checked/toggled by icreat)
+				" 200000 large file
+				" 000040 special? (checked by read/write)
+				" 000020  directory
+				" 000017 can be changed by chmod.
+   i.dskps: .=.+7		" disk block pointers (indirect if "large file")
+   i.uid: .=.+1			" owner
+   i.nlks: .=.+1		" link count
    i.size: .=.+1
-   i.uniq: .=.+1
+   i.uniq: .=.+1		" unique number
       .= inode+12
 di: .=.+1
-dnode:
-   d.i: .=.+1
-   d.name: .=.+4
-   d.uniq: .=.+1
+dnode:				" directory entry:
+   d.i: .=.+1			" inode number
+   d.name: .=.+4		" name (space padded)
+   d.uniq: .=.+1		" unique number from directory inode
       . = dnode+8
 fnode:
    f.flags: .=.+1
