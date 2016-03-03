@@ -3,22 +3,22 @@
 .. = 0
 t = 0
 orig:
-   hlt
-   jmp pibreak
+   hlt				" overwritten with interrupt return addr
+   jmp pibreak			" dispatch to interrupt processing
 
 . = orig+7
-   -1
+   -1				" only ever set (to -1): never read?!
 
-. = orig+020
-   1f
-   iof
-   dac u.ac
-   lac 020
-   dac 1f
+. = orig+020			" syscall (CAL) processing
+   1f				" addr for "CAL I": store return here on "CAL"
+   iof				" interrupts off
+   dac u.ac			" save user AC
+   lac 020			" save user return addr
+   dac 1f			" save as if "CAL I"
    lac 1f-1
-   dac 020
-   lac u.ac
-   jmp 1f+1
+   dac 020			" restore location 20
+   lac u.ac			" restore user AC
+   jmp 1f+1			" join "CAL I" processing
    1f
 1: 0
    iof				" interrupts off
@@ -49,7 +49,7 @@ orig:
    jmp .. i			" dispatch system call
 
 . = orig+0100
-   jmp coldentry
+   jmp coldentry		" here to start kernel
    jms halt
 
 okexit:
@@ -77,6 +77,7 @@ sysexit:			" common system call exit code
    lac u.ac			" restore AC register
    jmp u.rq+8 i			" return to user
 
+	" scheduler / idle loop
 swap: 0
    ion
 1:
@@ -84,49 +85,49 @@ swap: 0
       jmp 1f
    jms lookfor; 1 " in/ready
       skp
-   jmp 1b
-   dzm maxquant
+   jmp 1b			" loop until a process becomes ready
+   dzm maxquant			" here with in/ready (self?)
    jmp 3f
-1:
-   dac 9f+t
-   jms lookfor; 2 " in/notready
+1:				" here with out/ready process
+   dac 9f+t			" save process pointer (swapped out) in t0
+   jms lookfor; 2 " in/notready	" find a swapped in process to swap out?
       jmp 1f
    jms lookfor; 1 " in/ready
       jmp 1f
    jmp 2f
 1:
    lac swap
-   dac u.swapret
+   dac u.swapret		" return to scheduler when swapped back
    iof
-   lac o200000
+   lac o200000			" change status to swapped out
    tad u.ulistp i
    dac u.ulistp i
    ion
-   jms dskswap; 07000
+   jms dskswap; 07000		" swap process out
    lac u.dspbuf
    sna
    jmp 2f
    law dspbuf
    jms movdsp
 2:
-   iof
-   lac o600000
+   iof				" disable interrupts
+   lac o600000			" change status (1->7?)
    tad 9f+t i
    dac 9f+t i
-   ion
-   jms dskswap; 06000
-   lac u.swapret
-   dac swap
-   lac o20
+   ion				" enable interrupts
+   jms dskswap; 06000		" read process in?
+   lac u.swapret		" set our return addr
+   dac swap			" to saved return addr
+   lac o20			" reset maxquant to 16 ticks
    dac maxquant
    lac u.dspbuf
-   sza
+   sza				" using display?
 "** 01-s1.pdf page 4
-   jms movdsp
+   jms movdsp			"  yes.
 3:
-   dzm uquant
+   dzm uquant			" no. reset process tick count
    iof
-   jmp swap i
+   jmp swap i			" return
 t = t+1
 
 swp:			" system call dispatch table

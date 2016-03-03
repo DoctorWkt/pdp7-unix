@@ -164,6 +164,16 @@ sysdata:
    s.fblks: .=.+10			" free block numbers
    s.uniq: .=.+1			" next unique value
    s.tim: .=.+2				" (up)time(?) in 60Hz ticks (low, high)
+	" process table
+	" first word
+	"   bits 0:2 -- status
+	"	0: free slot
+	"	1: in/ready
+	"	2: in/notready
+	"	3: out/ready
+	"	4: out/notready??
+	"   bits 3:17 -- disk swap address/8
+	" second word: pid
 ulist:
    0131000;1;0;0
    0031040;0;0;0
@@ -182,7 +192,7 @@ userdata:
    u.uid: -1			" user id
    u.pid: 1			" process id
    u.cdir: 3			" connected directory (inode number?)
-   u.ulistp: ulist
+   u.ulistp: ulist		" pointer to process table entry
    u.swapret: 0
    u.base: 0
    u.count: 0
@@ -197,9 +207,12 @@ inode:
    i.flags: .=.+1		" inode flags
 				" 400000 free?? (checked/toggled by icreat)
 				" 200000 large file
-				" 000040 special? (checked by read/write)
+				" 000040 special device (indicated by inum)?
 				" 000020  directory
-				" 000017 can be changed by chmod.
+				" 000010 owner read
+				" 000004 owner write
+				" 000002 world read
+				" 000001 world write
    i.dskps: .=.+7		" disk block pointers (indirect if "large file")
    i.uid: .=.+1			" owner
    i.nlks: .=.+1		" link count

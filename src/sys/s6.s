@@ -255,29 +255,29 @@ pget: 0
 t = t+3
 
 iwrite: 0
-   dac 9f+t
-   lac iwrite
+   dac 9f+t				" save arg in t0
+   lac iwrite				" load return address
 
 "** 01-s1.pdf page 38
 
-   dac iread
+   dac iread				" save as iread return addr
    lac cskp
-   dac iwrite
+   dac iwrite				" set our return addr to "cskp"
    jmp 1f
 
 iread: 0
    dac 9f+t
-   lac cnop
+   lac cnop				" set iwrite return to "cnop"
    dac iwrite
 1:
    -1
-   tad iread i
-   dac 10
+   tad iread i				" get word before return addr
+   dac 10				" store in index 8 & 9
    dac 11
-   isz iread
-   lac iread i
-   dac 9f+t+1
-   isz iread
+   isz iread				" increment return addr
+   lac iread i				" load word
+   dac 9f+t+1				" save in t1
+   isz iread				" increment return addr
    lac o70000
    xct iwrite
    lac i.size

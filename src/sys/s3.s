@@ -1,15 +1,18 @@
 "** 01-s1.pdf page 14
 " s3
 
+	" call:
+	"   jms searchu; addr
+
 searchu: 0
-   lac searchu i
-   dac 9f+t+1
-   -mnproc
-   dac 9f+t
-   law ulist-1
-   dac 8
+   lac searchu i		" fetch argument
+   dac 9f+t+1			" in t1
+   -mnproc			" loop counter
+   dac 9f+t			" in t0
+   law ulist-1			" ulist ptr
+   dac 8			" in index 8
 1:
-   lac 8 i
+   lac 8 i			" copy ulist entry to lu
    dac lu
    lac 8 i
    dac lu+1
@@ -17,65 +20,69 @@ searchu: 0
    dac lu+2
    lac 8 i
    dac lu+3
-   jms 9f+t+1 i
-   isz 9f+t
-   jmp 1b
-   isz searchu
+   jms 9f+t+1 i			" call argument as subroutine
+   isz 9f+t			" returned: loop done?
+   jmp 1b			"  no, do it again
+   isz searchu			" skip argument
    jmp searchu i
 t = t+2
 
+	" look for process:
+	"   jms lookfor; status
+	"    found: ulist ptr in AC
+	"   not found
 lookfor: 0
    jms searchu; 1f
-   isz lookfor
-   isz lookfor
+   isz lookfor			" skip argument
+   isz lookfor			" give skip return
    jmp lookfor i
-1: 0
+1: 0				" worker called by searchu
    lac lu
-   rtl; rtl; and o7
-   sad lookfor i
-   skp
-   jmp 1b i
+   rtl; rtl; and o7		" bits 0:2 of lu
+   sad lookfor i		" match argument?
+   skp				"  yes
+   jmp 1b i			"   no, return, keep going
    -3
-   tad 8
+   tad 8			" roll index 8 back to this entry
    and o17777
-   isz lookfor
-   jmp lookfor i
+   isz lookfor			" skip argument
+   jmp lookfor i		" non-skip return
 
 .fork:
-   jms lookfor; 0 " not-used
+   jms lookfor; 0 " not-used	" find an unused process slot
       skp
-      jms error
-   dac 9f+t
-   isz uniqpid
+      jms error			" none found- return error
+   dac 9f+t			" save ulist ptr in t0
+   isz uniqpid			" generate new pid
    lac uniqpid
-   dac u.ac
+   dac u.ac			" return in AC
    law sysexit
-   dac u.swapret
-   lac o200000
+   dac u.swapret		" return from system call when swapped back in
+   lac o200000			" change process status to out/ready
    tad u.ulistp i
    dac u.ulistp i
-   jms dskswap; 07000
-   lac 9f+t
-   dac u.ulistp
-   lac o100000
+   jms dskswap; 07000		" swap parent out
+   lac 9f+t			" get unused ulist slot back
+   dac u.ulistp			" set ulist pointer
+   lac o100000			" mark child in/ready
    xor u.ulistp i
    dac u.ulistp i
    lac u.pid
 "** 01-s1.pdf page 15
-   dac u.ac
+   dac u.ac			" return parent pid in AC?
    lac uniqpid
-   dac u.pid
+   dac u.pid			" set child pid
    isz 9f+t
-   dac 9f+t i
-   isz u.rq+8
-   dzm u.intflg
-   jmp sysexit
+   dac 9f+t i			" set pid in process table
+   isz u.rq+8			" increment return address from sys call
+   dzm u.intflg			" clear int flag
+   jmp sysexit			" return in child process
 t= t+1
 
-badcal:
-   clon
+badcal:				" bad (unimplemented) system call
+   clon				" clear any pending clock interrupt?
    -1
-   dac 7
+   dac 7			" set location 7 to -1
 .save:
    lac d1
    jms iget
@@ -86,16 +93,16 @@ badcal:
 
 .exit:
    lac u.dspbuf
-   sna
-   jmp .+3
-   law dspbuf
+   sna					" process using display?
+   jmp .+3				"  no
+   law dspbuf				"   yes
    jms movdsp
    jms awake
    lac u.ulistp i
-   and o77777
+   and o77777				" mark process table entry free
    dac u.ulistp i
    isz u.ulistp
-   dzm u.ulistp i
+   dzm u.ulistp i			" clear pid in process table
    jms swap
 
 .rmes:
