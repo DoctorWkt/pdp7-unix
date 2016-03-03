@@ -485,21 +485,24 @@ sub eae {
         $PC++;
         return;
     }
-    if ( $maskedinstr == 0660700 ) {    # alss: long left shift, signed
-                                        # We don't fill the lsb with LINK yet
+    if ( $maskedinstr == 0660700 ) {    # alss: AC left shift, signed
         dprintf( "alss AC %06o step %d\n", $AC, $step );
         $AC = ( $AC << $step ) & MAXINT;
+        $LINK = ( $AC << 1 ) & LINKMASK;
         $PC++;
         return;
     }
     if ( $maskedinstr == 0660600 ) {    # llss: long left shift, signed
-                                        # We don't use MQ yet!
         dprintf( "llss AC %06o step %d\n", $AC, $step );
-        $AC = ( $AC << $step ) & MAXINT;
+	foreach my $i (1 .. $step) {
+	  my $MQmsb= ($MQ & SIGN) ? 1 : 0;
+	  $AC= (($AC << 1) | $MQmsb) & MAXINT;
+	  $MQ= (($MQ << 1) | (($LINK) ? 1 : 0)) & MAXINT;
+	}
         $PC++;
         return;
     }
-    if ( $maskedinstr == 0640700 ) {    # als: long left shift
+    if ( $maskedinstr == 0640700 ) {    # als: AC left shift
         dprintf( "als AC %06o step %d\n", $AC, $step );
         $AC = ( $AC << $step ) & MAXINT;
         $PC++;
