@@ -12,3 +12,7 @@ To bring your own local repository up to date with Github:
 
 To recover a delete file $file:
  git checkout $(git rev-list -n 1 HEAD -- "$file")^ -- "$file"
+
+To see the log of changes to one file
+ 	git log -- file
+

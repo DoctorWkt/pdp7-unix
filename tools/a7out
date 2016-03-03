@@ -6,6 +6,7 @@
 #
 use strict;
 use warnings;
+use DateTime;
 use Data::Dumper;
 
 ### Global variables ###
@@ -540,7 +541,7 @@ sub cal {
         12 => \&sys_setuid,
 				# 13 rename
         14 => \&sys_exit,
-				# 15 time
+        15 => \&sys_time,
         16 => \&sys_intrp,
         17 => \&sys_chdir,
         18 => \&sys_chmod,
@@ -882,6 +883,35 @@ sub sys_unlink {
     # Bump up the PC and do the unlink
     $PC += 2;
     return( unlink($filename) ? 0 : MAXINT);
+}
+
+# Time system call
+sub sys_time {
+    # Dennis' draft says: The call   sys time   returns in
+    # the AC and MQ registers the number of sixtieths of
+    # a second since the start of the current year.
+
+    # Get two Datetime objects set to now
+    my $dt = DateTime->now;
+    my $yearstart = DateTime->now;
+
+    # Set one object back to the beginning of the year
+    $yearstart->set( month => 1);
+    $yearstart->set( day => 1);
+    $yearstart->set( hour => 0);
+    $yearstart->set( minute => 0);
+    $yearstart->set( second => 0);
+
+    # Get the duration in sixtieths of a second
+    my $duration = $dt->subtract_datetime_absolute($yearstart);
+    my $sixtieths = $duration->seconds() * 60;
+
+    # Set MQ to the high 18 bits and AC to the low 18 bits
+    $MQ = $sixtieths >> 18;
+    $AC = $sixtieths & 0777777;
+    dprintf( "time %06o %06o\n", $MQ, $AC);
+    $PC += 1;
+    return;
 }
 
 # Convert an 18-bit word into two ASCII characters and return them.
