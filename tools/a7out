@@ -537,8 +537,8 @@ sub cal {
         17 => \&sys_chdir,
         18 => \&sys_chmod,
         19 => \&sys_chown,
-        27 => \&sys_rmes,
-        28 => \&sys_smes,
+        28 => \&sys_rmes,
+        27 => \&sys_smes,
         29 => \&sys_fork,
     );
 
