@@ -59,20 +59,28 @@ fassign: 0
    jmp fassign i
 t = t+1
 
+	" get inode fpr an open file
+	" AC/ user fd
+	"   jms fget
+	"    bad fd
+	"   return with fnode set
 fget: 0
-   jms betwen; d0; d9
-      jmp fget i
-   cll; mul; 3
+   jms betwen; d0; d9		" fd 0..9?
+      jmp fget i		"  no, return
+   cll; mul; 3			" multiply by three
    lacq
 "** 01-s1.pdf page 29
 
-   tad ofilesp
-   dac 9f+t
-   dac .+2
-   jms copy; ..; fnode; 3
-   isz fget
+   tad ofilesp			" get pointer into u.ofiles
+   dac 9f+t			" save in t0
+   dac .+2			" save as copy source
+   jms copy; ..; fnode; 3	" copy to "fnode"
+   isz fget			" give skip return
    jmp fget i
 
+	" copy fnode back to u.ofiles
+	" uses temp value set by "fget"
+	" (fget and fput calls must be paired)
 fput: 0
    lac 9f+t
    dac .+3
