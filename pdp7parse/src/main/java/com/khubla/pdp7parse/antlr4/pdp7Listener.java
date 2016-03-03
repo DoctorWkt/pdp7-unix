@@ -29,6 +29,16 @@ public interface pdp7Listener extends ParseTreeListener {
 	 */
 	void exitLine(pdp7Parser.LineContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link pdp7Parser#lineeol}.
+	 * @param ctx the parse tree
+	 */
+	void enterLineeol(pdp7Parser.LineeolContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pdp7Parser#lineeol}.
+	 * @param ctx the parse tree
+	 */
+	void exitLineeol(pdp7Parser.LineeolContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link pdp7Parser#declarations}.
 	 * @param ctx the parse tree
 	 */
@@ -118,16 +128,6 @@ public interface pdp7Listener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitString(pdp7Parser.StringContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link pdp7Parser#signednumber}.
-	 * @param ctx the parse tree
-	 */
-	void enterSignednumber(pdp7Parser.SignednumberContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link pdp7Parser#signednumber}.
-	 * @param ctx the parse tree
-	 */
-	void exitSignednumber(pdp7Parser.SignednumberContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link pdp7Parser#eol}.
 	 * @param ctx the parse tree
