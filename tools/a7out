@@ -653,12 +653,43 @@ sub sys_close {
     return;
 }
 
+# Open something which could be a file or a directory
+# Convert directories into files. Return the file handle.
+sub opensomething {
+    my ($readorwrite, $filename )= @_;
+    my $tempfile= "/tmp/a7out.$$";
+    my $FH;
+
+    # If this is not a directory, simply open and return the FH
+    if (! -d $filename) {
+       open( $FH, $readorwrite, $filename ) || return(undef);
+       return($FH);
+    }
+
+    # It's a directory. For now, until we fully understand the code,
+    # I'm going to write space-padded filenames to a temporary
+    # directory, open and unlink it, and return the FH
+    opendir(my $dh, $filename) || return(undef);
+    open( $FH, ">", $tempfile) || return(undef);
+    dprintf("Converting directory $filename\n");
+
+    while ( my $name= readdir($dh)) {
+        printf( $FH "%-8s", substr( $name, 0, 8 ) );
+    }
+    closedir($dh);
+    close($FH);
+    open( $FH, "<", $tempfile) || return(undef);
+    unlink($tempfile);
+    return($FH);
+}
+
 # Common code for creat and open
 sub creatopen {
     my ($filename, $readorwrite)= @_;
 
     # Open the file
-    if ( open( my $FH, $readorwrite, $filename ) ) {
+    my $FH= opensomething($readorwrite, $filename );
+    if ( $FH ) {
 
         # Find a place in the @FD array to store this filehandle.
         # 99 is arbitrary
