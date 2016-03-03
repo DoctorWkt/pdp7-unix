@@ -8,14 +8,15 @@ dspbsz = 270
 ndskbs = 4
 
 " flags
-.insys: 0
-.int1: 0
-.int2: 0
-.ac: 0
-.savblk: 0
-.dsptm: 0
-.dskb: 0
-.dske: 0
+	" interupt flags
+.insys: 0			" "in system"
+.int1: 0			" inode for interrupt 1
+.int2: 0			" inode for interrupt 2
+.ac: 0				" saved AC from interrupt
+.savblk: 0			" set by system call, cleared by disk i/o
+.dsptm: 0			" display restart countdown (10 ticks)
+.dskb: 0			" set on disk interrupt
+.dske: 0			" status from disk interrupt
 
 " pointers
 tadu: tad ulist
@@ -110,25 +111,25 @@ dspbuf:
    .=.+30
 coldentry:
    dzm 0100 " not re-entrant
-   caf
-   ion
-   clon
-   law 3072
+   caf				" clear all flags
+   ion				" enable interrupts
+   clon				" clear clock flag
+   law 3072			" initialize display....
    wcga
    jms dspinit
    law dspbuf
    jms movdsp
-   cla
+   cla				" read system block from disk
    jms dskio; 06000
-   jms copy; dskbuf; sysdata; ulist-sysdata
-   lac d3
+   jms copy; dskbuf; sysdata; ulist-sysdata	" copy to system data
+   lac d3			" look for "init" in default directory
    jms namei; initf
       jms halt
 "** 01-s1.pdf page 50
    jms iget
    cla
-   jms iread; 4096; 4096
-   jmp 4096
+   jms iread; 4096; 4096	" read in "init"
+   jmp 4096			" start process 1
    . = dspbuf+dspbsz+3
 dskbuf = 07700
 dskbs: .=.+65+65+65+65
@@ -144,9 +145,9 @@ name: .=.+4
 lnkaddr: .=.+1
 char: .=.+1
 dskaddr: .=.+1
-uniqpid: 1
-lu: .=.+4
-sfiles: .=.+10
+uniqpid: 1			" pid generator
+lu: .=.+4			" user (process) table entry copy
+sfiles: .=.+10			" wait addresses for special files
 dpdata:
    dpstat: .=.+1
    dpread: .=.+1
@@ -158,12 +159,12 @@ dspdata:
 crdata:
    crread: .=.+1
    crchar: .=.+1
-sysdata:
-   s.nxfblk: .=.+1
-   s.nfblks: .=.+1			" number of free blocks
-   s.fblks: .=.+10			" free block numbers
-   s.uniq: .=.+1			" next unique value
-   s.tim: .=.+2				" (up)time(?) in 60Hz ticks (low, high)
+sysdata:			" system data 64 words saved to disk
+   s.nxfblk: .=.+1		" pointer to next free block??
+   s.nfblks: .=.+1		" number of free blocks (in fblks?)
+   s.fblks: .=.+10		" cached free block numbers
+   s.uniq: .=.+1		" next unique value
+   s.tim: .=.+2			" (up?)time in 60Hz ticks (low, high)
 	" process table
 	" first word
 	"   bits 0:2 -- status
@@ -173,7 +174,9 @@ sysdata:
 	"	3: out/ready
 	"	4: out/notready??
 	"   bits 3:17 -- disk swap address/8
-	" second word: pid
+	" second word: process pid
+	" third word:  used for smes/rmes
+	" fourth word: ??
 ulist:
    0131000;1;0;0
    0031040;0;0;0
@@ -185,25 +188,25 @@ ulist:
    0031340;0;0;0
    0031400;0;0;0
    0031440;0;0;0
-userdata:
+userdata:			" "ustruct" (swappable)
    u.ac: 0			" user AC
    u.mq: 0			" user MQ
-   u.rq: .=.+9			" user 010-017
+   u.rq: .=.+9			" user 010-017, user PC
    u.uid: -1			" user id
    u.pid: 1			" process id
    u.cdir: 3			" connected directory (inode number?)
    u.ulistp: ulist		" pointer to process table entry
-   u.swapret: 0
-   u.base: 0
-   u.count: 0
+   u.swapret: 0			" kernel routine to resume at after swap in
+   u.base: 0			" start of user buffer
+   u.count: 0			" size of user buffer
 "** 01-s1.pdf page 51
-   u.limit: 0
-   u.ofiles: .=.+30
+   u.limit: 0			" end of user buffer
+   u.ofiles: .=.+30		" open files (10 "fnode" entries)
    u.dspbuf: 0
    u.intflg: 1
       .=userdata+64
-ii: .=.+1
-inode:
+ii: .=.+1			" number of i-node in inode:
+inode:				" disk inode in memory:
    i.flags: .=.+1		" inode flags
 				" 400000 free?? (checked/toggled by icreat)
 				" 200000 large file
@@ -225,7 +228,7 @@ dnode:				" directory entry:
    d.name: .=.+4		" name (space padded)
    d.uniq: .=.+1		" unique number from directory inode
       . = dnode+8
-fnode:
+fnode:				" open file entry
    f.flags: .=.+1
    f.badd: .=.+1
    f.i: 0
