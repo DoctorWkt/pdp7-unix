@@ -492,8 +492,15 @@ sub eae {
         $PC++;
         return;
     }
+    if ( $maskedinstr == 0660600 ) {    # llss: long left shift, signed
+                                        # We don't use MQ yet!
+        dprintf( "llss AC %06o step %d\n", $AC, $step );
+        $AC = ( $AC << $step ) & MAXINT;
+        $PC++;
+        return;
+    }
     if ( $maskedinstr == 0640700 ) {    # als: long left shift
-        dprintf( "alss AC %06o step %d\n", $AC, $step );
+        dprintf( "als AC %06o step %d\n", $AC, $step );
         $AC = ( $AC << $step ) & MAXINT;
         $PC++;
         return;
