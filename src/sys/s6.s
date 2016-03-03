@@ -261,28 +261,31 @@ iwrite: 0
 "** 01-s1.pdf page 38
 
    dac iread				" save as iread return addr
-   lac cskp
-   dac iwrite				" set our return addr to "cskp"
+   lac cskp				" load skip instruction
+   dac iwrite				" save as iwrite instruction
    jmp 1f
 
+	" iread from file referenced by loaded inode
+	" AC/ file offset
+	"    jms iread; addr; count
 iread: 0
-   dac 9f+t
-   lac cnop				" set iwrite return to "cnop"
-   dac iwrite
+   dac 9f+t				" save offset in t0
+   lac cnop				" get nop
+   dac iwrite				" save as iwrite instruction
 1:
    -1
    tad iread i				" get word before return addr
-   dac 10				" store in index 8 & 9
+   dac 10				" store in index 10 & 11
    dac 11
    isz iread				" increment return addr
-   lac iread i				" load word
+   lac iread i				" load addr
    dac 9f+t+1				" save in t1
    isz iread				" increment return addr
    lac o70000
-   xct iwrite
-   lac i.size
+   xct iwrite				" skip if write
+   lac i.size				"  read: get file size
    cma
-   tad 9f+t
+   tad 9f+t				" add offset
    cma
    jms betwen; d0; 9f+t+1
       lac 9f+t+1
@@ -336,6 +339,11 @@ cskp:
    jmp 1b
 t = t+4
 
+	" system call helper
+	" AC/ fd
+	"   jms finac
+	" return with: fnode and inode loaded
+	"	or makes error return to user
 finac: 0
    lac u.ac
    jms fget
@@ -347,6 +355,7 @@ finac: 0
    jms iget
    jmp finac i
 
+	" update inode file size with value in AC
 dacisize: 0
    dac i.size
    jms iput

@@ -1,8 +1,9 @@
 "** 01-s1.pdf page 41
 " s7
 
-pibreak:			" priority interrupt processing "chain"
-   dac .ac	"** CROSSED OUT....
+pibreak:			" priority interrupt break processing "chain"
+   dac .ac			" save interrupt AC
+	"** CROSSED OUT....
 
    dpsf
    jmp 1f
@@ -174,14 +175,15 @@ ttyrestart: 0
    dac sfiles+1
    jmp ttyrestart i	"** written arrow up 2 copies
 
-1: sck			"** BEGIN CROSSED OUT
-   jmp 1f
+			"** BEGIN CROSSED OUT
+1: sck				" Graphic-2 keyboard flag set?
+   jmp 1f			"  no.
 
-   cck
-   lck
+   cck				" yes: clear flag
+   lck				" read character
    dac char
-   sad o33
-   jmp intrp2
+   sad o33			" code 33 (ESCAPE?)
+   jmp intrp2			"  yes: mark interrupt
    lac d3
    jms putchar
       nop
@@ -190,8 +192,8 @@ ttyrestart: 0
    dac sfiles+2
    jmp piret
 
-1: rsf
-   jmp 1f
+1: rsf				" paper tape ready?
+   jmp 1f			"  no
 
 
 "** 01-s1.pdf page 44
@@ -237,12 +239,12 @@ ttyrestart: 0
    dac sfiles+3
    jmp piret
 
-1: psf
-   jmp 1f
+1: psf					" paper tape ready?
+   jmp 1f				"  no
 
-   pcf
+   pcf					" clear ptp flag
    lac d5
-   jms getchar
+   jms getchar				" get next char
    jmp .+3
    psa
    jmp piret
@@ -251,11 +253,12 @@ ttyrestart: 0
    dac sfiles+4
    jmp piret
 
-1: spb		"** BEGIN CROSSED OUT
-   jmp 1f
+		"** BEGIN CROSSED OUT
+1: spb					" graphic 2 push button flag set?
+   jmp 1f				"  no
 
-   cpb
-   lpb
+   cpb					" clear push button flag
+   lpb					" load push button value
    dac pbsflgs+1
 
 "** 01-s1.pdf page 45
@@ -271,8 +274,8 @@ ttyrestart: 0
    wbl
    jmp piret	"** END CROSSED OUT
 
-1: crsf
-   jmp 1f
+1: crsf					" card reader flag set?
+   jmp 1f				"  no
 
    crrb
    dac crchar
@@ -280,14 +283,14 @@ ttyrestart: 0
    dac crread
    jmp piret
 
-1: crrb
+1: crrb					" read card reader buffer??
 
-piret:
-   lac 0
-   ral
-   lac .ac
-   ion
-   jmp 0 i
+piret:					" return from priority interrupt
+   lac 0				" get LINK/PC
+   ral					" restore LINK
+   lac .ac				" restore AC
+   ion					" reenable interrupts
+   jmp 0 i				" return from interrupt
 
 wakeup: 0
    dac 9f+t
