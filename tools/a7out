@@ -537,6 +537,8 @@ sub cal {
         17 => \&sys_chdir,
         18 => \&sys_chmod,
         19 => \&sys_chown,
+        27 => \&sys_rmes,
+        28 => \&sys_smes,
         29 => \&sys_fork,
     );
 
@@ -551,7 +553,7 @@ sub cal {
 
 # Exit system call
 sub sys_exit {
-    dprintf("exit system call\n");
+    dprintf("exit system call, pid %06o\n", $$);
     exit(0);
 }
 
@@ -568,10 +570,32 @@ sub sys_fork {
 
     # Fork and get the child's process-id back, or zero if we are the child
     my $pid= fork();
-    $AC= $pid;
+    $AC= $pid & MAXINT;
+    dprintf( "fork, got id %06o\n", $AC);
 
     # The parent returns back to PC+1, the child returns to PC+2
     $PC += ($pid) ? 1 : 2;
+    return;
+}
+
+# Smes system call. Because we fake rmes with wait(),
+# there is no need for sms. When the child does
+# sys exit, that's going to wake wait() up and do the
+# rmes anyway.
+sub sys_smes {
+    # For now, do nothing
+    dprintf("smes system call\n");
+    $PC += 1;
+    return;
+}
+
+# Rmes system call. We simply call wait and
+# return the process-id in AC
+sub sys_rmes {
+    my $pid= wait();
+    dprintf("rmes system call, got pid $pid\n");
+    $AC= $pid & MAXINT;
+    $PC += 1;
     return;
 }
 
