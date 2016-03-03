@@ -219,14 +219,14 @@ nlinka: 0
 nlinkt: 0
 
 asters: 0
-   -10
+   -10		" Put -10 into c
    dac c
 1:
-   law 052
+   law 052	" Print out a "*"
    jms putc
    isz c
-   jmp 1b
-   jmp asters i
+     jmp 1b	" and loop back until 10 "*" are printed out
+   jmp asters i	" Leave the routine
 
 longout: 0
    lac statbuf+12 " i
@@ -416,38 +416,40 @@ done:
    sys exit
 
 putc: 0
-   and o177
+   and o177		" Keep the lowest 7 bits and save into 2f+1
    dac 2f+1
-   lac opt
-   dac 2f
-   add o400000
-   dac opt
-   spa
-   jmp 1f
-   lac 2f i
-   xor 2f+1
-   jmp 3f
+   lac opt		" Save the pointer to the empty buffer
+   dac 2f		" position to 2f
+   add o400000		" Flip the msb and save back into opt
+   dac opt		" This also has the effect of incrementing
+			" the opt pointer every second addition!
+   spa			" If the bit was set, we already have one
+     jmp 1f		" character at 2f+1. If no previous character,
+   lac 2f i		" merge the old and new character together
+   xor 2f+1		
+   jmp 3f		" and go to the "save it in buffer" code
 1:
-   lac 2f+1
-   alss 9
+   lac 2f+1		" Move the character up into the top half
+   alss 9	
 3:
-   dac 2f i
-   isz noc
-   lac noc
+   dac 2f i		" Save the word into the buffer
+   isz noc		" Add 1 to the char count, never skipping
+   lac noc		" Have we reached 128 characters, 64 words?
    sad d128
-   skp
-   jmp putc i
-   lac fo
-   sys write; obuf; 64
+     skp
+   jmp putc i		" No, so return (more room still in the buffer)
+   lac fo		" Load fd1 (i.e stdout)
+   sys write; obuf; 64	" and write out the 64 words in the buffer
    lac iopt
-   dac opt
-   dzm noc
-   jmp putc i
-2: 0;0
-opt: obuf
-iopt: obuf
-noc: 0
-fo: 1
+   dac opt		" Set opt pointing back to base of buffer
+   dzm noc		" Set the number of chars in the buffer to 0
+   jmp putc i		" and return
+
+2: 0;0			" Current input and output word pointers
+opt: obuf		" Pointer to the output buffer
+iopt: obuf		" Pointer to the output buffer
+noc: 0			" Number of output characters
+fo: 1			" Output file descriptor, fd 1 is stdout
 
 d1: 1
 o177: 0177
@@ -459,19 +461,19 @@ d8: 8
 o60: 060
 o20: 020
 d501: 501
-
+					" Names of files and directories
 dd:
-   <dd>; 040040; 040040; 040040
-dotdot:
-   056056; 040040; 040040; 040040
+   <dd>; 040040; 040040; 040040		" dd
+dotdot:	
+   056056; 040040; 040040; 040040	" ..
 system:
-   <sy>;<st>;<em>; 040040
+   <sy>;<st>;<em>; 040040		" system
 scrname:
-   <*s>;<rc>;040040;040040
+   <*s>;<rc>;040040;040040		" *src
 pass2:
-   <i
+   <i					" i
 pass1:
-   <i 012
+   <i 012				" i\n
 
 fso: .=.+1
 fsi: .=.+1
@@ -479,7 +481,7 @@ fsloc: .=.+1
 nfiles: .=.+1
 fflg: .=.+1
 buf: .=.+64
-obuf: .=.+64
+obuf: .=.+64		" Output buffer
 fd: .=.+1
 filp: .=.+1
 ddfilp: .=.+1
@@ -498,4 +500,3 @@ fsopt: .=.+1
 fsobuf: .=.+64
 dbuf: .=.+100
 fbuf:
-   
