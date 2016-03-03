@@ -1,31 +1,34 @@
 "** 01-s1.pdf page 28
 " s5
-
+	" read/write a process from/to swap space
+	" call:
+	" AC/ first word of process table
+	"   jms dskswap; DSLD bits
 dskswap: 0
-   cll; als 3
-   dac 9f+t
-   jms dsktrans; -64; userdata; 9f+t; dskswap
-   lac 9f+t
-   tad o20
-   dac 9f+t
-   jms dsktrans; -4096; 4096; 9f+t; dskswap
-   isz dskswap
-   jmp dskswap i
+   cll; als 3			" get process disk address
+   dac 9f+t			" save in t0
+   jms dsktrans; -64; userdata; 9f+t; dskswap	" read/write user area
+   lac 9f+t			" get swap addr back
+   tad o20			" advance by 16??
+   dac 9f+t			" save
+   jms dsktrans; -4096; 4096; 9f+t; dskswap	" read/write user memory
+   isz dskswap			" skip bits
+   jmp dskswap i		" return
 t = t+1
 
 access: 0
    lac i.flags
-   lmq
-   lac u.uid
-   spa
-   jmp access i
-   sad i.uid
-   lrs 2
-   lacq
-   and mode				" mode from system call
-   sza
-   jmp access i
-   jms error
+   lmq				" save in MQ
+   lac u.uid			" get user id
+   spa				" negative?
+   jmp access i			"  yes: super user, return
+   sad i.uid			" compare to file owner
+   lrs 2			"  same: shift flags down two
+   lacq				" get flags back
+   and mode			" mode from system call
+   sza				" access allowed?
+   jmp access i			"  yes: return
+   jms error			" no: return error from system call
 
 fassign: 0
    -10

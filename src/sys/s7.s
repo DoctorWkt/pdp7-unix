@@ -36,11 +36,13 @@ pibreak:			" priority interrupt processing "chain"
    isz uquant		"    increment user quantum counter
 	"** written: ttydelay -> ttyd1
 	"** written: ttyrestart -> ttyres1
+
+	" referenced in iread:
 cnop:
    nop
    -1
-   dac 7
-   clon
+   dac 7		" set location 7 to -1
+   clon			" enable clock interrupts, reset flag
    lac ttydelay
    spa
    isz ttydelay
