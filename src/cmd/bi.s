@@ -8,7 +8,7 @@ start:
 
 fetch:
    lac pc i
-   imq
+   lmq
    and o17777
    dac addr
    ecla lls 4
@@ -79,7 +79,7 @@ bor:
    jmp fetch
 
 band:
-   lac t2 i
+   lac t1 i
    and t2 i
    dac t4 i
    jmp fetch
@@ -185,7 +185,7 @@ consop:
    tad d1
    dac sp i
    isz sp
-   iac addr
+   lac addr
    dac sp i
    isz sp
    jmp fetch
@@ -206,13 +206,13 @@ mcall:
    dac t2
    -1
    tad t2 i
-   imq
+   lmq
    lac dp
    dac t1 i
    lac t1
    dac dp
    isz t1
-   iac pc
+   lac pc
    dac t1 i
    lacq
    dac pc
@@ -247,11 +247,11 @@ call:
    isz 8
    -1
    tad sp
-   sad B
+   sad 8
    skp
    jmp 1b
    lac ap i
-   img
+   lmq
    lac dp
    dac ap i
    lac ap
@@ -364,24 +364,24 @@ unaop:
    jmp . i
    uadr; umin; uind; unot
 
-badr:
+uadr:
    lac t1
    dac t3 i
    jmp fetch
 
-bmin:
+umin:
    -1
    tad t1 i
    cma
    dac t3 i
    jmp fetch
 
-bind:
+uind:
    lac t1 i
    dac t2 i
    jmp fetch
 
-bnot:
+unot:
    lac t1 i
    sna cla
    lac d1
@@ -412,22 +412,22 @@ s = n+a
 t = s+a
 u = t+a
 x = u+a
-f = x+a
+y = x+a
 
 d1: 1
 dm1: -1
 dm2: -2
 o17777: 017777
 
-:1: 0
-:2: 0
-:3: 0
-:4: 0
-:ddr: 0
+t1: 0
+t2: 0
+t3: 0
+t4: 0
+addr: 0
 
 pc = 017
 
 sp: stack
 dp: stack
-ip: stack
+ap: stack
 stack: 0

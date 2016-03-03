@@ -247,11 +247,11 @@ call:
    isz 8
    -1
    tad sp
-   sad B
+   sad 8
    skp
    jmp 1b
    lac ap i
-   img
+   lmq
    lac dp
    dac ap i
    lac ap
