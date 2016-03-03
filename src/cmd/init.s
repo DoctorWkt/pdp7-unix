@@ -162,80 +162,80 @@ boot:
    0				" 0 marks the end of the code, used by the copy routine above
 
 rline: 0
-   law ibuf-1
+   law ibuf-1		" Store ibuf pointer in location 8
    dac 8
 1:
-   cla
-   sys read; char; 1
+   cla			" Set fd 0 (stdin)
+   sys read; char; 1	" Read in one character from the device
    lac char
-   lrss 9
+   lrss 9		" Get it and shift down 9 bits
    sad o100
-     jmp rline+1
+     jmp rline+1	" Skip if it is an '@' character
    sad o43
-   jmp 2f
-   dac 8 i
+     jmp 2f		" Jump below if it was a '#' character
+   dac 8 i		" Store the character in the buffer
    sad o12
-     jmp rline i
-   jmp 1b
+     jmp rline i	" Return from routine if it was a newline
+   jmp 1b		" otherwise loop back to get another one
 2:
-   law ibuf-1
+   law ibuf-1		" # handling. Do nothing if at start of the buffer (?)
    sad 8
-     jmp 1b
+     jmp 1b		" and loop back
    -1
-   tad 8
+   tad 8		" Otherwise, move the pointer in location 8 back one
    dac 8
-   jmp 1b
+   jmp 1b		" and loop back
 
 gline: 0
    law obuf-1
-   dac 8
+   dac 8		" Save obuf pointer into location 8
 1:
-   jms gchar
-   dac 8 i
+   jms gchar		" Get a character
+   dac 8 i		" Save it into the obuf buffer
    sad o12
-     jmp gline i
-   jmp 1b
+     jmp gline i	" Return when we hit a newline
+   jmp 1b		" or loop back to read another one
 
 gchar: 0
-   lac tal
+   lac tal		" Load the pointer to the next word in the buffer
    sad ebufp
-     jmp 1f
-   ral
-   lac tal i
-   snl
-     lrss 9
-   and o777
+     jmp 1f		" We've reached the end of the buffer, so read more
+   ral			" Move the msb into the link register
+   lac tal i		" Load the word from the buffer
+   snl			" Skip if this is the second character in the word
+     lrss 9		" It's the first char, shift down the top character
+   and o777		" Keep the lowest 7 bits
    lmq
    lac tal
-   add o400000
+   add o400000		" Flip the msb and save into tal
    dac tal
    lacq
    sna
-     jmp gchar+1
-   jmp gchar i
+     jmp gchar+1	" Skip a NUL character and read another one
+   jmp gchar i		" Return the character from the subroutine
 1:
    lac bufp
    dac tal
 1:
    dzm tal i
-   isz tal
+   isz tal		" ??? this section
    lac tal
    sad ebufp
      skp
    jmp 1b
    lac bufp
    dac tal
-   lac d2
-   sys tead; buf; 64
+   lac d2		" Buffer is empty, read another 64 characters
+   sys read; buf; 64
    sna
-     jmp error
-   jmp gchar+1
+     jmp error		" No characters were read in
+   jmp gchar+1		" Loop back to get one character
 
 error:
    lac d1
-   sys write; m2; m2s
+   sys write; m2; m2s	" Write "?\n" on stdout
    lac d1
-   sys smes
+   sys smes		" and exit the child process
    sys exit
 
 m1:
