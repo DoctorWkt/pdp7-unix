@@ -673,7 +673,8 @@ sub opensomething {
     open( $FH, ">", $tempfile) || return(undef);
     dprintf("Converting directory $filename\n");
 
-    while ( my $name= readdir($dh)) {
+    my @list= sort(readdir($dh));
+    foreach my $name (@list) {
         printf( $FH "%-8s", substr( $name, 0, 8 ) );
     }
     closedir($dh);
