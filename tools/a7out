@@ -666,16 +666,27 @@ sub opensomething {
        return($FH);
     }
 
-    # It's a directory. For now, until we fully understand the code,
-    # I'm going to write space-padded filenames to a temporary
-    # directory, open and unlink it, and return the FH
+    # It's a directory. The on-disk format for this was:
+    #   d.i: .=.+1                   " inode number
+    #   d.name: .=.+4                " name (space padded)
+    #   d.uniq: .=.+1                " unique number from directory inode
+    #   followed by two unused words
+    # The code creates a temporary file and fills in the i-node numbers
+    # and space padded filenames from the directory. The file is closed
+    # opened read-only and unlinked, and the open filehandle is returned.
     opendir(my $dh, $filename) || return(undef);
     open( $FH, ">", $tempfile) || return(undef);
     dprintf("Converting directory $filename\n");
 
     my @list= sort(readdir($dh));
     foreach my $name (@list) {
-        printf( $FH "%-8s", substr( $name, 0, 8 ) );
+        # Get the file's i-node number
+        my (undef,$inode)= stat($name);
+
+        # ARGH! For now we are still read/writing ASCII files, so there's
+	# no way to represent a proper 18-bit value. For now I'll pad
+	# with spaces to create the record
+        printf( $FH "  %-8s      ", substr( $name, 0, 8 ) );
     }
     closedir($dh);
     close($FH);

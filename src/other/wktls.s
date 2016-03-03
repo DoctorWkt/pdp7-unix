@@ -20,17 +20,21 @@ fileloop:
    lac ibufptr		" Point bufptr at the base of the buffer
    dac bufptr
 
+" Each directory entry is eight words. We need to print out
+" the filename which is in words 2 to 5.
 printloop:
+
+   isz bufptr		" Move up to the filename
    lac d1
    sys write; bufptr:0; 4	" Write a filename out to stdout
    lac d1
    sys write; newline; 1	" followed by a newline
 
-   lac bufptr		" Add 4 to the bufptr
-   tad d4
+   lac bufptr		" Add 7 to the bufptr
+   tad d7
    dac bufptr
-   -4
-   tad count		" Decrement the count of words by 4
+   -8
+   tad count		" Decrement the count of words by 8
    dac count
    sza			" Anything left in the buffer to print?
      jmp printloop	" Yes, stuff left to print
@@ -47,7 +51,7 @@ newline: 012000
 
 fd: 0
 d1: 1				" stdout fd
-d4: 4
+d7: 7
 count: 0
 
 " Input buffer for read
