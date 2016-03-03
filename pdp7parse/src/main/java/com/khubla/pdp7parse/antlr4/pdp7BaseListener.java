@@ -41,6 +41,18 @@ public class pdp7BaseListener implements pdp7Listener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterLineeol(pdp7Parser.LineeolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLineeol(pdp7Parser.LineeolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDeclarations(pdp7Parser.DeclarationsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -144,18 +156,6 @@ public class pdp7BaseListener implements pdp7Listener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitString(pdp7Parser.StringContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSignednumber(pdp7Parser.SignednumberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSignednumber(pdp7Parser.SignednumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
