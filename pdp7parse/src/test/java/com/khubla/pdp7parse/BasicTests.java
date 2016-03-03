@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import com.khubla.pdp7parse.antlr4.pdp7Parser.ProgContext;
 
