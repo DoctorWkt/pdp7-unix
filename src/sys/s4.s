@@ -1,6 +1,7 @@
 "** 01-s1.pdf page 21
 " s4
 
+	" allocate a free disk block
 alloc: 0
    -1
    tad s.nfblks
@@ -29,6 +30,7 @@ alloc: 0
    dac s.nfblks
    jmp alloc+1
 
+	" free a disk block
 free: 0
    lmq
    lac s.nfblks
@@ -54,12 +56,16 @@ free: 0
    jmp free i
 t = t+1
 
+	" load AC indirect (without using indirect!)
+	" AC/ address
+	"   jms laci
+	" AC/ contents of address
 laci: 0
-   and o17777
-   tad o200000
+   and o17777				" clear everything but addr
+   tad o200000				" make into "lac addr"
    dac .+1
-   lac ..
-   jmp laci i
+   lac ..				" fetch
+   jmp laci i				" return
 
 "** 01-s1.pdf page 22
 
