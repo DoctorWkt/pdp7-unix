@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+#
+# Dump a binary PDP-7 file where a word is encoded as three bytes,
+# with sixbits are stored big-endian in each of the three byte.
+#
+use strict;
+use warnings;
+
+die("Usage: $0 binaryfile\n") if (@ARGV==0);
+
+open(my $IN, "<", $ARGV[0]) || die("Can't open $ARGV[0]: $!\n");
+while (1) {
+  # Convert three bytes into one 18-bit word
+  my $result= read($IN, my $three, 3);
+  last if ($result != 3);       # Not enough bytes read
+  my ($b1, $b2, $b3)= unpack("CCC", $three);
+  my $word= (($b1 & 077) << 12) | ($b2 << 6) | $b3;
+
+  my $c1= ($word >> 9) & 0777;
+  $c1= ($c1 < 0200) ? chr($c1) : " ";
+  my $c2= $word & 0777;
+  $c2= ($c2 < 0200) ? chr($c2) : " ";
+  printf("%06o %s%s\n", $word, $c1, $c2)
+}
+close($IN);
+exit(0);
