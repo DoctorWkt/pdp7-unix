@@ -555,6 +555,7 @@ sub eae {
         # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
 	my $MB= $Mem[ $PC+1 ];
     	my $eae_ac_sign;
+	dprintf("mul AC %06o by %06o (decimal %d by %d)\n", $AC, $MB, $AC, $MB);
 
         if (($instruction & 0004000) && ($AC & SIGN)) { # IR<6> and minus?
             $eae_ac_sign = $LINK; 			# set eae_ac_sign
@@ -565,18 +566,22 @@ sub eae {
 	my $oldlink= $LINK;
 	$LINK = 0;					# Clear link
 
-	foreach my $SC (1 .. $instruction & 077) {	# Loop for SC times
-            $AC = $AC + $MB
-                if ($MQ & 1);                           # MQ<17>? add
-            $MQ = ($MQ >> 1) | (($AC & 1) << 17);
-            $AC = $AC >> 1;                         	# Shift AC'MQ right
-	}
+	my $result= $AC * $MB;
+	$AC= ($result >> 18) & MAXINT;
+	$MQ= $result  & MAXINT;
+
+##	foreach my $SC (1 .. $instruction & 077) {	# Loop for SC times
+##            $AC = $AC + $MB
+##                if ($MQ & 1);                           # MQ<17>? add
+##            $MQ = ($MQ >> 1) | (($AC & 1) << 17);
+##            $AC = $AC >> 1;                         	# Shift AC'MQ right
+##	}
         if ($eae_ac_sign ^ $oldlink) {              	# Result negative?
             $AC = $AC ^ MAXINT;
             $MQ = $MQ ^ MAXINT;
         }
 
-        $PC++;
+        $PC+=2;
         return;
     }
     printf( STDERR "PC %06o: Unknown eae instruction %06o\n",
