@@ -363,28 +363,30 @@ putname: 0
    jmp putname i
 
 octal: 0
-   lmq
-   lac d5
-   tad octal i
-   cma
-   dac c
+   lmq			" Move the negative argument into the MQ
+                        " as we will use shifting to deal with the
+                        " number by shifting groups of 3 digits.
+   lac d5		" By adding 5 to the negative count and
+   tad octal i		" complementing it, we set the actual
+   cma			" loop count up to 6 - count. So, if we
+   dac c		" want to print 2 digits, we lose 6 - 2 = 4 digits
 1:
-   llss 3
-   isz c
-   jmp 1b
-   lac octal i
-   dac c
+   llss 3		" Lose top 3 bits of the MQ
+   isz c		" Do we have any more to lose?
+     jmp 1b		" Yes, keep looping
+   lac octal i		" Save the actual number of print digits into c
+   dac c		" as a negative number.
 1:
-   " ecla llss 3
-   llss 3
-   tad o60
+   cla
+   llss 3		" Shift 3 more bits into AC
+   tad o60		" Add AC to ASCII '0'
+   jms putc		" and print out the digit
+   isz c		" Any more characters to print out?
+     jmp 1b		" Yes, loop back
+   law 040		" Print out a space
    jms putc
-   isz c
-   jmp 1b
-   law 040
-   jms putc
-   isz octal
-   jmp octal i
+   isz octal		" Move return address 1 past the argument
+   jmp octal i		" and return from subroutine
 
 error: 0
    -1
