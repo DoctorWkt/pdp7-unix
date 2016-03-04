@@ -552,37 +552,32 @@ sub cal {
     # Syscalls that we can simulate
     my %Syscallist = (
 
-        # 1: save
+        # 1:       save
         2 => \&sys_getuid,
         3 => \&sys_open,
         4 => \&sys_read,
         5 => \&sys_write,
         6 => \&sys_creat,
-
-        # 7 seek
-        # 8 tell
+        7 => \&sys_seek,
+        # 8        tell
         9 => \&sys_close,
-
-        # 10 link
+        # 10        link
         11 => \&sys_unlink,
         12 => \&sys_setuid,
-
-        # 13 rename
+        # 13        rename
         14 => \&sys_exit,
         15 => \&sys_time,
         16 => \&sys_intrp,
         17 => \&sys_chdir,
         18 => \&sys_chmod,
         19 => \&sys_chown,
-
-        # 20 badcal
-        # 21 syslog
-        # 22 badcal
-        # 23 capt
-        # 24 rele
+        # 20        badcal
+        # 21        syslog
+        # 22        badcal
+        # 23        capt
+        # 24        rele
         25 => \&sys_status,
-
-        # 26 badcal
+        # 26    badcal
         27 => \&sys_smes,
         28 => \&sys_rmes,
         29 => \&sys_fork,
@@ -700,6 +695,9 @@ sub opensomething {
     if ( !-d $filename ) {
         open( $FH, $readorwrite, $filename ) || return (undef);
 
+	# Opened for writing, so for now this is not binary
+	return ( $FH, 0) if ($readorwrite eq ">");
+
         # Determine if the file is pure ASCII or contains 18-bit
         # words encoded in 24-bit groups. We test the msb of the
         # first character in the file. If it's on then it's a
@@ -749,6 +747,7 @@ sub opensomething {
     close($FH);
     open( $FH, "<", $tempfile ) || return (undef);
     binmode($FH);
+    #exit(0);
     unlink($tempfile);
     return ( $FH, 1 );
 }
@@ -907,11 +906,19 @@ sub sys_write {
         return;
     }
 
-    # Write each word out
+    # Write each word out either in binary or in ASCII
     my $FH = $FD[$fd];
     foreach my $addr ( $start .. $end ) {
+	# First see if any "non-ASCII" bits are set in the word.
+	# If so, then this is a binary file
+	my $word= $Mem[$addr];
+	$ISBINARY[$fd]=1 if ($word & 0600600);
 
-        print( $FH word2ascii( $Mem[$addr] ) );
+	if ($ISBINARY[$fd]) {
+	    print( $FH word2three($word) );
+	} else {
+            print( $FH word2ascii($word) );
+	}
     }
 
     # No error
@@ -1090,6 +1097,27 @@ sub sys_status {
         $AC = MAXINT;
     }
 
+    $PC += 3;
+    return;
+}
+
+# Seek syscall
+sub sys_seek {
+    # Seek takes three arguments: AC is the fd, PC+1 is a signed count
+    # and PC+1 is how to seek: 0=from start, 1=from curptr, 2=from end
+    # of file. Return AC=0 if OK, -1 on error.
+    my $fd= $AC;
+    my $FH= $FD[$fd];
+    my $offset= $Mem[ $PC + 1 ];
+    # XXX For now, we always do SEEK_SET.
+
+    # If it's a binary file, we have to seek 3 bytes for every word,
+    # but for an ASCII file that's 2 bytes per word.
+    $offset *= ($ISBINARY[$fd]) ? 3 : 2;
+    my $result= seek($FH, $offset, SEEK_SET);
+
+    # Set the AC result
+    $AC= ($result)? 0: MAXINT;
     $PC += 3;
     return;
 }
