@@ -139,7 +139,7 @@ swp:			" system call dispatch table
 swn:
    .-swp-1 i		" count of system calls, plus indirect!
 
-	" AC/ new value for intflg
+	" AC/ new value for intflg (non-zero to ignore interrupt char)
 	"   sys intrp
 .intrp:
    lac u.ac

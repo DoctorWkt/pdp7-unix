@@ -205,24 +205,24 @@
    lac u.cdir			" get current working directory
    jms namei; 0:0		" search for file
       jms error			" error: return -1
-   jms iget
+   jms iget			" load inode
    jms access			" check access (may return w/ error to user)
    lac i.flags			" get file flags
    and o20			" get directory bit
    sna				" is directory?
-   jmp open1			"  no
+   jmp open1			"  no, join common code
    lac mode			" get access mode
    and d1			" get write bit
    sna				" write access?
    jmp open1			"  no, continue
    lac u.uid			" yes: get uid?
-   sma				" negative (-1 is superuser)
+   sma				" negative? (-1 is superuser)
    jms error			"  no: return error
-   jmp open1
+   jmp open1			" yes: join common code
 
 .creat:
-   lac d1				" mode bit 1 (write?)
-   dac mode				" save for access call
+   lac d1			" mode bit 1 (write)
+   dac mode			" save for access call
    jms arg
    dac .+2
    jms copy; ..; name; 4
@@ -244,12 +244,12 @@
    jmp open1
 1:
    jms access
-   lac u.ac
-   and o17
+   lac u.ac			" get access bits from user AC (zero for lock!)
+   and o17			" mask to permissions
    jms icreat
-open1:
-   jms fassign
-      jms error
+open1:				" common exit for open/creat
+   jms fassign			" assign fd slot
+      jms error			"  none free, return -1
    jmp sysexit
 
 "** 01-s1.pdf page 11
@@ -312,7 +312,7 @@ open1:
       jms error			"  no: error
    dac u.limit			" yes: save as limit
    jms finac			" get fnode with fd from user AC
-   lac f.flags			" get file table flags
+   lac f.flags			" get open file table flags
    and d1			" open for write?
    sna				"  yes, skip
    jms error			"   no: error
