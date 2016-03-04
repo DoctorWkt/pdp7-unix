@@ -1,0 +1,105 @@
+010000: 217777	   lac 017777			" Skip past argc and save
+010001: 350137	   tad d1			" argv[0] (our name) into name2
+010002: 050026	   dac name2			" We will skip past it later
+010003: 237777	   lac 017777 i			" Any arguments left?
+010004: 550142	   sad d4
+010005: 020016	     sys exit			" 4 words = no args left, exit
+010006: 550143	   sad d8			" Do we have 2 args?
+010007: 610123	     jmp unbal			" No, an unbalanced set of arguments
+010010: 350145	   tad dm8			" Subtract 8 (two args) from the argc
+010011: 077777	   dac 017777 i			" and save it
+010012: 210026	   lac name2			
+010013: 350142	   tad d4
+010014: 050020	   dac name1			" Skipping pairs of filenames? not sure
+010015: 350142	   tad d4
+010016: 050026	   dac name2
+010017: 020003	   sys open; name1: 0; 0	" Open the input file
+010020: 000000	
+010021: 000000	
+010022: 741100	   spa
+010023: 610074	     jmp error			" File open error
+010024: 210144	   lac o17			" Why load 15 (017) into AC?
+010025: 020006	   sys creat; name2: 0		" Create the output file
+010026: 000000	
+010027: 741100	   spa
+010030: 610074	     jmp error			" File create error
+010031: 150147	   dzm nin			" Set the number of input words to zero
+010032: 210150	   lac bufp			" Set up the base of the upcoming read
+010033: 350147	   tad nin			" to be the buffer + nin so we skip
+010034: 050044	   dac 0f			" the existing words in the buffer
+010035: 777777	   -1
+010036: 350147	   tad nin			" Calculate 1024 - nin, i.e. the number
+010037: 740001	   cma				" of empty words yet to be filled in the
+010040: 350146	   tad d1024			" buffer, and use it as the read count
+010041: 050045	   dac 0f+1
+010042: 210140	   lac d2			" Read from fd 2: hard-wired in fd!
+010043: 020004	   sys read; 0:..;..
+010044: 010000	
+010045: 010000	
+010046: 741200	   sna
+010047: 610055	     jmp 2f			" No words were read in, go to 2f
+010050: 350147	   tad nin			" Add the number of words read in
+010051: 050147	   dac nin			" to the existing number of words
+010052: 550146	   sad d1024
+010053: 610055	     jmp 2f			" We do have 1,024 words, go to 2f
+010054: 610032	   jmp 1b			" Loop back if we don't have 1,024 words
+010055: 210147	   lac nin			" Load the number of words in the input buffer
+010056: 050062	   dac 2f			" Save in the write word count argument
+010057: 210141	   lac d3			" Write to fd 3: hard-wired out fd!
+010060: 020005	   sys write; buf; 2:0
+010061: 010151	
+010062: 000000	
+010063: 150147	   dzm nin			" Set nin back to zero
+010064: 210062	   lac 2b			" Get the write count (updated by sys write)
+010065: 550146	   sad d1024			" Did we write the buffer out?
+010066: 610032	     jmp 1b			" Yes, we wrote 1,024 words, so loop back
+010067: 210140	   lac d2		
+010070: 020011	   sys close			" Close fd 2 and fd 3
+010071: 210141	   lac d3
+010072: 020011	   sys close
+010073: 610003	   jmp loop			" Loop back to deal with the next arguments
+010074: 210020	   lac name1			" standard output, fd 1 followed by " ?\n"
+010075: 050100	   dac 1f
+010076: 210137	   lac d1			
+010077: 020005	   sys write; 1:0; 4
+010100: 000000	
+010101: 000004	
+010102: 210137	   lac d1
+010103: 020005	   sys write; mes; 1
+010104: 010121	
+010105: 000001	
+010106: 210026	   lac name2			" Then do the same with name 2
+010107: 050112	   dac 1f
+010110: 210137	   lac d1
+010111: 020005	   sys write; 1: 0; 4
+010112: 000000	
+010113: 000004	
+010114: 210137	   lac d1
+010115: 020005	   sys write; mes; 2
+010116: 010121	
+010117: 000002	
+010120: 610003	   jmp loop			" Loop back to deal with the next arguments
+010121: 040000	   040000;077012		" String literal: " ?\n"
+010122: 077012	
+010123: 210026	   lac name2			" so print out the name after name2
+010124: 350142	   tad d4			" on standard output followed by " ?\n"
+010125: 050130	   dac 1f
+010126: 210137	   lac d1
+010127: 020005	   sys write; 1: 0; 4
+010130: 000000	
+010131: 000004	
+010132: 210137	   lac d1
+010133: 020005	   sys write; mes; 2
+010134: 010121	
+010135: 000002	
+010136: 020016	   sys exit
+010137: 000001	d1: 1				" Numeric constants
+010140: 000002	d2: 2
+010141: 000003	d3: 3
+010142: 000004	d4: 4
+010143: 000010	d8: 8
+010144: 000017	o17: 017
+010145: 777770	dm8: -8
+010146: 002000	d1024: 1024
+010147: 000000	nin: 0				" Number of words in the input buffer
+010150: 010151	bufp: buf			" Pointer to the buffer
