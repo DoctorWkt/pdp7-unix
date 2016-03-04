@@ -1,7 +1,7 @@
 "** 01-s1.pdf page 21
 " s4
 
-	" allocate a free disk block
+	" allocate a free disk block for a file (data or indirect)
 alloc: 0
    -1
    tad s.nfblks
@@ -287,6 +287,8 @@ dskrd: 0
    jms collapse
    jmp dskrd i
 
+	" write a file block (data, inode or indirect)
+	" AC/ block
 dskwr: 0
    jms betwen; d2; d7999
       jms halt
@@ -298,7 +300,6 @@ dskwr: 0
    jmp dskwr i
 t = t+3
 
-	" called with:
 	" AC/ block
 	"   jms dskio; dsld_bits
 dskio: 0

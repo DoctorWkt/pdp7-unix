@@ -106,16 +106,16 @@ dsprestart:
    rlpd
    jmp piret
 
-1: ksf
-   jmp 1f
+1: ksf			" (TTY) keyboard flag set?
+   jmp 1f		"  no
 
    lac ttydelay
    sma
    isz ttydelay
-   krb
-   dac char
-   sad o375
-   jmp intrp1
+   krb			" read keyboard buffer
+   dac char		" save in char
+   sad o375		" interrupt char ('}'?)
+   jmp intrp1		"  yes
    lac d1
    jms putchar
       dzm char
@@ -330,9 +330,9 @@ putcr: 0
    cla
    jmp putcr i
 
-intrp1:
-   lac d6
-   dac .int1
+intrp1:			" here with keyboard interrupt
+   lac d6		" get keyboard special device number
+   dac .int1		" save as interrupt source
    lac d1
    jms getchar
       skp

@@ -229,7 +229,10 @@ dnode:				" directory entry:
    d.uniq: .=.+1		" unique number from directory inode
       . = dnode+8
 fnode:				" open file entry
-   f.flags: .=.+1
-   f.badd: .=.+1
-   f.i: 0
-
+   f.flags: .=.+1		" see below
+   f.badd: .=.+1		" offset
+   f.i: 0			" file i-number
+"	f.flags:
+"		400000	in use
+"		000002	read
+"		000001	write
