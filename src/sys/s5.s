@@ -31,35 +31,35 @@ access: 0
    jms error			" no: return error from system call
 
 fassign: 0
-   -10
-   dac 9f+t
+   -10				" loop count
+   dac 9f+t			" in t0
 1:
-   lac 9f+t
-   tad d10
-   jms fget
+   lac 9f+t			" get count
+   tad d10			" turn into fd
+   jms fget			" fetch open file into "fnode"
       jms halt " will not happen
-   lac f.flags
-   sma
-   jmp 1f
-   isz 9f+t
+   lac f.flags			" get fnode flags
+   sma				" sign bit set (active)?
+   jmp 1f			"  no: free
+   isz 9f+t			" increment loop count & loop until zero
    jmp 1b
    jmp fassign i
 1:
-   lac mode
-   xor o400000
-   dac f.flags
-   lac ii
-   dac f.i
+   lac mode			" get mode from system call
+   xor o400000			" set sign bit
+   dac f.flags			" save in fnode
+   lac ii			" get i-number
+   dac f.i			" save in fnode
    lac 9f+t
-   tad d10
-   dac u.ac
-   dzm f.badd
-   jms fput
-   isz fassign
+   tad d10			" get fd
+   dac u.ac			" return in user AC
+   dzm f.badd			" clear file offset in fnode
+   jms fput			" copy fnode back into u.ofiles
+   isz fassign			" give skip return
    jmp fassign i
 t = t+1
 
-	" get inode fpr an open file
+	" load fnode (open file entry) from u.ofiles
 	" AC/ user fd
 	"   jms fget
 	"    bad fd
