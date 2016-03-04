@@ -2,7 +2,7 @@
 
    lac 017777 i
    sad d8
-   skp
+     skp
    sys exit
    lac 017777
    tad d5
@@ -12,13 +12,16 @@
    dac fo
    law 017
    sys creat; scrname
-   spa; jms error
+   spa
+     jms error
    dac fso
    sys open; scrname; 0
-   spa; jms error
+   spa
+     jms error
    dac fsi
    sys chdir; dd
-   spa; jms error
+   spa
+     jms error
    lac d1
    sys write; pass1; 1
    law fsobuf
@@ -31,12 +34,14 @@
    dac dirp
    dzm fsloc
    sys open; dotdot; 0
-   spa; jms error
+   spa
+     jms error
    dac fd
    jms readdir; dotdot
    law statbuf
    sys status; dotdot; dotdot
-   spa; jms error
+   spa
+     jms error
    lac statbuf+12 " i index
    dac dirp i
    isz dirp
@@ -75,13 +80,15 @@ loop:
    sys read; scrname; 4
    law statbuf
    sys status; dotdot; scrname
-   spa; jms error
+   spa
+     jms error
    lac statbuf+0 " flags
    and o20
    sna
-   jmp 2f
+     jmp 2f
    sys open; scrname; 0
-   spa; jms error
+   spa
+     jms error
    dac fd
    jms readdir; scrname
    lac ddfilp i
@@ -109,7 +116,7 @@ loop:
    dzm fflg
    law fbuf
    dac i2
-   r1
+   -1
    tad nfiles
    cma
    dac c2
@@ -118,19 +125,19 @@ loop:
    lac c1
    tad d501
    sad i2 i
-   skp
+     skp
    jmp 3f
    -1
    tad i1
    dac i3
-   iac i3 i
+   lac i3 i
    dac c3
    law fbuf
    dac i3
 0:
    lac i3 i
    sad c3
-   jmp 0f
+     jmp 0f
    isz i3
    isz i3
    jmp 0b
@@ -159,14 +166,15 @@ loop:
 
    lac nlinkt
    sad nlinka
-   skp
+     skp
    jms fishy
    dzm nlinka
    law 012
    jms putc
    law statbuf
    sys status; scrname; dd
-   spa; jms error
+   spa
+     jms error
    -1
    tad statbuf+9
    cma
@@ -188,7 +196,7 @@ loop:
    isz i2
    lac i2
    sad i1 i
-   skp
+     skp
    jmp .+3
    isz i1
    isz i1
@@ -199,7 +207,7 @@ loop:
    jmp 1b
    lac nlinkt
    sad nlinka
-   skp
+     skp
    jms fishy
 
    sys chdir; system
@@ -267,9 +275,10 @@ readdir: 0
    jms copyz; buf; 64
    lac fd
    sys read; buf; 64
-   spa; jms error
+   spa
+     jms error
    sna
-   jmp 4f
+     jmp 4f
    -8
    dac c1
    law buf
@@ -277,7 +286,7 @@ readdir: 0
 1:
    lac i1 i
    sna
-   jmp 3f
+     jmp 3f
 
    isz nfiles
    dac filp i
@@ -292,7 +301,8 @@ readdir: 0
    dac .+4
    law statbuf
    sys status; 5:..; ..
-   spa; jms error
+   spa
+     jms error
    jms longout
    lac i1
    tad d1
@@ -316,7 +326,7 @@ readdir: 0
    isz fsopt
    law fsobuf+64
    sad fsopt
-   skp
+     skp
    jmp 3f
    lac fso
    sys write; fsobuf; 64
@@ -365,7 +375,8 @@ octal: 0
    lac octal i
    dac c
 1:
-   ecla llss 3
+   " ecla llss 3
+   llss 3
    tad o60
    jms putc
    isz c
@@ -401,10 +412,10 @@ copyz: 0
 done:
    lac noc
    sna
-   sys exit
+     sys exit
    and d1
    sna cla
-   jmp 1f
+     jmp 1f
    jms putc
    jmp done
 1:

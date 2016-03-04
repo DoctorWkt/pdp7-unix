@@ -9,6 +9,7 @@ utilities:
 	$(AS) -o bin/chmod src/cmd/chmod.s
 	$(AS) -o bin/chown src/cmd/chown.s
 	$(AS) -o bin/chrm  src/cmd/chrm.s
+	$(AS) -o bin/ls  src/other/wktls.s
 
 clean:
 	rm -f bin/*

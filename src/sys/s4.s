@@ -1,7 +1,7 @@
 "** 01-s1.pdf page 21
 " s4
 
-	" allocate a free disk block
+	" allocate a free disk block for a file (data or indirect)
 alloc: 0
    -1
    tad s.nfblks
@@ -92,11 +92,14 @@ betwen: 0
    cma				" complement (AC-high)
    spa sna			" AC-high <= 0?
 1:
-   isz betwen			"  no: give happy return
+   isz betwen			"  no: give happy (skip) return
    lacq				" restore ~AC
    cma				" restore AC
    jmp betwen i			" return w/o skip
 
+	" copy memory
+	" call:
+	"   jms copy; src; dest; count
 copy: 0
    -1
    tad copy i
@@ -118,21 +121,24 @@ copy: 0
    jmp 1b
    jmp copy i
 
+	" copy zeroes (clear memory)
+	" call:
+	"   jms copyz; pointer; count
 copyz: 0
    -1
-   tad copyz i
-   dac 8
-   isz copyz
+   tad copyz i			" get call PC
+   dac 8			" save in index (pre-increments)
+   isz copyz			" skip pointer
    -1
-   tad copyz i
-   cma
-   dac 9f+t
-   isz copyz
+   tad copyz i			" get count-1
+   cma				" get negative count
+   dac 9f+t			" save in t0
+   isz copyz			" skip count
 1:
-   dzm 8 i
-   isz 9f+t
-   jmp 1b
-   jmp copyz i
+   dzm 8 i			" zero word
+   isz 9f+t			" done?
+   jmp 1b			"  no: loop
+   jmp copyz i			" return
 t = t+1
 
 putchar: 0
@@ -281,6 +287,8 @@ dskrd: 0
    jms collapse
    jmp dskrd i
 
+	" write a file block (data, inode or indirect)
+	" AC/ block
 dskwr: 0
    jms betwen; d2; d7999
       jms halt
@@ -292,7 +300,6 @@ dskwr: 0
    jmp dskwr i
 t = t+3
 
-	" called with:
 	" AC/ block
 	"   jms dskio; dsld_bits
 dskio: 0
@@ -354,11 +361,11 @@ dsktrans: 0
 t = t+1
 
 halt: 0
-   isz 9f+t
+   isz 9f+t			" spin for a while (process interrupts)
    jmp .-1
-   iof
-   hlt
-   jms copy; law; 4096; 4096
-   hlt; jmp .-1
+   iof				" disable interrupts
+   hlt				" halt
+   jms copy; law; 4096; 4096	" continued: copy system up to user memory?
+   hlt; jmp .-1			" halt for good
 t = t+1
 
