@@ -717,7 +717,7 @@ sub sys_close {
 
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
-        dprint("close: fd $fd is not open\n");
+        dprintf("close: fd $fd is not open\n");
         $AC = MAXINT;
         return;
     }
