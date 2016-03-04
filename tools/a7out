@@ -487,6 +487,16 @@ sub eae {
     my $step        = $instruction & EAESTEP;
     my $maskedinstr = $instruction & EAEIMASK;
 
+    if ( $instruction == 0653323 ) {    # idiv: integer division
+	my $divisor= $Mem[ $PC+1 ];
+	# Prevent division by zero :-)
+	my $quotient = ($divisor) ? $AC / $divisor : 0;
+	my $remainder = ($divisor) ? $AC % $divisor : 0;
+	$MQ= $quotient;
+	$AC= $remainder;
+        $PC+=2;
+        return;
+    }
     if ( $maskedinstr == 0660500 ) {    # lrss: long right shift, signed
                                         # We ignore the MQ as it's not
                                         # used by any user-mode programs
@@ -537,6 +547,35 @@ sub eae {
     if ( $instruction == 0640002 ) {    # lacq: OR AC with MQ
         dprintf( "omq MQ %06o and AC %06o\n", $MQ, $AC );
         $AC |= $MQ;
+        $PC++;
+        return;
+    }
+    if ( $instruction == 0653122 ) {    # mul: unsigned multiply
+        # This logic shamelessly borrowed from SimH
+        # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
+	my $MB= $Mem[ $PC+1 ];
+    	my $eae_ac_sign;
+
+        if (($instruction & 0004000) && ($AC & SIGN)) { # IR<6> and minus?
+            $eae_ac_sign = $LINK; 			# set eae_ac_sign
+ 	} else {
+            $eae_ac_sign = 0; 				# if not, unsigned
+	}
+        $MQ = $MQ ^ MAXINT if ($eae_ac_sign);		# EAE AC sign? ~MQ
+	my $oldlink= $LINK;
+	$LINK = 0;					# Clear link
+
+	foreach my $SC (1 .. $instruction & 077) {	# Loop for SC times
+            $AC = $AC + $MB
+                if ($MQ & 1);                           # MQ<17>? add
+            $MQ = ($MQ >> 1) | (($AC & 1) << 17);
+            $AC = $AC >> 1;                         	# Shift AC'MQ right
+	}
+        if ($eae_ac_sign ^ $oldlink) {              	# Result negative?
+            $AC = $AC ^ MAXINT;
+            $MQ = $MQ ^ MAXINT;
+        }
+
         $PC++;
         return;
     }
