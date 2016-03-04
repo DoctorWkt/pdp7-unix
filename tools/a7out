@@ -489,6 +489,7 @@ sub eae {
 
     if ( $instruction == 0653323 ) {    # idiv: integer division
 	my $divisor= $Mem[ $PC+1 ];
+        dprintf( "div AC %06o AC by %06o (decimal %d by %d)\n", $AC, $divisor, $AC, $divisor );
 	# Prevent division by zero :-)
 	my $quotient = ($divisor) ? $AC / $divisor : 0;
 	my $remainder = ($divisor) ? $AC % $divisor : 0;
