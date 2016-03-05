@@ -1,3 +1,5 @@
 language: perl
+perl:
+  - "5.22"
 sudo: false
 script: make clean;make
