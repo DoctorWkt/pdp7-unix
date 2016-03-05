@@ -89,6 +89,16 @@ public interface pdp7Listener extends ParseTreeListener {
 	 */
 	void exitAssignment(pdp7Parser.AssignmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link pdp7Parser#symbol}.
+	 * @param ctx the parse tree
+	 */
+	void enterSymbol(pdp7Parser.SymbolContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pdp7Parser#symbol}.
+	 * @param ctx the parse tree
+	 */
+	void exitSymbol(pdp7Parser.SymbolContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link pdp7Parser#expression}.
 	 * @param ctx the parse tree
 	 */

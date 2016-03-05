@@ -113,6 +113,18 @@ public class pdp7BaseListener implements pdp7Listener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSymbol(pdp7Parser.SymbolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSymbol(pdp7Parser.SymbolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterExpression(pdp7Parser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
