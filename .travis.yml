@@ -1,0 +1,5 @@
+language: perl
+sudo: false
+script: make clean;make
+
+
