@@ -3,8 +3,6 @@
 " started by p budne 3/4/2016
 " with code from cat.s, init.s, and looking at the v1 (pdp-11) shell
 
-" BUG: XXX second char of second word being incremented?????
-
 start:
 " XXX take command line argument (script file to open), suppress prompt??
 " NOTE!!! v0 init.s doesn't set up the argv at the top of memory,
@@ -27,6 +25,9 @@ newcom:
    dzm char			" clear saved char
    dzm infile			" clear input redirect file name
    dzm outfile			" clear output redirect file name
+   dzm argv0			" clear out argv0 for chdir comparison
+   dzm argv0+1
+   dzm argv0+2
    lac iopt			" reset output pointer
    dac opt
    dac nextarg
@@ -111,7 +112,9 @@ eoname:
    dac nextarg
 
 1f:
+   dzm redirect			" clear redirect flag
 " TEMP output each name on a line:
+   lac d1; sys write; gt; 1
    lac d1; sys write; 8:0; 4
    lac d1; sys write; nl; 1
 
@@ -128,92 +131,143 @@ eoname:
    sza
     jmp newarg
 
-" here at end of line (or too many args)
-eol:
-" XXX check for "chdir", execute "in-process"
-" XXX if not, fork (child code below)
-" XXX parent wait for child (unless &)
-   jmp newline
+" too many args, (complain?) eat rest of line 
+4: jms getc
+   sad o12
+    skp
+     jmp 4b
 
-child:
-   cla
+" here at end of line
+eol:
+   cla			" get anything?
+   sad argc
+    jmp newline		" no, go back for another
+
+   lac argv0		" check for built-in "chdir" command
+   sad chdir
+    skp
+     jmp forkexec
+   lac argv0+1
+   sad chdir+1
+    skp
+     jmp forkexec
+   lac argv0+2
+   sad chdir+2
+    jmp changedir
+
+forkexec:
+" temp just exec in place
+"  sys fork
+"   jmp parent
+
+   dac pid			" here in child: save parent pid for smes
+
+   lac d2; sys close		" close fd 2
+
+" XXX open executable BEFORE I/O redirection, so we can output error!!!!
+   sys unlink; exectemp
+
+" try to link binary from "system" directory to "exectemp" file
+"   sys link; system; argv0; exectemp
+"   spa
+"     jmp notsys
+"   sys open; exectemp; 0
+"   spa
+"     jmp error
+"   sys unlink; exectemp
+"   jmp 1f
+
+   lac d1; sys write; star; 1
+   lac d1; sys write; star; 1
+   lac d1; sys write; argv0; 4
+   lac d1; sys write; nl; 1
+
+notsys:			" not found in "system"
+   sys open; argv0; 0	" try cwd
+   spa
+     jmp cmderr
+
+   cla				" check for input redirection
    sad infile
     jmp 1f
    sys close			" close fd 0
    sys open; infile; 0		" open redirected
-   spa
+   spa sna
      jmp inerror
-   cla				" XXX should still be zero!
+   cla
 1: sad outfile
-    jmp 1f
-   lac d1
-   sys close			" close fd 1
-" XXXXXXXXXX use creat!!!?
-   sys open; outfile; 1		" open redirected
+    jmp exec
+   lac d1; sys close		" close fd 1
+   lac o17
+   sys creat; outfile		" open output redirect
    spa
      jmp outerror
 
-" here to exec filename at argv, code adapted from init.s
-" right now always look in "system" directory.
-" but on error, check local directory?
-1: sys unlink; exectemp
-   sys link; system; argv0; exectemp
-   spa
-     jmp nofile
-   sys open; exectemp; 0
-   spa
-     jmp error
-   sys unlink; exectemp
-   jmp 1f
 
-nofile:			" not found in "system"
-   sys open; argv0; 0	" try cwd
-   spa
-     jmp cmderr
-1:
-   law bootloc-1	" Copy the code at the boot label below
-   dac 9		" up to high memory
-   law boot-1
-   dac 8
-1:
-   lac 8 i
+" here to "exec" file open on fd 2, adapted from init.s:
+exec:
+   law boot-1		" Get source addr
+   dac 8		" set up index 8 (pre-increments)
+   law bootloc-1	" Copy the code at the boot label into high memory
+   dac 9		" set up index 9 (pre-increments)
+1: lac 8 i
    dac 9 i
-   sza			" Stop copying when we hit the 0 marker
+   isz bootcount
      jmp 1b
    jmp bootloc		" and then jump to the code
 
+" copied up to bootloc in high memory (below argc)
 boot:
-   lac d2		" Load fd2 (the opened shell file)
+   lac d2		" Load fd 2 (the opened executable)
    lmq			" Save the fd into MQ
    sys read; userbase; userlen	" read executable in
    lacq			" Get the fd back and close the file
    sys close	
    jmp userbase		" and jump to the beginning of the executable
-   0			" 0 marks the end of the code, used by the copy loop
 bootlen=.-boot		" length of bootstrap
 
-inerror:
-  law infile
+bootcount: -bootlen	" isz loop count for bootstrap copy
+
+" error in child process:
+inerror:		" error opening input redirection
+  lac infilep
   jmp error
-outerror:
-  law outfile
+outerror:		" error opening output redirection (stdout closed!)
+  lac outfilep
   skp
-cmderr:
-   law argv0
-error:				" here for error in child
-  dac 1f
-  lac d1	" XXX stdout may be redirected!!!!
-  sys write qmsp; 1
-  lac d1
-  sys write; 1: 0; 4
-  lac d1
-  sys write; nl; 1
-" XXX smes to shell???
+cmderr:			" error opening command
+   lac argv0p
+error:			" here for error in child: filename pointer in AC
+  dac 1f		" save filename to complain about
+  lac d1; sys write; qmsp; 1
+  lac d1; sys write; 1: 0; 4
+  lac d1; sys write; nl; 1
+" XXX smes to parent???
+  lac d2; sys close
   sys exit
 
 " end code from init.s
 " ================
 
+parent:
+   dac pid
+1: sys rmes
+   sad pid
+    jmp newline
+   jmp 1b
+
+" chdir command:
+changedir:
+" XXX check argc > 1!!!
+   lac d1; sys write; gt; 1
+   lac d1; sys write; gt; 1
+   lac d1; sys write; gt; 1
+   lac d1; sys write; argv0+4; 4
+" XXX loop for multiple components!!!
+   jmp newline
+
+" ================
+" subroutines
 blank: 0
 1: jms getc
    sad o40
@@ -289,11 +343,12 @@ ibuf: .=.+64
 
 " end from cat.s
 " ****************************************************************
-" constants
+" literals
 d1: 1
 d2: 2
 o4:d4: 4
 o12:nl: 012	" newline
+o17: 017
 o40:sp: 040	" space
 o74:lt: 074
 o76:gt: 076
@@ -301,13 +356,17 @@ o177: 0177			" ASCII mask
 o400000: 0400000		" Msb toggle bit
 
 hash: <#> " superuser prompt
-qmsp: <? > "
-
+qmsp: <? > "			" question mark, space
+				" (traditional DDT error label was "dt"
+				" for "dink, tab")
 system:
    <sy>;<st>;<em>; 040040
 
 exectemp:
    <ex>;<ec>;<te><mp>		" temporary link for file being exec'ed
+
+chdir:
+   <ch>;<di>;<r 040
 
 " TEMP FOR DEBUG:
 star: <*> "
@@ -320,7 +379,7 @@ char: 0				" white space char
 redirect: 0			" last file was a redirect (lt or gt)
 bcount: 0			" byte counter for current filename
 
-iopt: argc-4			" initial value for nextarg, opt
+iopt:argv0p: argv0		" initial value for nextarg, opt
 nextarg: 0			" next slot in argv to fill
 opt: 0				" "output pointer" (may point to in/outfile)
 
@@ -330,15 +389,18 @@ outfilep: outfile
 outfile: .=.+4			" buffer for output redirect file name
 infile: .=.+4			" buffer for input redirect file name
 
-" == high memory
-userbase=010000
-userlen=userbase-bootloc	" max executable
-argptr=017777			" last word points to argc + argv data
 " leave room for maxargs items of 4 words each
 maxargs=8
-argc=argptr-maxargs-maxargs-maxargs-maxargs
-" 4 word blocks follow argc:
+
+userbase=010000			" user starts at 4K
+argptr=017777			" last word points to argc + argv data
+argc=argptr-maxargs-maxargs-maxargs-maxargs-1 " argc followed by argv
+
+" arguments in 4 word blocks follow argc
 argv0=argc+1
 
-" "bootstrap" (reads executable into userbase) below argc:
+" "bootstrap" (reads executable into userbase) JUST below argc
 bootloc=argc-bootlen		" location of bootstrap
+
+userlen=bootloc-userbase	" max executable
+
