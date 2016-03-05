@@ -3,3 +3,7 @@ perl:
   - "5.22"
 sudo: false
 script: make clean;make
+before_install:
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init --auto
+  
