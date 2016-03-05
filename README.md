@@ -31,3 +31,8 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /misc	  holds miscellaneous notes and information
 * /pdp7parse holds a Java parser for pdp7 source code
 
+## Travis Status
+
+<a href="https://travis-ci.org/DoctorWkt/pdp7-unix"><img src="https://api.travis-ci.org/DoctorWkt/pdp7-unix.png"></a>
+
+
