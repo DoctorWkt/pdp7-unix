@@ -1,21 +1,19 @@
 # Top level makefile to build the utilities etc
 AS=tools/as7
-ASARGS=--format=rim
-BINDIR=bin
-SYSDIR=$(BINDIR)/sys
-CMDDIR=$(BINDIR)/cmd
+#ASARGS=--format=rim
+SYSDIR=sys
+CMDDIR=bin
 
-all: dirs sys cmd others
+all: sys cmd others
 
 dirs:
-	mkdir -p $(BINDIR)
 	mkdir -p $(SYSDIR)
 	mkdir -p $(CMDDIR)
 
-sys:
-	$(AS) $(ASARGS) -o $(SYSDIR)/kernel   src/sys/*.s
+sys: dirs
+	$(AS) $(ASARGS) -o $(SYSDIR)/unix   src/sys/*.s
 
-cmd:
+cmd: dirs
 #	$(AS) $(ASARGS) -o $(CMDDIR)/adm   src/cmd/adm.s
 #	$(AS) $(ASARGS) -o $(CMDDIR)/apr   src/cmd/apr.s
 	$(AS) $(ASARGS) -o $(CMDDIR)/as   src/cmd/as.s
@@ -42,7 +40,8 @@ cmd:
 
 others:
 	$(AS) $(ASARGS) -o $(CMDDIR)/ls  src/other/wktls.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/sh  src/other/sh.s	
 
 clean:
-	rm -rf $(BINDIR)/*
-	rmdir $(BINDIR)
+	rm -rf $(SYSDIR)/*
+	rm -rf $(CMDDIR)/*
