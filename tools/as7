@@ -213,7 +213,7 @@ elsif ($format eq 'list') {
     dump_labels($OUT);
 }
 elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
-    for my $loc ( 0 .. $#Mem ) {
+    for my $loc ( $Var{'..'} .. $#Mem ) {
 	punch($Mem[$loc] || 0);
     }
 }
