@@ -28,6 +28,8 @@ newcom:
    dzm argv0			" clear out argv0 for chdir comparison
    dzm argv0+1
    dzm argv0+2
+   lac argcptr
+   dac argptr
    lac iopt			" reset output pointer
    dac opt
    dac nextarg
@@ -106,7 +108,9 @@ eoname:
    sza
     jmp 1f			" last name was a redirect file, skip increment
 
-   isz argc			" increment argc
+   lac argc			" increment argc
+   tad d4
+   dac argc
    lac nextarg
    tad d4			" advance nextarg
    dac nextarg
@@ -242,19 +246,16 @@ error:			" here for error in child: filename pointer in AC
   lac d1; sys write; qmsp; 1
   lac d1; sys write; 1: 0; 4
   lac d1; sys write; nl; 1
-" XXX smes to parent???
   lac d2; sys close
   sys exit
 
 " end code from init.s
 " ================
 
+" here in parent, child pid in AC
 parent:
-   dac pid
-1: sys rmes
-   sad pid
-    jmp newline
-   jmp 1b
+"  sys smes		" hangs until child exits
+   jmp newline
 
 " chdir command:
 changedir:
@@ -388,6 +389,8 @@ outfilep: outfile
 
 outfile: .=.+4			" buffer for output redirect file name
 infile: .=.+4			" buffer for input redirect file name
+
+argcptr: argc
 
 " leave room for maxargs items of 4 words each
 maxargs=8
