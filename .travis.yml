@@ -1,0 +1,3 @@
+language: c
+sudo: false
+script: make clean;make
