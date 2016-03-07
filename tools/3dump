@@ -14,7 +14,7 @@ while (1) {
   my $result= read($IN, my $three, 3);
   last if ($result != 3);       # Not enough bytes read
   my ($b1, $b2, $b3)= unpack("CCC", $three);
-  my $word= (($b1 & 077) << 12) | ($b2 << 6) | $b3;
+  my $word= (($b1 & 077) << 12) | (($b2 & 077) << 6) | ($b3 & 077);
 
   my $c1= ($word >> 9) & 0777;
   $c1= ($c1 < 0200) ? chr($c1) : " ";
