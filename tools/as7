@@ -53,6 +53,13 @@ GetOptions(
 
 usage() if ( @ARGV < 1 );
 
+# http://minnie.tuhs.org/cgi-bin/utree.pl?file=V3/man/manx/as.1
+# ".." is the relocation constant and is added to each relocatable
+#    reference.  On a PDP-11 with relocation hardware, its value is 0; on
+#    most systems without protection, its value is 40000(8).
+
+# PLB: "relocatable" values are flagged with $RELATIVE
+
 # start with the location counter at zero
 # predefine syscall and opcodes as variables
 %Var = (
