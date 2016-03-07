@@ -81,6 +81,18 @@ sub load_code {
 
     # Open up the PDP-7 executable file
     open( my $IN, "<", $filename ) || die("Unable to open $filename: $!\n");
+    my $c = getc($IN);
+    seek $IN, 0, 0;
+    if ((ord($c) & 0300) == 0200) { # handle "binary paper tape" format
+	my $addr = 010000;	# user programs loaded at 4K mark
+	while ($addr <= 017777) {
+	    my $result = read_word($IN);
+	    last if ($result == -1);
+	    $Mem[$addr++] = $result;
+	}
+	close($IN);
+	return;
+    }
     while (<$IN>) {
         chomp;
 
@@ -96,6 +108,18 @@ sub load_code {
         $Mem[$loc] = $val;
     }
     close($IN);
+}
+
+### read a word from a file in paper tape binary format
+### return -1 on EOF
+sub read_word {
+    my $F = shift;
+    # Convert three bytes into one 18-bit word
+    return -1 if ( read( $F, my $three, 3 ) != 3 ); # Not enough bytes read
+    my ( $b1, $b2, $b3 ) = unpack( "CCC", $three );
+    return ((($b1 & 077) << 12 ) |
+	    (($b2 & 077) << 6 ) |
+	     ($b3 & 077));
 }
 
 ### Copy the arguments into the PDP-7 memory space, and build
@@ -711,16 +735,19 @@ sub sys_fork {
     return;
 }
 
-# Smes system call. Because we fake rmes with wait(),
-# there is no need for sms. When the child does
-# sys exit, that's going to wake wait() up and do the
-# rmes anyway.
+# shell depends on smes hanging while child process exists
+"	https://www.bell-labs.com/usr/dmr/www/hist.html
+"	The message facility was used as follows: the parent shell, after
+"	creating a process to execute a command, sent a message to the new
+"	process by smes; when the command terminated (assuming it did not
+"	try to read any messages) the shell's blocked smes call returned an
+"	error indication that the target process did not exist. Thus the
+"	shell's smes became, in effect, the equivalent of wait.
 sub sys_smes {
-
-    # For now, do nothing
-    dprintf("smes system call\n");
+    waitpid($AC,0);
+    dprintf("smes returning error\n");
+    $AC = -1;
     $PC += 1;
-    return;
 }
 
 # Rmes system call. We simply call wait and
@@ -927,34 +954,35 @@ sub sys_read {
     # Read each word in
     my $FH = $FD[$fd];
     $count = 0;
-    my $tty = -t $FH;
+    if (-t $FH) {		# TTY?
+	my $char = getc($FH);	# use Term::ReadKey for 'cbreak' mode??
+	if (defined($char)) {
+	    $Mem[$start] = ord($char) << 9; # only ever returns one char
+	    $AC = 1;
+	}
+	else {
+	    $AC = 0;		# EOF
+	}
+	return;
+    }
     foreach my $addr ( $start .. $end ) {
 
         if ( $ISBINARY[$fd] ) {
             # Convert three bytes into one 18-bit word
-            my $result = read( $FH, my $three, 3 );
-            last if ( $result != 3 );    # Not enough bytes read
-            my ( $b1, $b2, $b3 ) = unpack( "CCC", $three );
-            $Mem[$addr] = ((($b1 & 077) << 12 ) |
-			   (($b2 & 077) << 6 ) |
-			    ($b3 & 077));
+	    my $result = read_word($FH);
+	    last if ($result == -1);
+            $Mem[$addr] = $result;
 	    $count++;
         }
         else {
             # Convert two ASCII characters into one 18-bit word
             my $c1 = getc($FH);
-	    my $c2;
             last if ( !defined($c1) );    # No character, leave the loop
 	    my $word = ord($c1) << 9;
-	    if ( !$tty || $c1 ne "\n") {
-		$c2 = getc($FH);
-		if (defined($c2)) {
-		    $word |= ord($c2);
-		}
-	    }
+	    my $c2 = getc($FH);
+	    $word |= ord($c2) if (defined($c2));
             $Mem[$addr] = $word;
 	    $count++;
-	    last if ($tty && (($c1 && ($c1 eq "\n")) || ($c2 &&($c2 eq "\n"))));
         } # ascii
     }
 
