@@ -944,7 +944,7 @@ sub sys_read {
 	    }
             $Mem[$addr] = $word;
 	    $count++;
-	    last if ($tty && ($c1 eq "\n") || ($c2 eq "\n"));
+	    last if ($tty && (($c1 && ($c1 eq "\n")) || ($c2 &&($c2 eq "\n"))));
         } # ascii
     }
 
