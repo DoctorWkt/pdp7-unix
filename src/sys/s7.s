@@ -114,7 +114,7 @@ dsprestart:
    isz ttydelay
    krb			" read keyboard buffer
    dac char		" save in char
-   sad o375		" interrupt char ('}'?)
+   sad o375		" interrupt char (TTY ALT MODE?)
    jmp intrp1		"  yes
    lac d1
    jms putchar

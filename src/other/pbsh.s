@@ -1,53 +1,73 @@
 " -*-fundamental-*-
-" sh -- a shell
+" pbsh -- a shell
 " started by p budne 3/4/2016
-" with code from cat.s, init.s, and looking at the v1 (pdp-11) shell
+" with code from init.s, cat.s and looking at the v1 (pdp-11) shell
 
-" XXX cat.s seems to write error output on fd 8
+" In particular, the newline/newcom/newarg/newchar processing loop(s)
+" are copied from the v1 shell:
+" redirection must occur at the start of a name (after whitespace)
 
-start:
-" XXX take command line argument (script file to open), suppress prompt??
-" NOTE!!! v0 init.s doesn't set up the argv at the top of memory,
-" so the v0 shell may not have taken command line arguments!!!
-" if non-interactive, "dzm prompt", jump to newcom
+" includes ';' and '&' (unknown if available in v0 shell)
+" does NOT (yet) include quoting (backslash or single quote)
+" no "globbing" (performed by /etc/glob in v1 shell)
 
-interactive:
-   -1
+" v0 cat.s seems to write error output on fd 8, *BUT* shell doesn't
+" know what device is on stdout (passed by init, and init doesn't pass
+" fd 8), and there isn't a "dup" call, nor does init appear to be an
+" "indirect" device like /dev/tty, nor does init make an equivalent link!!
+
+" Arguments for new processes are located at the end of memory.
+" Location 17777 points to a word with the argument count (argc),
+" followed by blocks of four words with (filename) arguments.
+" Currently leave room for ONLY maxargs items.
+maxargs=8
+
+" v1 shell expects "-" as argument from init or login, will read
+" filename passed as argument.  *BUT* v0 init.s doesn't set up the
+" argv at the top of memory, so the v0 shell may not have taken
+" command line arguments!!!
+
+   lac d1
    sys intrp			" make shell uninterruptable
    sys getuid
    sma				" <0?
-    jmp newline			"  no, a mundane
+    jmp newline			"  no
    lac hash			" yes: superuser
    dac prompt			" change prompt
 
 newline:
    lac d1; sys write; prompt; 1	" output prompt
+   jms rline			" read line into ibuf
+   lac iipt
+   dac ipt
 newcom:
    dzm char			" clear saved char
    dzm infile			" clear input redirect file name
    dzm outfile			" clear output redirect file name
-   lac iopt			" reset output pointer
+   lac iopt			" reset output buffer pointer
    dac opt
    dac nextarg
 
 " reset high memory
    dzm argc			" clear arg count
-   lac argcptr
+   lac argcptr			" (re) set arg pointer
    dac argptr
    dzm argv0			" clear out argv0 for chdir comparison
    dzm argv0+1
    dzm argv0+2
 
+" NOTE! behavior copied from v1 shell!!!
+" "improvements" here may be non-historic!!
 newarg:
    -8				" save 8 chars
    dac bcount
-   dzm redirect
+   dzm redirect			" clear redirect flag
 
    lac opt			" save start for print (TEMP)
    dac nextarg
 
    jms blank			" skip whitespace
-   jms delim			" newline?
+   jms delim			" command sep?
     jmp eol			"  yes
    sad lt			" input redirect?
     jmp redirin
@@ -59,19 +79,18 @@ redirin:			" saw <
    dac redirect			" flag redirect
    lac infilep
    dac opt
-   jmp newchar			" v1 behavior? no whitespace eater
+   jmp newchar
 
 redirout:			" saw >
    dac redirect			" flag redirect
    lac outfilep
    dac opt
-   " v1 behavior? no whitespace eater!
    " fall
 
 newchar:
    jms getc
    sad o40			" space?
-    jmp ws			"  yes
+    jmp eoname			"  yes
    jms delim
     jmp eoname
 3: jms putc			" save
@@ -81,22 +100,16 @@ newchar:
 " here after 8 chars: discard until terminator seen
 discard:
    jms getc
-   dac char
-   sad o4
-    jmp eof
    jms delim			" end of line?
     jmp eoname
    sad o40
     jmp eoname
    jmp discard
 
-" here with EOF in command: process command?
-eof:
-   sys exit			" quit, for now?
-
-" name ended (short) with whitespace or newline
+" name ended (short) with whitespace or delim
 " pad out last name to 8 with spaces
-ws:
+" XXX check if ANYTHING read
+eoname:
    dac char			" save terminator
 1: lac o40
    jms putc			" no: copy into argv
@@ -104,9 +117,7 @@ ws:
     jmp 1b
 
 " saw end of name
-eoname:
-   dac char
-   lac redirect
+2: lac redirect
    sza
     jmp 2f			" last name was a redirect file, skip increment
 
@@ -126,10 +137,10 @@ eoname:
    jms delim
     jmp eol
 
-   -maxargs
-   tad argc
-   sza
-    jmp newarg
+   lac argc
+   sad maxargwords
+    skp
+     jmp newarg
 
 " too many args, (complain?).  for now eat rest of line 
 4: jms getc
@@ -160,68 +171,65 @@ eol:
     jmp changedir
 
 1:
-" comment these out to test "exec"
+" comment these out to test "exec" w/o fork
    sys fork
     jmp parent
 
-" here in child
-   lac d2; sys close		" close fd 2
-   sys unlink; exectemp		" remove temp file
+   sys open; argv0; 0		" try cwd (no link required)
+   sma
+    jmp 1f
+   jmp cmderr
 
-" try to link binary from "system" directory to "exectemp" file
+"   sys unlink; exectemp		" remove old temp file, if any
 "   sys link; system; argv0; exectemp
 "   spa
-"     jmp notsys
+"     jmp cmderr
 "   sys open; exectemp; 0
 "   spa
-"     jmp error
+"     jmp cmderr
+"   dac cmdfd
 "   sys unlink; exectemp
-"   jmp 1f
-"notsys:			" not found in "system"
+"   skp
 
-   sys open; argv0; 0		" try cwd
-   spa
-     jmp cmderr
-
+1:  dac cmdfd			" save command file descriptor
    cla				" check for input redirection
-   sad infile
-    jmp 1f
+   sad infile			" input redirct?
+    jmp 1f			"  no
    sys close			" close fd 0
    sys open; infile; 0		" open redirected
    spa sna
-     jmp inerror
+    jmp inerror
    cla
-1: sad outfile
-    jmp exec
+1: sad outfile			" output redirec?
+    jmp exec			"  no
    lac d1; sys close		" close fd 1
-   lac o17
-   sys creat; outfile		" open output redirect
+   lac o17; sys creat; outfile	" open output redirect
    spa
-     jmp outerror
+    jmp outerror
 
-" here to "exec" file open on fd 2, adapted from init.s
+" here to "exec" file open on cmdfd, adapted from init.s
 exec:
    law boot-1			" Get source addr
-   dac 8			" set up index 8 (pre-increments)
+   dac 8			" set up index (pre-increments)
    law bootloc-1		" Copy "boot" code into high memory
-   dac 9			" set up index 9 (pre-increments)
+   dac 9			" set up index
+   -bootlen			" isz loop count for bootstrap copy
+   dac bootcount
 1: lac 8 i
    dac 9 i
    isz bootcount		" can only do this once!
      jmp 1b
+   lac cmdfd			" get fd for the executable
+   lmq				" Save the fd into MQ
    jmp bootloc			" and then jump to the code
 
 " copied up to bootloc in high memory (below argc)
 boot:
-   lac d2			" Load fd 2 (the opened executable)
-   lmq				" Save the fd into MQ
    sys read; userbase; userlen	" read executable in
    lacq				" Get the fd back and close the file
-   sys close	
+   sys close			" close command file
    jmp userbase			" and jump to the beginning of the executable
 bootlen=.-boot			" length of bootstrap
-
-bootcount: -bootlen		" isz loop count for bootstrap copy
 
 " error in child process:
 inerror:			" error opening input redirection
@@ -236,7 +244,7 @@ error:				" error in child: filename pointer in AC
   dac 1f			" save filename to complain about
   lac d1; sys write; 1: 0; 4
   lac d1; sys write; qmnl; 1
-  lac d2; sys close
+  lac d2; sys close		" close executable, if any
   sys exit
 
 " chdir command: executed in shell process
@@ -306,46 +314,48 @@ delim: 0
    isz delim			" ran the gauntlet: skip home
    jmp delim i
 
-" from cat.s
+" get character from ibuf
 getc: 0
-   lac ipt			" Load pointer to next word in the buffer
-   sad eipt
-     jmp 1f			" end of the buffer, so read more
-   dac 2f			" Save the pointer
-   add o400000			" flip MSB, increment pointer on overflow
-   dac ipt
-   ral				" Move the msb into the link register
-   lac 2f i			" Load the word from the buffer
-   szl				" Skip if second character in word
-     lrss 9			"  first char: shift down the top character
-   and o177			" Keep the lowest 7 bits
-   sna
-     jmp getc+1			" Skip a NUL characters and read another one
-   jmp getc i			" Return the character from the subroutine
+   lac ipt i		" fetch char
+   isz ipt		" increment pointer
+   jmp getc i
 
+" from init.s rline: read line from tty into ibuf
+" (store one character per word)
+rline: 0
+   law ibuf-1		" Store ibuf pointer in location 8
+   dac 8
 1:
-   cla				" Buffer is empty, read another 64 characters
-   sys read; ibuf; 64
-   sna
-     jmp 1f			" No characters were read in
-   tad iipt			" Add the word count to the base of the buffer
-   dac eipt			" and store in the end buffer pointer
-   lac iipt			" Reset the ipt to the base of the buffer
-   dac ipt
-   jmp getc+1			" and loop back to get one character
-1:
-   lac o4			" No character, return with ctrl-D
-   jmp getc i			" return from subroutine
+   cla; sys read; char; 1 " Read in one character from stdin
+   sna			" read ok?
+    sys exit		"  EOF: quit
+   lac char
+   lrss 9		" Get it and shift down 9 bits
+   sad o100		" '@' (kill) character?
+     jmp rline+1	"  yes: start from scratch
+   sad o43		" '#' (erase) character?
+     jmp 2f		"  yes: handle below
+
+   dac 8 i		" Store the character in the buffer
+   sad o12		" Newline?
+     jmp rline i	"  yes: return
+   jmp 1b		" no: keep going
+2:
+   law ibuf-1		" # handling. Do nothing if at start of the buffer
+   sad 8
+     jmp 1b		" and loop back
+   -1
+   tad 8		" Otherwise, move the pointer in location 8 back one
+   dac 8
+   jmp 1b		" and loop back
 
 putc: 0
    and o177			" Keep the lowest 7 bits and save into 2f+1
    dac 2f+1
-   lac opt			" Save the pointer to the empty buffer
-   dac 2f			" position to 2f
-   add o400000			" Flip the msb and save back into opt
-   dac opt			" This also has the effect of incrementing
-				" the opt pointer every second addition!
-
+   lac opt			" get output buffer pos
+   dac 2f			" save
+   add o400000			" Flip the msb (advance) and save back into opt
+   dac opt
    spa				" If the bit was set, we already have one
      jmp 1f			" character at 2f+1. If no previous character,
    lac 2f i			" merge the old and new character together
@@ -358,11 +368,7 @@ putc: 0
    dac 2f i			" Save the word into the buffer
    jmp putc i			" No, so return (more room still in the buffer)
 
-2: 0;0				" Current input and output word pointers
-ipt: 0				" Current input buffer base
-eipt: 0				" Pointer to end of data read in input buffer
-iipt: ibuf
-ibuf: .=.+64
+2: 0;0				" pointer, char
 
 " literals
 d1: 1
@@ -371,10 +377,12 @@ o4:d4: 4
 o12: 012			" newline
 o17: 017
 o40: 040			" space
+o43: 043			" #
 o46: 046			" ampersand
 o73: 046			" semi
 o74:lt: 074			" <
 o76:gt: 076			" >
+o100: 0100			" @
 o177: 0177			" 7-bit (ASCII) mask
 o400000: 0400000		" MSB
 
@@ -396,29 +404,34 @@ star: <*> "
 toomany: <to>;<o> ;<ma>;<ny>;< a>;<rg>;<s 012
 ltoomany=.-toomany
 
-" ################ variables
-
-prompt: <@> " v1 prompt
-pid: 0				" "other" pid
-char: 0				" white space char
-redirect: 0			" last file was a redirect (lt or gt)
-bcount: 0			" byte counter for current filename
-delimchar: 0			" character that terminated line
-
-iopt:argv0p: argv0		" initial value for nextarg, opt
-nextarg: 0			" next slot in argv to fill
-opt: 0				" "output pointer" (may point to in/outfile)
+maxargwords: maxargs+maxargs+maxargs+maxargs
+argcptr: argc
 
 infilep: infile
 outfilep: outfile
 
+iipt: ibuf
+iopt:argv0p: argv0		" initial value for nextarg, opt
+
+" ################ variables
+
+prompt: <@ 040			" v1 prompt!
+
+redirect: .=.+1			" last file was a redirect (lt or gt)
+nextarg: .=.+1			" next slot in argv to fill
+bcount: .=.+1			" byte counter for current filename
+opt: .=.+1			" "output pointer" (may point to in/outfile or into argv)
+delimchar: .=.+1		" character that terminated line
+char: .=.+1			" char that terminated word
+
 outfile: .=.+4			" buffer for output redirect file name
 infile: .=.+4			" buffer for input redirect file name
+pid: .=.+1			" "other" pid
+cmdfd: .=.+1			" fd for executable
+bootcount: .=.+1		" loop count for "boot" copy
 
-argcptr: argc
-
-" leave room for maxargs items of 4 words each
-maxargs=8
+ipt: .=.+1			" input buf pointer
+ibuf:				" input line stored here, one character per word
 
 userbase=010000			" user starts at 4K
 argptr=017777			" last word points to argc + argv data
@@ -431,4 +444,3 @@ argv0=argc+1
 bootloc=argc-bootlen		" location of bootstrap
 
 userlen=bootloc-userbase	" max executable
-
