@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 use Fcntl qw(:seek);
-use DateTime;
+#use DateTime;
 use Data::Dumper;
 
 ### Global variables ###
@@ -606,10 +606,10 @@ sub cal {
         7 => \&sys_seek,
         # 8        tell
         9 => \&sys_close,
-        # 10        link
+        10 => \&sys_link,
         11 => \&sys_unlink,
         12 => \&sys_setuid,
-        # 13        rename
+        13 => \&sys_rename,
         14 => \&sys_exit,
         15 => \&sys_time,
         16 => \&sys_intrp,
@@ -647,6 +647,8 @@ sub sys_exit {
 # Getuid system call
 sub sys_getuid {
     $AC = $< & MAXINT;
+    # On PDP-7 Unix, the root user is user-id -1
+    $AC= MAXINT if ($AC==0);
     dprintf( "getuid system call, uid %06o\n", $AC );
     $PC += 1;
     return;
@@ -656,7 +658,7 @@ sub sys_getuid {
 sub sys_setuid {
 
     # For now, do nothing
-    dprint("setuid system call\n");
+    dprintf("setuid system call\n");
     $PC += 1;
     return;
 }
@@ -665,7 +667,7 @@ sub sys_setuid {
 sub sys_intrp {
 
     # For now, do nothing
-    dprint("intrp system call\n");
+    dprintf("intrp system call\n");
     $PC += 1;
     return;
 }
@@ -891,7 +893,7 @@ sub sys_read {
 
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
-        dprint("read: fd $fd is not open\n");
+        dprintf("read: fd $fd is not open\n");
         $AC = MAXINT;
         return;
     }
@@ -899,26 +901,35 @@ sub sys_read {
     # Read each word in
     my $FH = $FD[$fd];
     $count = 0;
+    my $tty = -t $FH;
     foreach my $addr ( $start .. $end ) {
 
         if ( $ISBINARY[$fd] ) {
-
             # Convert three bytes into one 18-bit word
             my $result = read( $FH, my $three, 3 );
             last if ( $result != 3 );    # Not enough bytes read
             my ( $b1, $b2, $b3 ) = unpack( "CCC", $three );
-            $Mem[$addr] = ( ( $b1 & 077 ) << 12 ) | ( $b2 << 6 ) | $b3;
+            $Mem[$addr] = ((($b1 & 077) << 12 ) |
+			   (($b2 & 077) << 6 ) |
+			    ($b3 & 077));
+	    $count++;
         }
         else {
             # Convert two ASCII characters into one 18-bit word
             my $c1 = getc($FH);
+	    my $c2;
             last if ( !defined($c1) );    # No character, leave the loop
-            my $c2 = getc($FH);           # No character, make it a NUL
-            $c2 = "" if ( !defined($c2) );
-            $Mem[$addr] =
-              ( ord($c1) << 9 ) | ord($c2);    # Pack both into one word
-        }
-        $count++;
+	    my $word = ord($c1) << 9;
+	    if ( !$tty || $c1 ne "\n") {
+		$c2 = getc($FH);
+		if (defined($c2)) {
+		    $word |= ord($c2);
+		}
+	    }
+            $Mem[$addr] = $word;
+	    $count++;
+	    last if ($tty && ($c1 eq "\n") || ($c2 eq "\n"));
+        } # ascii
     }
 
     # No error
@@ -946,7 +957,7 @@ sub sys_write {
 
     # That filehandle is not open, set an error -1 in octal
     if ( !defined( $FD[$fd] ) ) {
-        dprint("write: fd $fd is not open\n");
+        dprintf("write: fd $fd is not open\n");
         $AC = MAXINT;
         return;
     }
@@ -1109,6 +1120,7 @@ sub sys_status {
     #   000004  owner write
     #   000002  user write
     #   000001  user write
+    # XXX: We don't seem to have the i-node number in this structure?!
 
     # Get the start address of the string
     # Convert this to a sensible ASCII filename
@@ -1149,7 +1161,7 @@ sub sys_status {
 # Seek syscall
 sub sys_seek {
     # Seek takes three arguments: AC is the fd, PC+1 is a signed count
-    # and PC+1 is how to seek: 0=from start, 1=from curptr, 2=from end
+    # and PC+2 is how to seek: 0=from start, 1=from curptr, 2=from end
     # of file. Return AC=0 if OK, -1 on error.
     my $fd= $AC;
     my $FH= $FD[$fd];
@@ -1160,6 +1172,39 @@ sub sys_seek {
     # but for an ASCII file that's 2 bytes per word.
     $offset *= ($ISBINARY[$fd]) ? 3 : 2;
     my $result= seek($FH, $offset, SEEK_SET);
+
+    # Set the AC result
+    $AC= ($result)? 0: MAXINT;
+    $PC += 3;
+    return;
+}
+
+# Rename syscall
+sub sys_rename {
+    # Rename takes two arguments: PC+1 is the current filename and
+    # PC+2 is the new filename. Returns AC=0 on success, AC=-1 on error.
+    #
+    my $oldname = mem2arg($Mem[$PC+1]);
+    my $newname = mem2arg($Mem[$PC+2]);
+    dprintf( "rename file %s to %s\n", $oldname, $newname );
+    my $result= rename($oldname, $newname);
+
+    # Set the AC result
+    $AC= ($result)? 0: MAXINT;
+    $PC += 3;
+    return;
+}
+
+# Link syscall
+sub sys_link {
+    # Link takes two arguments: PC+1 is the current filename and
+    # PC+2 is the new filename. Returns AC=0 on success, AC=-1 on error.
+    # Yes, this is not strictly what PDP-7 Unix would have done.
+    #
+    my $oldname = mem2arg($Mem[$PC+1]);
+    my $newname = mem2arg($Mem[$PC+2]);
+    dprintf( "link file %s to %s\n", $oldname, $newname );
+    my $result= link($oldname, $newname);
 
     # Set the AC result
     $AC= ($result)? 0: MAXINT;

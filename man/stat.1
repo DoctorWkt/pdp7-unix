@@ -1,0 +1,50 @@
+        11/3/70                                                       STAT (I)
+
+
+NAME              stat - get file status
+
+SYNOPSIS          stat name
+
+DESCRIPTION       stat gives several kinds of information about one file:
+                  files:
+
+                     access mode
+                     number of links
+                     owner
+                     size in words
+                     name
+
+                  All information is self-explanatory except the mode. The
+                  mode is a five-character string whose characters mean the
+                  following:
+
+                     1   s: file is small (smaller than 4096 words)
+                         l: file is large
+                         d:    file is a directory
+
+                     2   r: owner can read
+                         -: owner cannot read
+
+                     3   w: owner can write
+                         -: owner cannot write
+
+                     4   r: non-owner can read
+                         -: non-owner cannot read
+
+                     5   w: non-owner can write
+                         -: non-owner cannot write
+
+                  All numeric values are printed in octal
+                  if he cannot be found in "/etc/uids" a number is given.
+
+
+FILES             
+
+SEE ALSO          ls with the -l option gives the same information as stat,
+		  except that it also shows the i-node number for each file.
+
+DIAGNOSTICS       "name  ?" for any error. "nofiles" if no file name is given.
+
+BUGS              none
+
+OWNER             wkt

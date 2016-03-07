@@ -148,6 +148,7 @@ init: 0				" common init for both passes
    dac fname			" point to first file name
    -1
    dac eofflg
+   jms nextfil
    jms ioinit
    dzm savchr			" clear saved char
    dzm comflg			" clear line comment flag
