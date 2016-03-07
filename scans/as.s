@@ -148,6 +148,7 @@ init: 0
    dac fname
    -1
    dac eofflg
+   jms nextfil
    jms ioinit
    dzm savchr
    dzm comflg

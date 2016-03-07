@@ -736,13 +736,13 @@ sub sys_fork {
 }
 
 # shell depends on smes hanging while child process exists
-"	https://www.bell-labs.com/usr/dmr/www/hist.html
-"	The message facility was used as follows: the parent shell, after
-"	creating a process to execute a command, sent a message to the new
-"	process by smes; when the command terminated (assuming it did not
-"	try to read any messages) the shell's blocked smes call returned an
-"	error indication that the target process did not exist. Thus the
-"	shell's smes became, in effect, the equivalent of wait.
+#	https://www.bell-labs.com/usr/dmr/www/hist.html
+#	The message facility was used as follows: the parent shell, after
+#	creating a process to execute a command, sent a message to the new
+#	process by smes; when the command terminated (assuming it did not
+#	try to read any messages) the shell's blocked smes call returned an
+#	error indication that the target process did not exist. Thus the
+#	shell's smes became, in effect, the equivalent of wait.
 sub sys_smes {
     waitpid($AC,0);
     dprintf("smes returning error\n");
