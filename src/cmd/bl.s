@@ -11,7 +11,7 @@ jmp start
    cma
    tad lastv
    dac lastv
-   imq
+   lmq
    lac sp
    tad d1
    dac sp i
@@ -82,10 +82,10 @@ getc: 0
    jmp getc i
 
 putc: 0
-   and 0777
+   and o777
    sna
    jmp putc i
-   imq
+   lmq
    lac oflg
    sza
    jmp 1f
@@ -115,7 +115,7 @@ stop:
    jms flush
    las
    sma
-   sys save
+   sys exit     " XXX replaced for now:   sys save
    sys exit
 
 flush: 0
@@ -132,7 +132,7 @@ flush: 0
    lac obufp
    dac 1f
    lac .fout
-   sys write; 1: :.; ..
+   sys write; 1: ..; ..
    lac obufp
    dac cobufp
    dzm oflg
