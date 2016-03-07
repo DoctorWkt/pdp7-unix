@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 use Fcntl qw(:seek);
-#use DateTime;
+use DateTime;
 use Data::Dumper;
 
 ### Global variables ###
@@ -421,12 +421,12 @@ sub opr {
         dprintf(" cla");
         $AC = 0;
     }
-    if ( $instruction & 004000 ) {    # cli
-        dprintf(" cli");
+    if ( $instruction & 004000 ) {    # cll
+        dprintf(" cll");
         $LINK = 0;
     }
-    if ( $instruction & 000002 ) {    # cmi
-        dprintf(" cmi");
+    if ( $instruction & 000002 ) {    # cml
+        dprintf(" cml");
         $LINK = ($LINK) ? 0 : LINKMASK;
     }
     if ( $instruction & 000001 ) {    # cma
@@ -489,10 +489,26 @@ sub eae {
 
     if ( $instruction == 0653323 ) {    # idiv: integer division
 	my $divisor= $Mem[ $PC+1 ];
-        dprintf( "div AC %06o AC by %06o (decimal %d by %d)\n", $AC, $divisor, $AC, $divisor );
+        dprintf( "idiv AC %06o by %06o (decimal %d by %d)\n",
+					$AC, $divisor, $AC, $divisor );
 	# Prevent division by zero :-)
 	my $quotient = ($divisor) ? $AC / $divisor : 0;
 	my $remainder = ($divisor) ? $AC % $divisor : 0;
+	$MQ= $quotient;
+	$AC= $remainder;
+        $PC+=2;
+        return;
+    }
+    if ( $instruction == 0640323 ) {	# div: 36-bit unsigned integer division
+	my $divisor= $Mem[ $PC+1 ];
+        dprintf( "div MQ.AC %06o.%06o AC by %06o (decimal %d)\n",
+					$MQ, $AC, $divisor, $divisor );
+	# http://www.perlmonks.org/?node_id=718414 says that we won't
+	# lose accuracy before 2^53
+	my $dividend= ($MQ << 18) | $AC;
+	# Prevent division by zero :-)
+	my $quotient = ($divisor) ? $dividend / $divisor : 0;
+	my $remainder = ($divisor) ? $dividend % $divisor : 0;
 	$MQ= $quotient;
 	$AC= $remainder;
         $PC+=2;
@@ -1093,7 +1109,7 @@ sub sys_time {
     # Set MQ to the high 18 bits and AC to the low 18 bits
     $MQ = $sixtieths >> 18;
     $AC = $sixtieths & 0777777;
-    dprintf( "time %06o %06o\n", $MQ, $AC );
+    dprintf( "time %06o %06o, %d sixtieths\n", $MQ, $AC, $sixtieths );
     $PC += 1;
     return;
 }
