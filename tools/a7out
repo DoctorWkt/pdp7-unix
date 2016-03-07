@@ -543,6 +543,16 @@ sub eae {
         $PC++;
         return;
     }
+    if ( $maskedinstr == 0640600 ) {    # lls: long left shift
+        dprintf( "lls AC %06o step %d\n", $AC, $step );
+        foreach my $i ( 1 .. $step ) {
+            my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
+            $AC = ( ( $AC << 1 ) | $MQmsb ) & MAXINT;
+            $MQ = ( ( $MQ << 1 ) | ( ($LINK) ? 1 : 0 ) ) & MAXINT;   # XXX how to handle unsigned?
+        }
+        $PC++;
+        return;
+    }
     if ( $maskedinstr == 0640700 ) {    # als: AC left shift
         dprintf( "als AC %06o step %d\n", $AC, $step );
         $AC = ( $AC << $step ) & MAXINT;
