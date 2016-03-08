@@ -40,7 +40,7 @@ cmd: dirs
 
 others:
 	$(AS) $(ASARGS) -o $(CMDDIR)/ls    src/other/wktls.s	
-	$(AS) $(ASARGS) -o $(CMDDIR)/sh    src/other/sh.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/sh    src/other/pbsh.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/stat  src/other/wktstat.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/mv    src/other/wktmv.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/ln    src/other/wktln.s	
