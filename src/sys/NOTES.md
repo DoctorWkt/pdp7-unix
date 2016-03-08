@@ -8,6 +8,7 @@ process 1 is "init", runs as superuser
 DISK
 ====
 
+```
 RB09: Burroughs fixed head disk (same hardware as RD10!)
 
 64 word sectors; 80 sectors/track; 100 tracks/surface; 2 surfaces
@@ -21,9 +22,11 @@ first disk block is copy of "system data"
 
 12 word inodes (5 per block)
 710 sectors of inodes (max 3550 files)
+```
 
 inode format
 ------------
+```
    i.flags
         400000  free?? (checked/toggled by icreat)
         200000  large file
@@ -39,18 +42,21 @@ inode format
    i.nlks       link count
    i.size       size (in words?)
    i.uniq       unique value assigned at creation
+```
 
 directory files can (only) be truncated by superuser
 
 directory node (dnode) format
 -----------------------------
+```
    d.i          i-number of file
    d.name       four words, space padded
    d.uniq       i.uniq value of file
+```
 
 i numbers
 ---------
-
+```
   1     core file?? (written by "sys save" or bad system call)
   2     "dd"??? "root" directory
   3     "system"??? default process cdir, must contain "init", "dd"
@@ -61,3 +67,4 @@ i numbers
   10    "ttyout" special file
   11    "display" (graphic-2) special file
   12    "pptout" (paper tape punch) special file
+```
