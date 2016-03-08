@@ -175,8 +175,11 @@ sysdata:			" system data 64 words saved to disk
 	"	4: out/notready??
 	"   bits 3:17 -- disk swap address/8
 	" second word: process pid
-	" third word:  used for smes/rmes
-	" fourth word: ??
+	" third word:  smes/rmes status:
+	"	0: not waiting
+	"	-1: this process waiting (rmes)
+	"	other: complement of sender pid
+	" fourth word: smes message
 ulist:
    0131000;1;0;0
    0031040;0;0;0

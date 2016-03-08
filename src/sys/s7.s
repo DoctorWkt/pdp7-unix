@@ -330,7 +330,7 @@ putcr: 0
    cla
    jmp putcr i
 
-intrp1:			" here with keyboard interrupt
+intrp1:			" here with TTY interrupt character
    lac d6		" get keyboard special device number
    dac .int1		" save as interrupt source
    lac d1

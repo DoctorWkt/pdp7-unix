@@ -284,7 +284,7 @@ open1:				" common exit for open/creat
    jmp 1f			"  no
    iof				" yes: disable interrupts
    lac ii			" get i number
-   tad swr			" get read routine table addr
+   tad swr			" add to base instruction
    dac .+1
    jmp .. i			" dispatch to read routine
 1:
