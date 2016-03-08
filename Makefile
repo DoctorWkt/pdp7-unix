@@ -1,6 +1,6 @@
 # Top level makefile to build the utilities etc
 AS=tools/as7
-#ASARGS=--format=rim
+ASARGS=--format=ptr
 SYSDIR=sys
 CMDDIR=bin
 
@@ -44,6 +44,7 @@ others:
 	$(AS) $(ASARGS) -o $(CMDDIR)/stat  src/other/wktstat.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/mv    src/other/wktmv.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/ln    src/other/wktln.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/date  src/other/wktdate.s	
 
 clean:
 	rm -rf $(SYSDIR)/*
