@@ -6,6 +6,9 @@ CMDDIR=bin
 
 all: sys cmd others
 
+runsh: all
+	cd bin && ../tools/a7out sh
+
 dirs:
 	mkdir -p $(SYSDIR)
 	mkdir -p $(CMDDIR)
