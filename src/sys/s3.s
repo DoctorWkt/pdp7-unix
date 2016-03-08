@@ -356,12 +356,12 @@ wppto:
    jms swap
    jmp wppto
 
-	" common exit for special file
+	" common exit for special file input
 passone:
-   sad o4000
-   jmp okexit
-   dac u.base i
-   lac d1
+   sad o4000			" CTRL/D?
+   jmp okexit			"  yes: return zero
+   dac u.base i			" no: save for user
+   lac d1			" return 1
    dac u.ac
    jmp sysexit
 
