@@ -324,7 +324,8 @@ putsc: 0
    dac i sctalp			" save pointer
    sma cla			" skip if minus & clear AC
    jmp 1f			"  AC positive
-   llss 27			" get char in high 9 bits, zero in low
+   lacq
+   als 9			" get char in high 9 bits, zero in low
    dac i sctal			" store word
    lrss 9			" shift char back down
    jmp i putsc			" return
