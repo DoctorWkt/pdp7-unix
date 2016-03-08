@@ -125,7 +125,7 @@ init2: 0			" start pass 2
    lac d1
 "** 05-1-4.pdf page 34
    dac passno			" passno = 1
-   sys write; 1f; 2f-1f		" output II
+   sys write; 1f; 2f-1f		" output II\n
    jms init
    lac o17
    sys creat; 2f		" create a.out
@@ -479,9 +479,9 @@ nf1:
    sys open; fname: 0; 0	" open fname
    dac iof			" save fd
    sma				" open ok?
-   lac passno			"  yes, load pass number
-   sna				"   open failed: skip or open ok, pass 2
-   jmp nextfil i		"    pass 1, open OK, return.
+   lac passno			"  yes: load pass number
+   sna				" no: open failed: skip or open ok, pass 2
+   jmp nextfil i		"  pass 1, open OK, return.
    lac fname			" load filename pointer
    dac 1f			" save for write
    lac d1			" stdout
