@@ -484,7 +484,7 @@ nf1:
    lac fname			" load filename pointer
    dac 1f			" save for write
    lac d1			" stdout
-   sys write; 1; 0; 4		" output filename
+   sys write; 1: 0; 4		" output filename
    lac iof			" load fd
    sma				" open ok?
    jmp 1f			"  yes, continue
