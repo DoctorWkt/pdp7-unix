@@ -86,7 +86,7 @@ swap: 0
    jms lookfor; 1 " in/ready
       skp
    jmp 1b			" loop until a process becomes ready
-   dzm maxquant			" here with in/ready (self?)
+   dzm maxquant			" in/ready (self?): come back next tick!
    jmp 3f
 1:				" here with out/ready process
    dac 9f+t			" save process pointer (swapped out) in t0
@@ -97,7 +97,7 @@ swap: 0
    jmp 2f
 1:
    lac swap
-   dac u.swapret		" return to scheduler when swapped back
+   dac u.swapret		" return to caller when swapped back
    iof
    lac o200000			" change status to swapped out
    tad u.ulistp i
@@ -105,13 +105,13 @@ swap: 0
    ion
    jms dskswap; 07000		" swap process out
    lac u.dspbuf
-   sna
-   jmp 2f
+   sna				" process using display??
+   jmp 2f			"  no
    law dspbuf
    jms movdsp
 2:
    iof				" disable interrupts
-   lac o600000			" change status (1->7?)
+   lac o600000			" change status (1->7?????)
    tad 9f+t i
    dac 9f+t i
    ion				" enable interrupts
