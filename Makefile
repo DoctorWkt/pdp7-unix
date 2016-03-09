@@ -39,8 +39,7 @@ cmd: dirs
 #	$(AS) $(ASARGS) -o $(CMDDIR)/dskres    src/cmd/dskres.s
 #	$(AS) $(ASARGS) -o $(CMDDIR)/dsksav    src/cmd/dsksav.s
 #	$(AS) $(ASARGS) -o $(CMDDIR)/dsw    src/cmd/dsw.s
-#	$(AS) $(ASARGS) -o $(CMDDIR)/ed1    src/cmd/ed1.s
-#	$(AS) $(ASARGS) -o $(CMDDIR)/ed2    src/cmd/ed2.s
+	$(AS) $(ASARGS) -o $(CMDDIR)/ed    src/cmd/ed2.s src/cmd/ed1.s
 #	$(AS) $(ASARGS) -o $(CMDDIR)/init    src/cmd/init.s
 
 others: dirs
