@@ -44,7 +44,7 @@ cmd: dirs
 #	$(AS) $(ASARGS) -o $(CMDDIR)/init    src/cmd/init.s
 
 others: dirs
-	$(AS) $(ASARGS) -o $(CMDDIR)/pbsh    	src/other/pbsh.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/sh    	src/other/pbsh.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/ops    	src/other/ops.s	
 
 # wkt apps
