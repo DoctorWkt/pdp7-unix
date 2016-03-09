@@ -3,7 +3,7 @@
 " ed2
 
 cs:
-   jsm getsc; tal
+   jms getsc; tal
    sad o40
    jmp cs
    sad o12
@@ -67,7 +67,7 @@ cs:
    jmp 3b
 3:
    -1
-   tad lcrhno
+   tad lchrno
    rcr
    szl
    xor o400000
@@ -118,7 +118,7 @@ bsrch:
    jms compile
    jms srcsav
    lac dot
-   dad zerop
+   sad zerop
    lac eofp
 bloop:
    tad dm1
@@ -275,7 +275,7 @@ execute: 0
    dac i trvect+1
    jmp 1f
 
-exchg: "???
+xchg: "???
    lacq
    sad o12
    jmp i execute
@@ -310,7 +310,7 @@ matchar: 0 "???
    skp
    jmp 1f
    lac matchar
-   adn o17777
+   and o17777
    tad jms1
    dac i 8 "??? [unreadable page cutoff]
 "** 08-rest.pdf page 26
@@ -407,7 +407,7 @@ matclo: 0 "???
 
 "??? the remainder of this scan had an unreadable first character
 "??? I did the best I could to recreate the characters appropriately
-o1: 1
+d1: 1
 o133: 0133
 dm3: -3
 o136: 0136
@@ -456,7 +456,7 @@ o54: 054
 o17: 017
 
 tname:
-   0145056;0164155;0160040;040040
+   0145056;0164155;0160040;040040	" e.tmp
 tbufp: tbuf
 linep: line
 nlistp: nlist
@@ -480,7 +480,7 @@ c1: .=.+1
 ital: .=.+1
 otal: .=.+1
 diskin: .=.+1
-glint: .=.+1
+glint1: .=.+1
 c2: .=.+1
 num: .=.+1
 zermp: .=.+1
@@ -502,7 +502,7 @@ bett1: .=.+1
 bett2: .=.+1
 wrflg: .=.+1
 apt1: .=.+1
-"[page cuts off one label]
+sfi: .=.+1			"[page cuts off one label] PLB: added
 "** 08-rest.pdf page 29
 "[handwritten page number top right of scan - 22]
 sfo: .=.+1
@@ -513,7 +513,7 @@ fbuf: .=.+4  "not sure if this is fbuf, but
 tbuf: .=.+64 "there is a write; tbuf; 64 call
 line: .=.+64
 nlist: .=.+50
-"??? ?list: .=.+50, unable to determine label
+clist: .=.+50		" unable to determine label [PLB missing clist]
 compbuf: .=.+100
 dskbuf: .=.+1 "[line crossed out - scan markup]
 lnodes: .=.+1000
