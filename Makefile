@@ -3,8 +3,9 @@ AS=tools/as7
 ASARGS=--format=ptr
 SYSDIR=sys
 CMDDIR=bin
+TESTDIR=tests
 
-all: sys cmd others
+all: sys cmd others tests
 
 runsh: all
 	cd bin && ../tools/a7out sh
@@ -12,6 +13,7 @@ runsh: all
 dirs:
 	mkdir -p $(SYSDIR)
 	mkdir -p $(CMDDIR)
+	mkdir -p $(TESTDIR)
 
 sys: dirs
 	$(AS) $(ASARGS) -o $(SYSDIR)/unix   src/sys/*.s
@@ -56,6 +58,14 @@ others: dirs
 	$(AS) $(ASARGS) -o $(CMDDIR)/wktopr    	src/other/wktopr.s	
 	$(AS) $(ASARGS) -o $(CMDDIR)/wktstat  	src/other/wktstat.s	
 
+tests: dirs
+	$(AS) $(ASARGS) -o $(TESTDIR)/decimal_out    	src/tests/decimal_out.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/fork_test    		src/tests/fork_test.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/octal_test    	src/tests/octal_test.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/testmul    		src/tests/testmul.s
+	$(AS) $(ASARGS) -o $(TESTDIR)/write_test    	src/tests/write_test.s
+
 clean:
 	rm -rf $(SYSDIR)/*
 	rm -rf $(CMDDIR)/*
+	rm -rf $(TESTDIR)/*
