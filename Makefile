@@ -41,13 +41,20 @@ cmd: dirs
 #	$(AS) $(ASARGS) -o $(CMDDIR)/ed2    src/cmd/ed2.s
 #	$(AS) $(ASARGS) -o $(CMDDIR)/init    src/cmd/init.s
 
-others:
-	$(AS) $(ASARGS) -o $(CMDDIR)/ls    src/other/wktls.s	
-	$(AS) $(ASARGS) -o $(CMDDIR)/sh    src/other/pbsh.s	
-	$(AS) $(ASARGS) -o $(CMDDIR)/stat  src/other/wktstat.s	
-	$(AS) $(ASARGS) -o $(CMDDIR)/mv    src/other/wktmv.s	
-	$(AS) $(ASARGS) -o $(CMDDIR)/ln    src/other/wktln.s	
-	$(AS) $(ASARGS) -o $(CMDDIR)/date  src/other/wktdate.s	
+others: dirs
+	$(AS) $(ASARGS) -o $(CMDDIR)/pbsh    	src/other/pbsh.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/ops    	src/other/ops.s	
+
+# wkt apps
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktls    	src/other/wktls.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktcat    	src/other/wktcat.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktcp    	src/other/wktcp.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktdate  	src/other/wktdate.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktln  	src/other/wktln.s
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktls  	src/other/wktls.s		
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktmv    	src/other/wktmv.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktopr    	src/other/wktopr.s	
+	$(AS) $(ASARGS) -o $(CMDDIR)/wktstat  	src/other/wktstat.s	
 
 clean:
 	rm -rf $(SYSDIR)/*
