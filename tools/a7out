@@ -437,7 +437,7 @@ sub opr {
     $skip = 1
       if ( ( $i == 017 )
         && ( $LINK == 0 )
-        && ( $AC != 0 )
+        && ( $AC < SIGN )
         && ( $AC != 0 ) );    # szl & sna & spa
 
     # Clear operations
@@ -558,6 +558,8 @@ sub eae {
         return;
     }
     if ( $maskedinstr == 0660600 ) {    # llss: long left shift, signed
+	# Set the link to be the AC sign bit
+	$LINK= ($AC & SIGN) ? LINKMASK : 0;
         dprintf( "llss AC %06o step %d\n", $AC, $step );
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
@@ -572,7 +574,7 @@ sub eae {
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
             $AC = ( ( $AC << 1 ) | $MQmsb ) & MAXINT;
-            $MQ = ( ( $MQ << 1 ) | ( ($LINK) ? 1 : 0 ) ) & MAXINT;   # XXX how to handle unsigned?
+            $MQ = ( ( $MQ << 1 ) | ( ($LINK) ? 1 : 0 ) ) & MAXINT;
         }
         $PC++;
         return;

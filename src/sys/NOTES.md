@@ -52,6 +52,7 @@ directory node (dnode) format
    d.i          i-number of file
    d.name       four words, space padded
    d.uniq       i.uniq value of file
+		two unused words, so 8 words/entry, 8 entries/block
 ```
 
 i numbers
