@@ -26,7 +26,7 @@
    dzm fbuf
    lac d1
    dac dskadr
-   dac wrlfg
+   dac wrflg
    dzm diskin
  "o------------> [scan markup]
    jmp advanc
@@ -272,7 +272,7 @@ cw:
    jms putsc; tal1
 1:
    -1
-   tad tufp
+   tad tbufp
    cma
    tad tal1
    dac 1f
@@ -283,7 +283,7 @@ cw:
    jms number
    jmp advanc
 
-cn1:
+cnl:
    lac adrflg
    sna
    jmp 1f
@@ -346,7 +346,7 @@ addres: 0
 ad1:
    jms getsc; tal
 ad2:
-   jms betwen; d47; d56
+   jms betwen; d47; d58
    skp
    jmp numb
    sad o40 "[o40 circled in scan]
@@ -523,7 +523,7 @@ gline: 0
    dac glint1
    jms getdsk
    lac glint1 " [these 6 lines were surrounded by a box
-   adn o17777 " that was Xed out with an arrow pointing to it]:
+   and o17777 " that was Xed out with an arrow pointing to it]:
    tad dskbfp " --
    dac ital   "|\/|
    lac linep  "|/\|<---
