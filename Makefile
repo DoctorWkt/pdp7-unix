@@ -65,6 +65,13 @@ tests: dirs
 	$(AS) $(ASARGS) -o $(TESTDIR)/testmul    		src/tests/testmul.s
 	$(AS) $(ASARGS) -o $(TESTDIR)/write_test    	src/tests/write_test.s
 
+runtests: tests
+	cd tests && ../tools/a7out decimal_out
+	cd tests && ../tools/a7out fork_test
+	cd tests && ../tools/a7out octal_test
+#	cd tests && ../tools/a7out testmul
+#	cd tests && ../tools/a7out write_test
+
 clean:
 	rm -rf $(SYSDIR)/*
 	rm -rf $(CMDDIR)/*
