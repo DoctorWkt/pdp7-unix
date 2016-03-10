@@ -323,6 +323,18 @@ sub add_file {
     # Allocate enough blocks for the file
     my @blklist = allocate_blocks($size);
 
+    # Put the contents of the file into the blocks
+    my ($blocknum, $offset)= ($blklist[0], 0);
+    dprint("Filling block $blocknum with content from $extfile\n");
+    foreach my $i (0 .. $size-1) {
+        $Block[$blocknum][$offset++]= $buf[$i];
+        if ( $offset == WORDSPERBLK ) {
+            $offset = 0;
+            $blocknum++;
+    	    dprint("Filling block $blocknum with content from $extfile\n");
+        }
+    }
+
     # If it's too big, allocate indirect blocks
     my $large = 0;
     my @indblocks;
