@@ -368,3 +368,4 @@ add_special("display", 014, -1, 11);
 add_special("pptout", 014, -1, 12);
 add_file("as", 014, -1, "b.c");
 add_file("a7out", 014, -1, "a7out");
+add_file("oflow", 014, -1, "a7out");
