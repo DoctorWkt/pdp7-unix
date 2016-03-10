@@ -47,6 +47,8 @@ use constant I_OWNERWRITE => 0000004;
 use constant I_WORLDREAD  => 0000010;
 use constant I_WORLDWRITE => 0000004;
 
+use constant I_LINK => 0000001;		# Never used in an i-node: just internal use
+
 # Directory field offsets
 use constant D_INUM     => 0;
 use constant D_NAME     => 1;
@@ -388,6 +390,7 @@ sub parse_perms {
 
     $filetype = I_DIRECTORY if ( $permstring =~ m{^d} );
     $filetype = I_SPECIAL   if ( $permstring =~ m{^i} );
+    $filetype = I_LINK      if ( $permstring =~ m{^l} );
 
     $perms |= I_OWNERREAD  if ( $permstring =~ m{^.r} );
     $perms |= I_OWNERWRITE if ( $permstring =~ m{^..w} );
@@ -439,6 +442,12 @@ sub parse_proto_file {
             add_special( $name, $perms, $uid, $inum );
             next;
         }
+        if ( $type eq I_LINK ) {
+            my ( $name, $permstr, $inum ) = @words;
+	    dprint("Adding link in curdir to $name inum $inum\n");
+	    add_direntry( $name, $inum );
+            next;
+	}
     }
     close($IN);
 }
