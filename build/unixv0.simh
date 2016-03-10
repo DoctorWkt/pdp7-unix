@@ -1,5 +1,11 @@
+set cpu 8k
+set cpu eae
+set cpu history=100
+show cpu
+
 set rb ena
 att rb image.fs
-load -S a.rim
 show dev
+
+load -S a.rim
 dep pc 0100
