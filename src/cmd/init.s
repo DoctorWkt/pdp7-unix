@@ -52,7 +52,7 @@ login:
    dac 9
 2:
    lac 8 i
-   sac o12
+   sad o12
    lac o72
    sad 9 i
      skp
@@ -270,7 +270,7 @@ password:
 d1: 1
 o43: 043
 o100: 0100
-o400000; 0400000
+o400000: 0400000
 d2: 2
 o12: 012
 om60: -060
