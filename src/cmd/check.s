@@ -37,7 +37,7 @@ sys sysloc
 dac dskbuf
 dac dskbuf1
 
-   dzm indircnt
+   dzm indircnt		" Zero the counts for indirect and others
    dzm icnt
    dzm licnt
    dzm blcnt
