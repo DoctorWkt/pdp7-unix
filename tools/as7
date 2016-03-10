@@ -227,11 +227,11 @@ elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
 elsif ($format eq 'rim') {	# PDP-7 Read In Mode
     for my $loc ( 0 .. $#Mem ) {
 	if (defined($Mem[$loc])) {
-	    punch(0200000 | $loc ); # LAC addr
+	    punch(0040000 | $loc ); # DAC addr
 	    punch($Mem[$loc] || 0);
 	}
     }
-    punch($OUT, 0740040 );	# HLT
+    punch(0740040 );	# HLT
 }
 else {
     die("unknown format $format");
