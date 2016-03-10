@@ -14,16 +14,12 @@ Getopt::Long::Configure qw(gnu_getopt);
 # Constants
 use constant NUMBLOCKS     => 8000;    # Number of blocks on a surface
 use constant WORDSPERBLK   => 64;      # 64 words per block
-use constant NUMINODEBLKS  => 710;     # Blocks 1 to 710 for i-nodes
-#use constant FIRSTINODEBLK => 1;       # First i-node block number
+use constant NUMINODEBLKS  => 710;     # Number of i-nodes
 use constant FIRSTINODEBLK => 2;       # First i-node block number
 use constant INODESIZE     => 12;      # Size of an i-node
 use constant INODESPERBLK => int(WORDSPERBLK / INODESIZE);
 use constant DIRENTSIZE => 8;          # Size of an directory entry
 use constant DIRENTSPERBLK => WORDSPERBLK / DIRENTSIZE;
-
-use constant ROOT_UID => -1;           # Native root user-id
-use constant MAXINT   => 0777777;      # Biggest unsigned integer
 
 use constant DD_INUM => 2;             # I-number of the dd directory
 
@@ -148,8 +144,7 @@ sub fill_inode {
     my ( $inum, $perms, $filetype, $uid, $size, @blklist ) = @_;
     die("Too many blocks\n") if ( @blklist > 7 );
 
-    # Deal with the root user-id
-    $uid = MAXINT if ( $uid == ROOT_UID );
+    $uid &= 0777777;		# truncate negative UID to 18 bits
 
     # Calculate the block number and word offset for this
     $inum = allocate_inode() if ( !defined($inum) );
@@ -174,6 +169,12 @@ sub fill_inode {
     dprintf( "Fill inum %d: flags %06o uid %06o size %d (%06o)=> blk %d off %d\n",
         $inum, $flags, $uid, $size, $size, $blocknum, $offset );
     return ($inum);
+}
+
+sub increment_file_length {
+    my ( $inum, $incr) = @_;
+    my ( $blocknum, $offset ) = get_inode_block_offset($inum);
+    $Block[$blocknum][ $offset + I_SIZE ] += $incr;
 }
 
 # Convert an ASCII string into an array of 18-bit word values
@@ -240,6 +241,8 @@ sub add_direntry {
 
     # Move up to the next position in the directory.
     $dirref->[1] += D_NUMWORDS;
+
+    increment_file_length( $dirref->[2], D_NUMWORDS ); # update directory inode i.size
 
     # If we have filled the directory up, allocate another block to it
     if ( $dirref->[1] == WORDSPERBLK ) {
@@ -535,6 +538,7 @@ sub dump_image {
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
             foreach my $offset ( 0 .. WORDSPERBLK-1 ) {
                 my $word = $Block[$blocknum][$offset] || 0;
+		# SIMH format packs word in a little-endian 32-bit int
                 my $packedword = pack( "CCCC",
                     $word & 0xff,
                     ( $word >> 8 ) & 0xff,
