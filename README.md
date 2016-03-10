@@ -13,7 +13,7 @@ as the files 0*.pdf.
 
 ## Current Status
 
-Update March 2016: We've written an assembler, a user-mode simulator and
+Update mid-March 2016: We've written an assembler, a user-mode simulator and
 commented several source files. We now have these utilities running:
 as, cat, chmod, chown, chrm, cp, date, ln, ls, mv, stat. We have a working
 shell with some functionality missing. We have begun work on building a
@@ -21,7 +21,8 @@ filesystem.
 
 Things to do: finish the filesystem creation tool, finish the shell, write the
 missing utilities, try to bring the system up on a PDP-7 system. We have
-a real PDP-7 and [SimH](http://simh.trailing-edge.com/) as target platforms.
+a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
+and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
 ## Source Tree
 
