@@ -454,17 +454,16 @@ sub dump_image {
     # list: Octal output with block comments
     if ( $format eq "list" ) {
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
-            printf( $OUT "Block %d (%06o)\n", $blocknum, $blocknum )
-              if ($debug);
+            printf( $OUT "Block %d (%06o)\n", $blocknum, $blocknum );
             foreach my $line ( 0 .. 7 ) {
                 foreach my $offset ( 0 .. 7 ) {
                     printf( $OUT "%06o ",
                         $Block[$blocknum][ 8 * $line + $offset ] || 0
                     );
                 }
-                print( $OUT "\n" ) if ($debug);
+                print( $OUT "\n" );
             }
-            print( $OUT "\n" ) if ($debug);
+            print( $OUT "\n" );
         }
     }
 
