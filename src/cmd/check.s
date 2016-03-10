@@ -42,7 +42,7 @@ dac dskbuf1
    dzm licnt
    dzm blcnt
    dzm curi
-   jms coopyz i; usetab; 500
+   jms copyz i; usetab; 500
 
 iloop:
    isz curi
@@ -68,7 +68,7 @@ iloop:
 1:
    lac i t1
    sza
-   jms dupchech
+   jms dupcheck
    isz t1
    isz t2
    jmp 1b
