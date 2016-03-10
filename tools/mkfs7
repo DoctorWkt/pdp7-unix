@@ -166,8 +166,8 @@ sub fill_inode {
     $flags |= I_LARGE if ( $size > WORDSPERBLK * I_NUMBLKS );
     $Block[$blocknum][ $offset + I_FLAGS ] = $flags;
 
-    dprintf( "fill inum %d: flags %06o uid %06o size %d\n",
-        $inum, $flags, $uid, $size );
+    dprintf( "Fill inum %d: flags %06o uid %06o size %d => blk %d off %d\n",
+        $inum, $flags, $uid, $size, $blocknum, $offset );
     return ($inum);
 }
 
@@ -177,6 +177,8 @@ sub fill_inode {
 sub ascii2words {
     my $str = shift;
     my @words;
+    # Pad the string to eight characters
+    $str = sprintf( "%-8s", substr( $str, 0, 8 ) );
     for ( my $i = 0 ; $i < length($str) ; $i += 2 ) {
         my $c1 = substr( $str, $i,     1 ) || "\0";
         my $c2 = substr( $str, $i + 1, 1 ) || "\0";
@@ -206,35 +208,38 @@ sub add_block_to_inode {
 # directory stack.
 sub add_direntry {
     my ( $name, $inum ) = @_;
-    dprint("Adding $name inode $inum to current directory\n");
 
     # Get the block and offset to the next empty slot in the directory
     my $dirref = $Dirstack[-1];
 
     if ( !defined($dirref) ) {
+        dprint("Adding $name inode $inum to current directory\n");
         dprint("Empty dirstack, we must be building the root dir\n");
         return;
     }
 
     my $blocknum = $dirref->[0];
     my $offset   = $dirref->[1];
+    dprint("Adding $name inode $inum to curdir inum $dirref->[2]" .
+		" blk $blocknum off $offset\n");
 
     # Convert the name into four words
     my @wlist = ascii2words($name);
 
     # Fill in the directory entry
     $Block[$blocknum][ $offset + D_INUM ]     = $inum;
-    $Block[$blocknum][ $offset + D_NAME ]     = pop(@wlist);
-    $Block[$blocknum][ $offset + D_NAME + 1 ] = pop(@wlist);
-    $Block[$blocknum][ $offset + D_NAME + 2 ] = pop(@wlist);
-    $Block[$blocknum][ $offset + D_NAME + 3 ] = pop(@wlist);
+    $Block[$blocknum][ $offset + D_NAME ]     = shift(@wlist);
+    $Block[$blocknum][ $offset + D_NAME + 1 ] = shift(@wlist);
+    $Block[$blocknum][ $offset + D_NAME + 2 ] = shift(@wlist);
+    $Block[$blocknum][ $offset + D_NAME + 3 ] = shift(@wlist);
 
     # Move up to the next position in the directory.
     $dirref->[1] += D_NUMWORDS;
 
     # If we have filled the directory up, allocate another block to it
     if ( $dirref->[1] == WORDSPERBLK ) {
-        my $nextblock = allocate_blocks(WORDSPERBLK);
+        my ($nextblock) = allocate_blocks(WORDSPERBLK);
+	dprint("Extra block $nextblock for this directory\n");
         $dirref->[0] = $nextblock;
         $dirref->[1] = 0;
 
@@ -253,7 +258,7 @@ sub make_dir {
     $inum = allocate_inode($inum);
 
     # Get a block for this directory
-    my $dirblock = allocate_blocks(WORDSPERBLK);
+    my ($dirblock) = allocate_blocks(WORDSPERBLK);
 
     # Add this to the previous directory
     # and fill the i-node with the details
@@ -266,7 +271,7 @@ sub make_dir {
 
     # Add a "dd" entry to this directory
     add_direntry( "dd", DD_INUM );
-    dprintf( "Made directory %s perms %06o uid %d in i-node %d\n\n",
+    dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
 }
 
@@ -410,6 +415,7 @@ sub parse_proto_file {
         # If the first word is a $, then pop a directory from the stack
         if ( $words[0] eq '$' ) {
             pop(@Dirstack);
+	    dprint("Popping back a directory in the dirstack\n\n");
             next;
         }
 
@@ -435,6 +441,18 @@ sub parse_proto_file {
     close($IN);
 }
 
+# Convert an 18-bit word into two ASCII characters and return them.
+# Don't return NUL characters
+sub word2ascii {
+    my $word   = shift;
+    my $c1     = ( $word >> 9 ) & 0177;
+    my $c2     = $word & 0177;
+    my $result = "";
+    $result .= (($c1 >= 32) && ($c1 <= 126)) ? chr($c1) : ' ';
+    $result .= (($c2 >= 32) && ($c2 <= 126)) ? chr($c2) : ' ';
+    return ($result);
+}
+
 # Convert an 18-bit word into a scalar which has three sixbit
 # values in three bytes. Set the msb in the first byte
 sub word2three {
@@ -456,10 +474,18 @@ sub dump_image {
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
             printf( $OUT "Block %d (%06o)\n", $blocknum, $blocknum );
             foreach my $line ( 0 .. 7 ) {
+
+		# Print out the words in octal
                 foreach my $offset ( 0 .. 7 ) {
                     printf( $OUT "%06o ",
                         $Block[$blocknum][ 8 * $line + $offset ] || 0
                     );
+                }
+
+		# Now print out the ASCII characters in the word
+                foreach my $offset ( 0 .. 7 ) {
+                    print( $OUT word2ascii(
+                        $Block[$blocknum][ 8 * $line + $offset ] || 0));
                 }
                 print( $OUT "\n" );
             }
