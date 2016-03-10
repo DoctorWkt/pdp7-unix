@@ -1,0 +1,44 @@
+# Prototype file for PDP-7 Unix filesystem layout
+#
+# Entries are one of:
+#    filename f[r-][w-][r-][r-] uid local_file_to_insert
+#    dirname  d[r-][w-][r-][r-] uid [inumber]
+#    device   i[r-][w-][r-][r-] uid inumber
+#    link     l---- inumber
+#
+# The top directory's name is ignored
+# Numeric values are in decimal
+# Contents of each directory ends with a $ on a line by itself
+# Format was inspired by 6th Edition mkfs
+#
+dd 	         drw-- -1 2
+    system       drw-- -1 3
+	init     frwr- -1 ../bin/init
+	password frw-- -1 password
+        ttyin    irwr- -1 6
+        keyboard irwr- -1 7
+        pptin    irwr- -1 8
+        ttyout   irwr- -1 10
+        display  irwr- -1 11
+        pptout   irwr- -1 12
+        sh       frwr- -1 ../bin/sh
+	$
+
+    as       frwr- -1 ../bin/as
+    cat      frwr- -1 ../bin/cat
+    chmod    frwr- -1 ../bin/chmod
+    chown    frwr- -1 ../bin/chown
+    chrm     frwr- -1 ../bin/chrm
+    cp       frwr- -1 ../bin/cp
+    date     frwr- -1 ../bin/date
+    ds       frwr- -1 ../bin/ds
+    ln       frwr- -1 ../bin/ln
+    ls       frwr- -1 ../bin/ls
+    mv       frwr- -1 ../bin/mv
+    stat     frwr- -1 ../bin/stat
+    ken      drwr- 10
+        system l---- 3
+        $
+    dmr      drwr- 12
+        system l---- 3
+        $

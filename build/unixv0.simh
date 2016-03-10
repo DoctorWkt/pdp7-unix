@@ -1,0 +1,5 @@
+set rb ena
+att rb image.fs
+load -S a.rim
+show dev
+dep pc 0100
