@@ -52,7 +52,7 @@ login:
    dac 9
 2:
    lac 8 i
-   sac o12
+   sad o12
    lac o72
    sad 9 i
      skp
