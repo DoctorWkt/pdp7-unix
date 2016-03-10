@@ -480,7 +480,7 @@ sub dump_image {
     my ( $format, $output ) = @_;
     open( my $OUT, ">", $output ) || die("Can't write to $output: $!\n");
 
-    # list: Octal output with block comments
+    # list: Octal output with block comments. We don't dump the first 8K blocks
     if ( $format eq "list" ) {
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
             printf( $OUT "Block %d (%06o)\n", $blocknum, $blocknum );
@@ -506,6 +506,14 @@ sub dump_image {
 
     # ptr: Each word into three bytes, a sixbit in each one
     if ( $format eq "ptr" ) {
+        # Dump 8000 empty blocks first
+        foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
+            foreach my $offset ( 0 .. WORDSPERBLK ) {
+                print( $OUT word2three( 0 ) );
+            }
+        }
+
+	# Now the real blocks
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
             foreach my $offset ( 0 .. WORDSPERBLK ) {
                 print( $OUT word2three( $Block[$blocknum][$offset] || 0 ) );
@@ -515,6 +523,14 @@ sub dump_image {
 
     # simh: Each word into four bytes, little endian
     if ( $format eq "simh" ) {
+        # Dump 8000 empty blocks first
+        foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
+            foreach my $offset ( 0 .. WORDSPERBLK ) {
+                print( $OUT pack( "CCCC", 0,0,0,0));
+            }
+        }
+
+	# Now the real blocks
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
             foreach my $offset ( 0 .. WORDSPERBLK ) {
                 my $word = $Block[$blocknum][$offset] || 0;
