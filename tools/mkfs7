@@ -536,10 +536,10 @@ sub dump_image {
             foreach my $offset ( 0 .. WORDSPERBLK-1 ) {
                 my $word = $Block[$blocknum][$offset] || 0;
                 my $packedword = pack( "CCCC",
-                    ( $word >> 24 ) & 0xff,
-                    ( $word >> 16 ) & 0xff,
+                    $word & 0xff,
                     ( $word >> 8 ) & 0xff,
-                    $word & 0xff );
+                    ( $word >> 16 ) & 0xff,
+                    ( $word >> 24 ) & 0xff);
                 print( $OUT $packedword );
             }
         }
