@@ -17,7 +17,7 @@ use constant WORDSPERBLK   => 64;      # 64 words per block
 use constant NUMINODEBLKS  => 710;     # Blocks 1 to 710 for i-nodes
 use constant FIRSTINODEBLK => 1;       # First i-node block number
 use constant INODESIZE     => 12;      # Size of an i-node
-use constant INODESPERBLK => WORDSPERBLK / INODESIZE;
+use constant INODESPERBLK => int(WORDSPERBLK / INODESIZE);
 use constant DIRENTSIZE => 8;          # Size of an directory entry
 use constant DIRENTSPERBLK => WORDSPERBLK / DIRENTSIZE;
 
@@ -82,8 +82,9 @@ sub allocate_blocks {
     foreach my $b ( 1 .. $numblocks ) {
         push( @blklist, $nextblknum++ );
     }
-    dprint(
-        "Allocated blocks for size $numwords: $blklist[0] .. $blklist[-1]\n");
+    dprintf(
+        "Allocated blocks for size %d: %d .. %d (%06o .. %06o)\n",
+	$numwords, $blklist[0], $blklist[-1], $blklist[0], $blklist[-1]);
     return (@blklist);
 }
 
@@ -159,6 +160,7 @@ sub fill_inode {
     my $i = $offset;
     foreach my $datablocknum (@blklist) {
         $Block[$blocknum][ $i + I_DISKPS ] = $datablocknum;
+	$i++;
     }
 
     # Deal with the flags and see if it's a large file
@@ -166,8 +168,8 @@ sub fill_inode {
     $flags |= I_LARGE if ( $size > WORDSPERBLK * I_NUMBLKS );
     $Block[$blocknum][ $offset + I_FLAGS ] = $flags;
 
-    dprintf( "Fill inum %d: flags %06o uid %06o size %d => blk %d off %d\n",
-        $inum, $flags, $uid, $size, $blocknum, $offset );
+    dprintf( "Fill inum %d: flags %06o uid %06o size %d (%06o)=> blk %d off %d\n",
+        $inum, $flags, $uid, $size, $size, $blocknum, $offset );
     return ($inum);
 }
 
