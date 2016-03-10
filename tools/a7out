@@ -1301,8 +1301,8 @@ sub word2ascii {
     my $c1     = ( $word >> 9 ) & 0177;
     my $c2     = $word & 0177;
     my $result = "";
-    $result .= chr($c1) if ($c1);
-    $result .= chr($c2) if ($c2);
+    $result .= (($c1 >= 32) && ($c1 <= 126)) ? chr($c1) : ' ';
+    $result .= (($c2 >= 32) && ($c2 <= 126)) ? chr($c2) : ' ';
     return ($result);
 }
 
