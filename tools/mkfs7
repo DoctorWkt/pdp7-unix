@@ -15,7 +15,8 @@ Getopt::Long::Configure qw(gnu_getopt);
 use constant NUMBLOCKS     => 8000;    # Number of blocks on a surface
 use constant WORDSPERBLK   => 64;      # 64 words per block
 use constant NUMINODEBLKS  => 710;     # Blocks 1 to 710 for i-nodes
-use constant FIRSTINODEBLK => 1;       # First i-node block number
+#use constant FIRSTINODEBLK => 1;       # First i-node block number
+use constant FIRSTINODEBLK => 2;       # First i-node block number
 use constant INODESIZE     => 12;      # Size of an i-node
 use constant INODESPERBLK => int(WORDSPERBLK / INODESIZE);
 use constant DIRENTSIZE => 8;          # Size of an directory entry
@@ -58,7 +59,7 @@ use constant D_NUMWORDS => 8;    # Eight words in a direntry
 # Globals
 my $debug = 0;
 my @Block;                       # Array of blocks and words in each block
-my $nextblknum = NUMINODEBLKS + 1;    # Next free block number
+my $nextblknum = FIRSTINODEBLK + NUMINODEBLKS;    # Next free block number
 my $nextinum   = 1;                   # i-num 0 is never used
 my @Dirstack;    # Stack of directories. Each value is a ref
                  # to a [ blocknum, offset, inum ] array which
