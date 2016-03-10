@@ -509,14 +509,14 @@ sub dump_image {
     if ( $format eq "ptr" ) {
         # Dump 8000 empty blocks first
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
-            foreach my $offset ( 0 .. WORDSPERBLK ) {
+            foreach my $offset ( 0 .. WORDSPERBLK-1 ) {
                 print( $OUT word2three( 0 ) );
             }
         }
 
 	# Now the real blocks
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
-            foreach my $offset ( 0 .. WORDSPERBLK ) {
+            foreach my $offset ( 0 .. WORDSPERBLK-1 ) {
                 print( $OUT word2three( $Block[$blocknum][$offset] || 0 ) );
             }
         }
@@ -526,14 +526,14 @@ sub dump_image {
     if ( $format eq "simh" ) {
         # Dump 8000 empty blocks first
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
-            foreach my $offset ( 0 .. WORDSPERBLK ) {
+            foreach my $offset ( 0 .. WORDSPERBLK-1 ) {
                 print( $OUT pack( "CCCC", 0,0,0,0));
             }
         }
 
 	# Now the real blocks
         foreach my $blocknum ( 0 .. NUMBLOCKS - 1 ) {
-            foreach my $offset ( 0 .. WORDSPERBLK ) {
+            foreach my $offset ( 0 .. WORDSPERBLK-1 ) {
                 my $word = $Block[$blocknum][$offset] || 0;
                 my $packedword = pack( "CCCC",
                     ( $word >> 24 ) & 0xff,
