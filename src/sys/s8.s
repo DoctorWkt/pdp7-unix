@@ -8,11 +8,10 @@ dspbsz = 270
 ndskbs = 4
 
 " flags
-	" interupt flags
 .insys: 0			" "in system"
-.int1: 0			" inode for interrupt 1
-.int2: 0			" inode for interrupt 2
-.ac: 0				" saved AC from interrupt
+.int1: 0			" inode for user interrupt 1
+.int2: 0			" inode for user interrupt 2
+.ac: 0				" saved AC from Priotity Interrupt
 .savblk: 0			" set by system call, cleared by disk i/o
 .dsptm: 0			" display restart countdown (10 ticks)
 .dskb: 0			" set on disk interrupt
@@ -107,7 +106,10 @@ q2:
 dsploc: .=.+1
 dsplno: .=.+1
 dspbuf:
-   0065057;0147740;0160000
+   0065057;0147740;0160000	" display commands: see 03-scope.pdf pg 20
+	" PARAM: clear blink, clear light pen, scale=1, intensity=3
+	" X-Y: invisible, no delay, Y=01740 (992)
+	" X-Y: invisible, settling delay, X=0
    .=.+30
 coldentry:
    dzm 0100 " not re-entrant
@@ -134,13 +136,13 @@ coldentry:
 dskbuf = 07700
 dskbs: .=.+65+65+65+65
 edskbsp: .
-uquant: .=.+1
-dspbufp: .=.+1
-pbsflgs: .=.+2
+uquant: .=.+1			" number of ticks user has been running
+dspbufp: .=.+1			" pointer to display buffer
+pbsflgs: .=.+2			" buttons on last tick, last button interrupt
 mode: .=.+1
-nttychar: .=.+1
+nttychar: .=.+1			" CR to send next, or zero
 npptchar: .=.+1
-ttydelay: .=.+1
+ttydelay: .=.+1			" delay count for TTY output
 name: .=.+4
 lnkaddr: .=.+1
 char: .=.+1
@@ -148,6 +150,9 @@ dskaddr: .=.+1
 uniqpid: 1			" pid generator
 lu: .=.+4			" user (process) table entry copy
 sfiles: .=.+10			" wait addresses for special files
+		" (bit vector of waiting processes?)
+		" offsets:	0: ttyin, 1: ttyout, 2: keyboard,
+		"		3: ptr,   4: ptp,    6: display
 dpdata:
    dpstat: .=.+1
    dpread: .=.+1
@@ -211,21 +216,21 @@ userdata:			" "ustruct" (swappable)
 ii: .=.+1			" number of i-node in inode:
 inode:				" disk inode in memory:
    i.flags: .=.+1		" inode flags
-				" 400000 free?? (checked/toggled by icreat)
+				" 400000 in use
 				" 200000 large file
-				" 000040 special device (indicated by inum)?
-				" 000020  directory
+				" 000040 special device (indicated by inum)
+				" 000020 directory
 				" 000010 owner read
 				" 000004 owner write
 				" 000002 world read
 				" 000001 world write
-   i.dskps: .=.+7		" disk block pointers (indirect if "large file")
+   i.dskps: .=.+7		" disk block numbers (indirect if "large file")
    i.uid: .=.+1			" owner
-   i.nlks: .=.+1		" link count
-   i.size: .=.+1
+   i.nlks: .=.+1		" link count (negative)
+   i.size: .=.+1		" size (in words)
    i.uniq: .=.+1		" unique number
       .= inode+12
-di: .=.+1
+di: .=.+1			" directory index
 dnode:				" directory entry:
    d.i: .=.+1			" inode number
    d.name: .=.+4		" name (space padded)

@@ -151,12 +151,14 @@ iput: 0
    jmp iput i
 t = t+3
 
+	" allocate directory entry
+	" AC/ entry number
 dget: 0
-   dac di
-   alss 3
-   dac 9f+t
-   jms pget
-   dac 9f+t+1
+   dac di			" save entry number
+   alss 3			" get word number
+   dac 9f+t			" save in t0
+   jms pget			" get free disk block
+   dac 9f+t+1			" save in t1
    jms dskrd
    lac 9f+t
    and o77
@@ -185,7 +187,8 @@ dput: 0
 
 t = t+3
 
-	" allocate a block for a file, returns disk block number
+	" get a block number for a file, returns disk block number
+	" allocates block if not allocated
 	" AC/ file offset
 	"   jms pget
 	" AC/ disk block number
