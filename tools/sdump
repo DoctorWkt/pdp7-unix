@@ -6,6 +6,7 @@
 #
 use strict;
 use warnings;
+use Fcntl qw(:flock SEEK_SET);
 
 ### read a word from a file in SimH format
 ### return -1 on EOF
@@ -14,10 +15,10 @@ sub read_word {
     # Convert four bytes into one 18-bit word
     return -1 if ( read( $F, my $four, 4 ) != 4 ); # Not enough bytes read
     my ( $b1, $b2, $b3, $b4 ) = unpack( "CCCC", $four );
-    return ((($b1 & 0xff) << 24 ) |
-            (($b2 & 0xff) << 16 ) |
-            (($b3 & 0xff) << 8) |
-             ($b4 & 0xff));
+    return (($b1 & 0xff)  |
+            (($b2 & 0xff) << 8 ) |
+            (($b3 & 0xff) << 16) |
+            (($b3 & 0xff) << 24));
 }
 
 ### Main program
@@ -27,6 +28,11 @@ open(my $IN, "<", $ARGV[0]) || die("Couldn't open $ARGV[0]: $!\n");
 
 use constant NUMBLOCKS     => 8000;    # Number of blocks on a surface
 use constant WORDSPERBLK   => 64;      # 64 words per block
+use constant BYTESPERWORD  => 4;       # We encode each word into 4 bytes
+
+# Skip the first surface
+seek($IN, NUMBLOCKS*WORDSPERBLK*BYTESPERWORD, SEEK_SET) ||
+				die("Cannot seek: $!\n");
 
 foreach my $blocknum ( 0 .. NUMBLOCKS*2 - 1 ) {
     printf("Block %d (%06o)\n", $blocknum, $blocknum );

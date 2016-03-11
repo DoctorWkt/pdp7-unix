@@ -3,11 +3,11 @@
 
 	" allocate a free disk block for a file (data or indirect)
 alloc: 0
-   -1
-   tad s.nfblks
+   -1			" Decrement the # free block numbers in the cache
+   tad s.nfblks		" kept at s.fblks. Jump to 1f if no free blocks left.
    spa
    jmp 1f
-   dac s.nfblks
+   dac s.nfblks		" Update the count of free block numbers
    tad fblksp
    jms laci
    dac 9f+t
@@ -16,7 +16,7 @@ alloc: 0
    jms dskwr
    dzm .savblk
    lac 9f+t
-   jmp alloc i
+   jmp alloc i		" Return from routine
 1:
    lac s.nxfblk
    sna
@@ -30,7 +30,7 @@ alloc: 0
    dac s.nfblks
    jmp alloc+1
 
-	" free a disk block
+	" free the disk block whose number is in AC
 free: 0
    lmq
    lac s.nfblks
@@ -53,7 +53,7 @@ free: 0
    dzm .savblk
    lac d1
    dac s.nfblks
-   jmp free i
+   jmp free i				" Return from the routine
 t = t+1
 
 	" load AC indirect (without using indirect!)

@@ -13,6 +13,10 @@ a.rim:
 	$(AS) -f rim  -o a.rim $(SYS)/sop.s $(SYS)/s[1-8].s
 	$(AS) -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-8].s
 
+coldboot:
+	$(AS) -f rim  -o a.rim $(SYS)/sop.s $(SYS)/s[1-9].s
+	$(AS) -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-9].s
+
 image.fs:
 	$(MKFS) --debug --format simh proto
 
