@@ -23,6 +23,7 @@ use constant DIRENTSIZE => 8;          # Size of an directory entry
 use constant DIRENTSPERBLK => WORDSPERBLK / DIRENTSIZE;
 
 use constant DD_INUM => 2;             # I-number of the dd directory
+use constant MAXINT    => 0777777;     # Biggest unsigned integer
 
 # i-node field offsets
 use constant I_FLAGS  => 0;
@@ -190,7 +191,7 @@ sub fill_inode {
     my ( $inum, $perms, $filetype, $uid, $size, @blklist ) = @_;
     die("Too many blocks\n") if ( @blklist > 7 );
 
-    $uid &= 0777777;		# truncate negative UID to 18 bits
+    $uid &= MAXINT;		# truncate negative UID to 18 bits
 
     # Calculate the block number and word offset for this
     $inum = allocate_inode() if ( !defined($inum) );
