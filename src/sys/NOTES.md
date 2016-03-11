@@ -41,7 +41,7 @@ inode format
             01  world write
    i.dskps      7 block numbers (all indirect blocks if "large file")
    i.uid        owner
-   i.nlks       link count
+   i.nlks       link count (negative)
    i.size       size (in words?)
    i.uniq       unique value assigned at creation
 ```
