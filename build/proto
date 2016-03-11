@@ -15,12 +15,12 @@ dd 	         drw-- -1 2
     system       drw-- -1 3
 	init     frwr- -1 ../bin/init
 	password frw-- -1 password
-        ttyin    irwr- -1 6
-        keyboard irwr- -1 7
-        pptin    irwr- -1 8
-        ttyout   irwr- -1 10
-        display  irwr- -1 11
-        pptout   irwr- -1 12
+        ttyin    irwr- -1 7
+        keyboard irwr- -1 8
+        pptin    irwr- -1 9
+        ttyout   irwr- -1 11
+        display  irwr- -1 12
+        pptout   irwr- -1 13
         sh       frwr- -1 ../bin/sh
 	$
 
