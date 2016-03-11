@@ -18,7 +18,7 @@ sub read_word {
     return (($b1 & 0xff)  |
             (($b2 & 0xff) << 8 ) |
             (($b3 & 0xff) << 16) |
-            (($b3 & 0xff) << 24));
+            (($b4 & 0xff) << 24));
 }
 
 ### Main program

@@ -14,7 +14,8 @@ Getopt::Long::Configure qw(gnu_getopt);
 # Constants
 use constant NUMBLOCKS     => 8000;    # Number of blocks on a surface
 use constant WORDSPERBLK   => 64;      # 64 words per block
-use constant NUMINODEBLKS  => 710;     # Number of i-nodes
+use constant LASTFREEBLOCK => 6399;    # That's what s9.s uses
+use constant NUMINODEBLKS  => 710;     # Number of i-node blocks
 use constant FIRSTINODEBLK => 2;       # First i-node block number
 use constant INODESIZE     => 12;      # Size of an i-node
 use constant INODESPERBLK => int(WORDSPERBLK / INODESIZE);
@@ -54,12 +55,12 @@ use constant D_NUMWORDS => 8;    # Eight words in a direntry
 
 # Globals
 my $debug = 0;
-my @Block;                       # Array of blocks and words in each block
-my $nextblknum = FIRSTINODEBLK + NUMINODEBLKS;    # Next free block number
-my $nextinum   = 1;                   # i-num 0 is never used
-my @Dirstack;    # Stack of directories. Each value is a ref
-                 # to a [ blocknum, offset, inum ] array which
-                 # is the next free position in the directory
+my @Block;	# Array of blocks and words in each block
+my @Freelist;	# List of free block numbers
+my $nextinum   = 1;	# i-num 0 is never used
+my @Dirstack;	# Stack of directories. Each value is a ref
+                # to a [ blocknum, offset, inum ] array which
+                # is the next free position in the directory
 
 # Debug printing
 sub dprint {
@@ -70,6 +71,50 @@ sub dprintf {
     printf(@_) if ($debug);
 }
 
+# Initialise the free block list
+# s9.s sets up blocks 710 to 6399 as free
+sub init_freelist {
+  foreach my $blk (FIRSTINODEBLK+NUMINODEBLKS-1 .. LASTFREEBLOCK) {
+    push(@Freelist, $blk);
+  }
+}
+
+# Recursively write the free list of blocks to disk.
+# Set up a block with nine free block numbers in it,
+# plus a pointer to the next block in the free list.
+# Return the block number of this block with nine free block numbers
+# or 0 if we did not set up out a block.
+# The argument is only used to make the debug output pleasing
+sub write_freelist {
+   no warnings 'recursion';
+   my $i= shift;
+
+   # Get a block to store nine free block numbers
+   # Return if there are no free blocks
+   my $thisblock= shift(@Freelist);
+   return(0) if (!defined($thisblock));
+   dprint("$thisblock ");
+   dprint("\n") if (($i % 14) == 0);
+
+   # Try to grab nine of them and store in this block
+   foreach my $count (1 .. 9) {
+      $Block[$thisblock][$count]= shift(@Freelist) || 0;
+   }
+
+   # Now we need the pointer to the next block in the chain
+   $Block[$thisblock][0]= write_freelist($i+1);
+
+   # and return our own block number
+   return($thisblock);
+}
+
+# Fill block zero, the sysdata block, with whatever it needs.
+# As far as we can tell, all it needs is the pointer to the
+# beginning of the free list.
+sub fill_sysdata {
+  $Block[0][0]= write_freelist(6);
+}
+
 # Given a size in words, allocate and return a set of block numbers
 # for the entity
 sub allocate_blocks {
@@ -77,9 +122,10 @@ sub allocate_blocks {
     my @blklist;
 
     my $numblocks = int( ( $numwords + WORDSPERBLK - 1 ) / WORDSPERBLK );
-    die("Not enough blocks\n") if ( ( $nextblknum + $numblocks ) >= NUMBLOCKS );
-    foreach my $b ( 1 .. $numblocks ) {
-        push( @blklist, $nextblknum++ );
+    foreach my $cnt ( 1 .. $numblocks ) {
+	my $blk= shift(@Freelist);
+  	die("Not enough blocks\n") if (!defined($blk));
+        push( @blklist, $blk );
     }
     dprintf(
         "Allocated blocks for size %d: %d .. %d (%06o .. %06o)\n",
@@ -568,6 +614,10 @@ GetOptions(
 ) or usage();
 
 usage() if ( @ARGV < 1 );
+init_freelist();
 parse_proto_file( $ARGV[0] );
+dprint("Storing free list in blocks ");
+fill_sysdata();
+dprint("\n");
 dump_image( $format, $output );
 exit(0);
