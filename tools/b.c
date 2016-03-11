@@ -27,13 +27,13 @@ int fin = 0;
 int fout = 1;
 
 int symtab[500] = { /* , type = 1, value = 1, name = 4 */
-  1, 5,0,0,'a','u','t','o',0,
-  1, 6,0,0,'e','x','t','r','n',0,
-  1,10,0,0,'g','o','t','o',0,
-  1,11,0,0,'r','e','t','u','r','n',0,
-  1,12,0,0,'i','f',0,
-  1,13,0,0,'w','h','i','l','e',0,
-  1,14,0,0,'e','l','s','e',0,
+  1, 5,'a','u','t','o',0,
+  1, 6,'e','x','t','r','n',0,
+  1,10,'g','o','t','o',0,
+  1,11,'r','e','t','u','r','n',0,
+  1,12,'i','f',0,
+  1,13,'w','h','i','l','e',0,
+  1,14,'e','l','s','e',0,
   0
 };
 
@@ -67,6 +67,7 @@ int *csym = 0;
 int cval = 0;
 int isn = 1;
 int nerror = 0;
+int nauto = 0;
 
 int main(int argc, char **argv) {
   if (argc > 1) {
@@ -96,7 +97,7 @@ int *lookup() {
  
   rp = symtab;
   while (*rp) {
-    np = rp + 4;
+    np = rp + 2;
     sp = symbuf;
     while (*np==*sp) {
       if (!*np)
@@ -109,7 +110,7 @@ int *lookup() {
     rp = np + 1;
   }
   sp = symbuf;
-  np = rp + 4;
+  np = rp + 2;
   if (np >= symtab + 490) {
     error("sf");
     exit(1);
@@ -312,26 +313,25 @@ void expr(int lev) {
   if (o==21) { /* constant */
 case21:
     gen('n',5); /* litrl */
-    xwrite(' ');
     number(cval); 
     xwrite('\n');
     goto loop;
   }
    
   if (o==20) { /* name */
-		if (*csym==0) {
-			if((peeksym=symbol())==6) { /* ( */
-				*csym = 6;	/* extern */
-      }
-			else {
-				if(csym[2]==0)	/* unseen so far */
-					csym[2] = isn++;
-			}
+    if (*csym==0) { /* not seen */
+//      if((peeksym=symbol())==6) { /* ( */
+        *csym = 6;  /* extern */
+//      }
+//      else {
+//        if(csym[2]==0)  /* unseen so far */
+//          csym[2] = isn++;
+//      }
     }
-		if(*csym==6)	/* extern */
-      gens('x',csym+4);
-		else
-      gen('a',csym+4);
+    if(*csym==6)  /* extern */
+      gens('x',csym+2);
+    else
+      gen('a',csym[1]);
     goto loop;
   }
   
@@ -446,25 +446,15 @@ loop:
   peeksym = o;
 }
 
-#if 0
-
-decl(kw) {
-  extern csym[], symbol, paraml[], parame[];
-  extern error, cval, peeksym, exit;
-  int t[], n, o;
+declare(kw) {
+//  extern csym[], symbol, paraml[], parame[];
+//  extern error, cval, peeksym, exit;
+//  int t[], n, o;
+  int o;
 
   while((o=symbol())==20) {        /* name */
-    if(kw>=5) {            /* type or sort? */
-      if(*csym>0)
-        error('rd'); //error("%p redeclared", csym[4]);
-      *csym = kw;
-    } else {
-      if ((csym[1]&017)!=0)
-        error('rd'); //error("%p redeclared", &csym[4]);
-      csym[1] =| csym[1]&0760 | kw;
-      if (*csym==0)
-        *csym = -2;
-    }
+    *csym = kw;
+#if 0
     while((o=symbol())==4) {    /* [ */
       if((o=symbol())==21) {    /* const */
         if(csym[1]>=020)
@@ -474,43 +464,26 @@ decl(kw) {
       }
       if (o!=5)        /* ] */
         goto syntax;
-      csym[1] =+ 020;
+      csym[1] += 020;
     }
-    if(kw==8)  {        /* parameter */
+#endif
+    if(kw==5) {        /* auto */
+      csym[1] = nauto;
+      nauto++;
       *csym = -1;
-      if (paraml==0)
-        paraml = csym;
-      else
-        *parame = csym;
-      parame = csym;
     }
     if (o!=9)    /* , */
-      break;
+      goto done;
   }
-  if(o==1 & kw!=8 | o==7 & kw==8)
+done:
+  if(o==1 | o==7)    /* ; or ')' */
     return;
 syntax:
   error('[]'); //error("Declaration syntax");
 }
-#endif
-
-function() {
-//  extern declare, blkhed, blkend;
-//  extern printf, statement, peeksym, cval, symbol;
-//  extern paraml;
-//  auto o;
-
-//  printf(".text; 1:mov r5,-(sp); mov sp,r5\n");
-//  declare(8);
-//  declist();
-  gen('s',2); /* ??? */
-  statement(1);
-  gen('n',7); /* retrn */
-}
-
 
 extdef() {
-//  extern eof, function, cval;
+//  extern eof, cval;
 //  extern symbol, block, printf, pname, csym[];
 //  extern error;
   auto o, c, *cs;
@@ -524,7 +497,7 @@ extdef() {
     goto syntax;
 
   csym[0] = 6;
-  cs = csym + 4;
+  cs = csym + 2;
   xwrite('.');
   name(cs);
   xwrite(': ');
@@ -534,13 +507,18 @@ extdef() {
   o=symbol();
   
   if (o==6) { /* ( */
-    function();
+    nauto = 2;
+    declare(5);
+    statement(1);
+    gen('n',7); /* retrn */
     return;
   }
 
   if (o==2) { /* $( */
     peeksym = o;
-    function();
+    nauto = 2;
+    statement(1);
+    gen('n',7); /* retrn */
     return;
   }
   
@@ -617,8 +595,10 @@ stmt:
     return;
   
   if (o==2) { /* { */
-    if(d)
-      blkhed();
+    if(d) {
+      declist();
+      gen('s',nauto); /* setop */
+    }
     while (!eof) {
       o = symbol();
       if (o==3) /* } */
@@ -632,14 +612,11 @@ stmt:
 
   if (o==19) { /* keyword */
 
-#if 0
-    
     if (cval==10) { /* goto */
-      o1 = block(1,102,0,0,tree());
-//      rcexpr(o1, regtab);
+      expr(15);
+      gen('n',6); /* goto */
       goto semi;
-  }
-#endif
+    }
     
     if (cval==11) { /* return */
       if((peeksym=symbol())==6)    /* ( */
@@ -688,7 +665,6 @@ stmt:
   }
 
   if (o==20) { /* name */
-#if 0
     if (peekc==':') {
       peekc = 0;
       if (csym[0]>0) {
@@ -699,14 +675,14 @@ stmt:
       csym[1] = 020;    /* int[] */
 //      if (csym[2]==0)
 //        csym[2] = isn++;
-      slabel();
+//      slabel();
       goto stmt;
     }
-#endif
   }
 
   peeksym = o;
   expr(15);
+  gen('s',nauto); /* setop */
 
 semi:
   o = symbol();
@@ -730,66 +706,17 @@ pexpr()
   error('()');
 }
 
-blkhed()
+declist()
 {
-#if 0
-    extern symbol, cval, declare, peeksym, paraml[], parame[];
-    extern error, length, rlength, setstk, defvec, isn, defstat;
-    extern stack, hshtab[], hshsiz, pssiz;
-    int o, al, pl, cs[], hl;
+//	extern peeksym, peekc, csym[], cval;
+	auto o;
 
-    declist();
-    stack = al = -2;
-    pl = 4;
-    while(paraml) {
-        *parame = 0;
-        paraml = *(cs = paraml);
-        cs[2] = pl;
-        *cs = 10;
-        pl =+ rlength(cs[1]);
-    }
-    cs = hshtab;
-    hl = hshsiz;
-    while(hl--) {
-        if (cs[4])
-        switch(cs[0]) {
-
-        /* sort unmentioned */
-        case 0177776:    /* -2 */
-            cs[0] = 5;        /* auto */
-
-        /* auto */
-        case 5:
-            if (cs[3]) {    /* vector */
-                al =- (cs[3]*length(cs[1]-020)+1) & 077776;
-                setstk(al);
-                defvec(al);
-            }
-            cs[2] = al;
-            al =- rlength(cs[1]);
-            goto loop;
-
-        /* parameter */
-        case 10:
-            cs[0] = 5;
-            goto loop;
-
-        /* static */
-        case 7:
-            cs[2] = isn++;
-            defstat(cs);
-            goto loop;
-
-        loop:;
-        }
-        cs = cs+pssiz;
-    }
-    setstk(al);
-#endif
+	while((o=symbol())==19 & cval<10)
+		declare(cval);
+	peeksym = o;
 }
 
 gens(o,n) {
-  xwrite(' ');
   xwrite(o);
   xwrite(' .');
   name(n);
@@ -797,7 +724,6 @@ gens(o,n) {
 }
 
 gen(o,n) {
-  xwrite(' ');
   xwrite(o);
   xwrite(' ');
   number(n);
@@ -805,14 +731,14 @@ gen(o,n) {
 }
 
 jumpc(n) {
-  xwrite(' f'); /* ifop */
+  xwrite('f'); /* ifop */
   xwrite(' .');
   number(n);
   xwrite('\n');
 }
 
 jump(lbl) {
-  xwrite(' t'); /* traop */
+  xwrite('t'); /* traop */
   xwrite(' .');
   number(lbl);
   xwrite('\n');
@@ -862,7 +788,7 @@ error(code)
   xwrite(code);
   xwrite(' ');
   if (code=='rd' | code=='un') {
-    name(csym + 4);
+    name(csym + 2);
     xwrite(' ');
   }
   printn(line);
