@@ -84,7 +84,7 @@ sub init_freelist {
 # Set up a block with nine free block numbers in it,
 # plus a pointer to the next block in the free list.
 # Return the block number of this block with nine free block numbers
-# or 0 if we did not set up out a block.
+# or 0 if we did not set up a block.
 # The argument is only used to make the debug output pleasing
 sub write_freelist {
    no warnings 'recursion';
