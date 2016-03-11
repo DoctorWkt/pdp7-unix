@@ -19,3 +19,7 @@ A prototypical compiler for the B language
 ## mkfs7
 
 Makes a PDP-7 filesystem image for SimH
+
+## sdump
+
+A tool to dump the contents of the ../build/image.fs filesystem
