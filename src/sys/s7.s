@@ -38,18 +38,18 @@ pibreak:			" priority interrupt break processing "chain"
 	"** written: ttydelay -> ttyd1
 	"** written: ttyrestart -> ttyres1
 
-	" referenced in iread:
-cnop:
-   nop
+cnop:			" fetched as constant in iread
+   nop			
    -1
-   dac 7		" set location 7 to -1
+   dac 7		" set location 7 to -1 (nothing ever clears it)
    clon			" enable clock interrupts, reset flag
-   lac ttydelay
-   spa
-   isz ttydelay
-   skp
-   jms ttyrestart
-   lac .dspb	"** START CROSSED OUT: written: lac tty
+   lac ttydelay		" tty delay positive?
+   spa			"  yes: skip to skp
+   isz ttydelay		"   no: done delaying?
+   skp			"    not done
+   jms ttyrestart	"     yes: start output
+	"** START CROSSED OUT: written: lac tty
+   lac .dspb
    sna
    jmp piret
    isz .dsptm
@@ -61,23 +61,24 @@ cnop:
    jmp piret
    jmp dsprestart "** END CROSSED OUT
 
-1: dssf
-   jmp 1f
+1: dssf				" disk flag set?
+   jmp 1f			"  no
 
-   -1
+   -1				" set .dskb = -1
    dac .dskb
 
 "** 01-s1.pdf page 42
 
-   dsrs
+   dsrs				" get disk status in .dske
    dac .dske
-   dscs
+   dscs				" clear status register
    jmp piret
 
-1: lds		"** BEGIN CROSSED OUT
-   sma ral
-   jmp 1f
-   cdf
+		"** BEGIN CROSSED OUT
+1: lds				" load display status (see 03-scope.pdf pg 25)
+   sma ral			" edges flag??
+   jmp 1f			"  not set
+   cdf				" clear display flags?
    lac .dspb
    sna
    jmp piret
@@ -88,89 +89,89 @@ cnop:
    jmp piret
 dsprestart:
    lac d1
-   dac .dspb
-   lac dspbufp
-   beg
+   dac .dspb			" set .dsbp = 1
+   lac dspbufp			" load display buf pointer
+   beg				" start display processor
    -10
-   dac .dsptm
+   dac .dsptm			" set .dsptm = -10 (10 ticks)
    jmp piret
 
-1: sna ral
-   jmp .+3
-   dpcf
-   jmp piret
-   sma
-   jmp 1f
-   lda
-   dac .lpba
-   rlpd
+1: sna ral			" dataphone flag set (bit 7)??
+   jmp .+3			"  no
+   dpcf				" clear dataphone flag
+   jmp piret			" return
+   sma				" light pen flags (bit 2)
+   jmp 1f			"  no
+   lda				" G-2: load display address
+   dac .lpba			" save
+   rlpd				" G-2: resume after light pen stop
    jmp piret
 
-1: ksf			" (TTY) keyboard flag set?
-   jmp 1f		"  no
+1: ksf				" (TTY) keyboard flag set?
+   jmp 1f			"  no
 
-   lac ttydelay
-   sma
+   lac ttydelay		" get TTY delay
+   sma				"
    isz ttydelay
-   krb			" read keyboard buffer
-   dac char		" save in char
-   sad o375		" interrupt char (TTY ALT MODE?)
-   jmp intrp1		"  yes
+   krb				" read keyboard buffer
+   dac char			" save in char
+   sad o375			" interrupt char (TTY ALT MODE?)
+   jmp intrp1			"  yes
    lac d1
    jms putchar
       dzm char
-   lac sfiles+0
-   jms wakeup
-   dac sfiles+0
-   lac char
-   sad o212
-   skp
-   jmp piret
-   lac sfiles+1
-   sma
-   xor o400000
-   dac sfiles+1
+   lac sfiles+0			" get sleep word for ttyin
+   jms wakeup			" wake processes
+   dac sfiles+0			" clear sleep word
+   lac char			" get character
+   sad o212			" odd condition (break???)
+   skp				"  yes
+   jmp piret			"   no: done
+   lac sfiles+1			" get ttyout wait word
+   sma				" bit for process 1 already set?
+   xor o400000			" no, make it so
+   dac sfiles+1			" save back
 
 "** 01-s1.pdf page 43
 
-   jms putcr
-   jms ttyrestart
+   jms putcr			" output CR next
+   jms ttyrestart		" start output
    jmp piret
 
-1: tsf
-   jmp 1f
+1: tsf				" TTY output flag set?
+   jmp 1f			"  no
 
-   tcf
-   jms ttyrestart
+   tcf				" yes: clear flag
+   jms ttyrestart		" transmit next character
    jmp piret
 
 ttyrestart: 0
-   lac ttydelay
-   spa
-   jmp ttyrestart i
-   lac nttychar
-   dzm nttychar
-   sza
-   jmp 3f
-   isz ttydelay
+   lac ttydelay			" get tty delay
+   spa				" positive?
+   jmp ttyrestart i		"  no: keep waiting
+   lac nttychar			" get pending CR, if any
+   dzm nttychar			" clear it
+   sza				" need to send CR?
+   jmp 3f			"  yes
+   isz ttydelay			" increment ttydelay (make more positive)
    lac d2
-   jms getchar
-      jmp 2f
+   jms getchar			" get a character
+      jmp 2f			"  none found??
 3:
-   tls
-   sad o12
-   jms putcr
-   sad o15
-   skp
-   jmp ttyrestart i
-   lac ttydelay
-   tad o20
-   rcr
-   cma
-   dac ttydelay
+   tls				" start output
+   sad o12			" newline?
+   jms putcr			" yes: put CR next
+   sad o15			" CR?
+   skp				"  yes
+   jmp ttyrestart i		"   no: return
+   lac ttydelay			" get current tty delay
+   tad o20			" bump by 16
+   rcr				" divide by two
+   cma				" complement
+   dac ttydelay			" save
    jmp ttyrestart i
 2:
-   lac sfiles+1
+   lac sfiles+1			" run out of characters to send: wake user(s)
    jms wakeup
    dac sfiles+1
    jmp ttyrestart i	"** written arrow up 2 copies
@@ -270,7 +271,7 @@ ttyrestart: 0
    lac sfiles+6
    jms wakeup
    dac sfiles+6
-   cla
+   cla					" clear button lights
    wbl
    jmp piret	"** END CROSSED OUT
 
@@ -292,35 +293,42 @@ piret:					" return from priority interrupt
    ion					" reenable interrupts
    jmp 0 i				" return from interrupt
 
+	" wake sleeping processes
+	" NOTE!! Called from interrupt service, so avoids indirect!!!
+	" call:
+	" AC/ sfiles word (bit vector of processes to wake)
+	"   jms wakeup
+	" AC/ 0 (to store in sfiles word)
 wakeup: 0
-   dac 9f+t
+   dac 9f+t				" save vector in t0
    -mnproc
-   dac 9f+t+1
-   lac tadu
+   dac 9f+t+1				" loop count in t1
+   lac tadu				" get "tad ulist"
    dac 2f
-   lac dacu
+   lac dacu				" get "dac ulist"
    dac 2f+1
 1:
    lac 9f+t
-   ral
+   ral					" rotate vector up one
    dac 9f+t
-   sma
-   jmp 2f+2
-   lac o700000
-2: tad ..
+   sma					" high bit set?
+   jmp 2f+2				"  no: skip the fun
+   lac o700000				" yes: decrement process status (wake)
+2: tad ..				" (avoiding indirect)
    dac ..
-   lac 2b
+   lac 2b				" advance tad operand by 4 words
    tad d4
    dac 2b
-   lac 2b+1
+   lac 2b+1				" advance tad operand by 4 words
    tad d4
    dac 2b+1
-   isz 9f+t+1
-   jmp 1b
-   cla
+   isz 9f+t+1				" done?
+   jmp 1b				"  no, keep going
+   cla					" return zero in AC
    jmp wakeup i
 t = t+2
 
+	" call to output CR after LF (NL)
 putcr: 0
    lac o15
    dac nttychar
@@ -330,43 +338,43 @@ putcr: 0
    cla
    jmp putcr i
 
-intrp1:			" here with TTY interrupt character
-   lac d6		" get keyboard special device number
-   dac .int1		" save as interrupt source
-   lac d1
+intrp1:				" here with TTY interrupt character
+   lac d6			" get keyboard special device number
+   dac .int1			" save as interrupt source
+   lac d1			" drain tty input buffer?
    jms getchar
       skp
    jmp .-3
-   lac d2
+   lac d2			" drain tty output buffer?
    jms getchar
       skp
    jmp .-3
-   lac sfiles+0
+   lac sfiles+0			" wake ttyin sleepers
    jms wakeup
    dac sfiles+0
-   lac sfiles+1
+   lac sfiles+1			" wake ttyout sleepers
    jms wakeup
    dac sfiles+1
-   jms chkint
-      jmp piret
-   jmp 1f
-intrp2:
-   lac d7
-   dac .int2
-   lac d3
+   jms chkint			" check if user interrupted
+      jmp piret			"  no, return from PI
+   jmp 1f			" yes: return thru system call code (dump core)
+intrp2:				" here with display interrupt character
+   lac d7			" get keyboard special device number
+   dac .int2			" save as interrupt source
+   lac d3			" drain keyboard buffer?
    jms getchar
       skp
    jmp .-3
-   lac sfiles+2
+   lac sfiles+2			" wake up any "keyboard" sleepers
    jms wakeup
    dac sfiles+2
-   lac sfiles+6
+   lac sfiles+6			" wake up any "display" sleepers
    jms wakeup
    dac sfiles+6
-   jms chkint
-      jmp piret
+   jms chkint			" check if user interrupted
+      jmp piret			"  no, return from PI
 1:
-   lac 0
-   dac 020
-   lac .ac
-   jmp 021
+   lac 0			" get interrupt PC
+   dac 020			" save as system call return PC
+   lac .ac			" restore AC from interrupt
+   jmp 021			" join system call processing (dump core?)

@@ -9,7 +9,7 @@ orig:
 . = orig+7
    -1				" only ever set (to -1): never read?!
 
-. = orig+020			" syscall (CAL) processing
+. = orig+020			" syscall (CAL) and user "interrupt" processing
    1f				" addr for "CAL I": store return here on "CAL"
    iof				" interrupts off
    dac u.ac			" save user AC
@@ -19,8 +19,8 @@ orig:
    dac 020			" restore location 20
    lac u.ac			" restore user AC
    jmp 1f+1			" join "CAL I" processing
-   1f
-1: 0
+   1f				" literal to restore location 20
+1: 0				" "CAL I" PC stored here
    iof				" interrupts off
    dac u.ac			" save user AC
    lacq
@@ -64,7 +64,7 @@ sysexit:			" common system call exit code
    jms dskio; 07000		" save to disk?
 1:
    dzm .insys			" clear "in system call" flag
-   jms chkint			" pending interrupt?
+   jms chkint			" pending user interrupt?
       skp			"  no
    jmp .save			"   yes: dump core
    jms copy; u.rq+2; 10; 6	" restore auto-index locations 10-15
@@ -169,12 +169,14 @@ locsw:			" table of system addresses for sysloc
 locn:
    .-locsw-1
 
-	" check if interrupt for user
+	" check if "interrupt" for current process
 	" checks .int1 and .int2 (contain i-number of interrupt source)
+	" compared against process stdin
+	"
 	" call:
 	" .insys/ 0
 	"   jms chkint
-	"    no: no interrupt, or intflg set (discards interupt)
+	"    no: no interrupt, or intflg set (discards interrupt)
 	"   yes: PI off, .insys set
 chkint: 0
    lac .insys

@@ -231,7 +231,7 @@ sww:
 	" read routine for ttyin special file
 rttyi:
    jms chkint1
-   lac d1
+   lac d1		" ** written d3 ttyin2
    jms getchar
       jmp 1f
    and o177
@@ -258,9 +258,9 @@ wttyo:
    xor o400000
    dac sfiles+1
    lacq
-   tls
-   sad o12
-   jms putcr
+   tls				" load output buffer
+   sad o12			" newline?
+   jms putcr			"  yes, put CR as well
    jmp fallr
 1:
    lacq
@@ -317,8 +317,8 @@ rkbdi:
 wdspo:
    jms chkint1
    jms forall
-   jms dspput
-      jmp fallr
+   jms dspput			" put char (fallr "returns" here)
+      jmp fallr			" go back for next (continuation!)
    jms sleep; sfiles+6
    jms swap
    jmp wdspo

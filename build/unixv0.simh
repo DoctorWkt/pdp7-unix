@@ -3,6 +3,7 @@ set cpu eae
 set cpu history=100
 show cpu
 
+set tti 8b
 set rb ena
 att rb image.fs
 show dev

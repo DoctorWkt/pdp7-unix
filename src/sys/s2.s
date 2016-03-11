@@ -121,7 +121,7 @@
    lac i.uniq
    dac d.uniq
    -1
-   tad i.nlks
+   tad i.nlks			" decrement link count!
    dac i.nlks
 "** 01-s1.pdf page 9
    jms iput
@@ -138,10 +138,10 @@
    jms dput
    lac u.base
    jms iget
-   isz i.nlks
-   jmp 1f
-   jms itrunc
-   dzm i.flags
+   isz i.nlks			" increment link count
+   jmp 1f			"  not zero
+   jms itrunc			" zero links: free blocks
+   dzm i.flags			" clear status (free inode)
 1:
    jms iput
    jmp sysexit

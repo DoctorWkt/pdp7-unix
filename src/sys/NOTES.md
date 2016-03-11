@@ -5,6 +5,8 @@ uid -1 is superuser
 
 process 1 is "init", runs as superuser
 
+there are ten process slots, pids are 18 bits.
+
 DISK
 ====
 
@@ -28,7 +30,7 @@ inode format
 ------------
 ```
    i.flags
-        400000  free?? (checked/toggled by icreat)
+        400000  in use
         200000  large file
         000040  special file
         000020  directory
@@ -39,7 +41,7 @@ inode format
             01  world write
    i.dskps      7 block numbers (all indirect blocks if "large file")
    i.uid        owner
-   i.nlks       link count
+   i.nlks       link count (negative)
    i.size       size (in words?)
    i.uniq       unique value assigned at creation
 ```
@@ -69,3 +71,10 @@ i numbers
   11    "display" (graphic-2) special file
   12    "pptout" (paper tape punch) special file
 ```
+
+swapping
+--------
+
+Only one process is in memory at any time (in the high half of the 8KW
+memory).  The ten processes are swapped to the last ten tracks of the
+disk.
