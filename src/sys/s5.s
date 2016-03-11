@@ -204,9 +204,9 @@ dspput: 0
    jms dspnl			"  yes
    lac dsploc i			" get display word
    sad o400000			" TRAP?
-   jmp dspleft			"  yes
-   omq				" no: get character back
-   dac dsploc i			" save as "character 2"
+   jmp dspleft			"  yes (first character)
+   omq				" no: or in second character
+   dac dsploc i			" save both characters
    isz dsploc			" advance display pointer
    jmp i dspput
 
@@ -219,19 +219,19 @@ dspput: 0
 dspleft:
    lac dsploc			" get display pointer
    sad edspbuf			" end of the buffer?
-   jmp 1f			"  yes
-   dac 8
+   jmp 1f			"  yes: light up a button!?
+   dac 8			" no: store in index
    lac o400000			" get TRAP instruction
-   dac 8 i			" store
-   cla; llss 18+7
-   dac dsploc i
+   dac 8 i			" store as next
+   cla; llss 18+7		" shift MQ upto "char1" position
+   dac dsploc i			" store word with char1
    jmp dspput i
 
-dspnl: 0
-   lac dsplno
-   sad d33
-   jmp 1f
-   isz dsplno
+dspnl: 0			" only called once!
+   lac dsplno			" get display line number
+   sad d33			" 33?
+   jmp 1f			"  yes: light a button!
+   isz dsplno			" no: increment line number
    jmp dspnl i
 1:
    lac o2000			" get bit for push button 7

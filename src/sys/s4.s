@@ -141,6 +141,9 @@ copyz: 0
    jmp copyz i			" return
 t = t+1
 
+	" put queued character
+	" CALLED FROM PI: AVOIDS INDIRECT!!
+	" queue number in AC
 putchar: 0
 "** 01-s1.pdf page 23
    dac 9f+t
@@ -157,6 +160,14 @@ putchar: 0
    jmp putchar i
 t = t+1
 
+	" get queued character
+	" CALLED FROM PI: AVOIDS INDIRECT!!
+	" queue number in AC:
+	"  1: tty input
+	"  2: tty output
+	"  3: display keyboard
+	"  4: paper tape reader
+	"  5: paper tape punch
 getchar: 0
    jms takeq
       jmp i getchar
@@ -168,6 +179,7 @@ getchar: 0
    isz getchar
    jmp i getchar
 
+	" CALLED FROM PI: AVOIDS INDIRECT!!
 takeq: 0
    rcl
    tad lacq1

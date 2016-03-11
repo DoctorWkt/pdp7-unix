@@ -93,10 +93,16 @@ o777760: 0777760
 dm3: -3
 dm1: -1
 
-9: .=.+t
-c1: .=.+1
-q1: q2;q2+90  "** ?? 98 ??
+9: .=.+t			" per-routine temp variables
+c1: .=.+1			" not used?
+q1: q2;q2+98	" ** 90?  96??	" queue element free list?
    .=.+14
+	" queues (two words each, head and tail pointers?)
+	"  1: tty input
+	"  2: tty output
+	"  3: display keyboard
+	"  4: paper tape reader
+	"  5: paper tape punch
 q2:
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0

@@ -338,29 +338,29 @@ putcr: 0
    cla
    jmp putcr i
 
-intrp1:			" here with TTY interrupt character
-   lac d6		" get keyboard special device number
-   dac .int1		" save as interrupt source
-   lac d1
+intrp1:				" here with TTY interrupt character
+   lac d6			" get keyboard special device number
+   dac .int1			" save as interrupt source
+   lac d1			" drain tty input buffer?
    jms getchar
       skp
    jmp .-3
-   lac d2
+   lac d2			" drain tty output buffer?
    jms getchar
       skp
    jmp .-3
-   lac sfiles+0
+   lac sfiles+0			" wake ttyin sleepers
    jms wakeup
    dac sfiles+0
-   lac sfiles+1
+   lac sfiles+1			" wake ttyout sleepers
    jms wakeup
    dac sfiles+1
    jms chkint			" check if user interrupted
       jmp piret			"  no, return from PI
-   jmp 1f			" yes: return from system call
+   jmp 1f			" yes: return thru system call code (dump core)
 intrp2:				" here with display interrupt character
-   lac d7
-   dac .int2
+   lac d7			" get keyboard special device number
+   dac .int2			" save as interrupt source
    lac d3			" drain keyboard buffer?
    jms getchar
       skp
@@ -377,4 +377,4 @@ intrp2:				" here with display interrupt character
    lac 0			" get interrupt PC
    dac 020			" save as system call return PC
    lac .ac			" restore AC from interrupt
-   jmp 021			" join system call processing!!!
+   jmp 021			" join system call processing (dump core?)

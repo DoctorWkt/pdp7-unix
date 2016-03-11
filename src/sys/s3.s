@@ -317,8 +317,8 @@ rkbdi:
 wdspo:
    jms chkint1
    jms forall
-   jms dspput
-      jmp fallr
+   jms dspput			" put char (fallr "returns" here)
+      jmp fallr			" go back for next (continuation!)
    jms sleep; sfiles+6
    jms swap
    jmp wdspo
