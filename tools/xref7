@@ -7,6 +7,7 @@
 # (c) 2016 Warren Toomey, GPL3
 use strict;
 use warnings;
+
 #use Data::Dumper;
 
 my %Label;    # Hash of labels found
@@ -117,13 +118,14 @@ sub parse_file {
     open( my $IN, "<", $file ) || die("Cannot read $file: $!\n");
     while ( my $line = <$IN> ) {
         chomp($line);    # Lose the end of line
-        parse_line($line);
+        parse_line( $file, $line );
     }
     close($IN);
 }
 
 sub parse_line {
-    my $line = shift;
+    my ( $file, $line ) = @_;
+    $file =~ s{.*/}{};
 
     # Lose leading whitespace and comments
     $line =~ s{^\s+}{};
@@ -140,7 +142,10 @@ sub parse_line {
         if ( !( $label =~ m{^\d+$} ) ) {
 
             # Define the label in stage 1
-            $Label{$label}{def} = 1 if ( $stage == 1 );
+            if ( $stage == 1 ) {
+                $Label{$label}{def}  = 1;
+                $Label{$label}{file} = $file;
+            }
             $curlabel = $label;
         }
     }
@@ -189,10 +194,11 @@ sub print_output {
 
         # Does it have anything useful?
         my $count = keys( %{ $Label{$curlabel} } );
-        next if ( $count == 1 );    # Nope
+        next if ( $count == 2 );    # Nope
 
         print("Function $curlabel\n");
         print("==============\n");
+        print("File: $Label{$curlabel}{file}\n");
         print("Purpose:\n");
         print("Arguments:\n");
         print("Returns:\n");
