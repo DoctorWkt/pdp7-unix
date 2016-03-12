@@ -23,3 +23,7 @@ Makes a PDP-7 filesystem image for SimH
 ## sdump
 
 A tool to dump the contents of the ../build/image.fs filesystem
+
+## xref7
+
+A quick and nasty tool to cross-reference the kernel code

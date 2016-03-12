@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Read in files of PDP-7 assembly code in Ken Thompon's as format
+# Read in files of PDP-7 assembly code in Ken Thompson's as format
 # and convert them into PDP-7 machine code
 #
 # (c) 2016 Warren Toomey, GPL3

@@ -1,0 +1,222 @@
+#!/usr/bin/perl
+#
+# Read in files of PDP-7 assembly code in Ken Thompson's as format
+# and output cross-reference and other details on the files.
+# It's very rough and ready.
+#
+# (c) 2016 Warren Toomey, GPL3
+use strict;
+use warnings;
+#use Data::Dumper;
+
+my %Label;    # Hash of labels found
+
+# Instructions that use the MQ register but don't modify it
+my %UseMQ = ( omq => 1, lacq => 1 );
+
+# Instructions that use and modify the MQ register
+my %ModMQ = (
+    lrs    => 1,
+    lrss   => 1,
+    lls    => 1,
+    llss   => 1,
+    norm   => 1,
+    norms  => 1,
+    mul    => 1,
+    muls   => 1,
+    div    => 1,
+    divs   => 1,
+    idiv   => 1,
+    frdiv  => 1,
+    frdivs => 1,
+    clq    => 1,
+    cmq    => 1
+);
+
+# Instructions that use memory locations
+my %UseMem = (
+    lac => 1,
+    xor => 1,
+    add => 1,
+    tad => 1,
+    xct => 1,
+    and => 1,
+    law => 1
+);
+
+# Instructions that modify memory
+my %ModMem = ( dac => 1, dzm => 1, isz => 1 );
+
+# Kernel-mode instructions
+my %Kmode = (
+    dscs => 'Uses disk: yes',
+    dslw => 'Uses disk: yes',
+    dslm => 'Uses disk: yes',
+    dsld => 'Uses disk: yes',
+    dsls => 'Uses disk: yes',
+    dssf => 'Uses disk: yes',
+    dsrs => 'Uses disk: yes',
+    iof  => 'Uses interrupts: yes',
+    ion  => 'Uses interrupts: yes',
+    caf  => 'Uses CPU: yes',
+    clon => 'Uses clock: yes',
+    clsf => 'Uses clock: yes',
+    clof => 'Uses clock: yes',
+    ksf  => 'Uses keyboard: yes',
+    krb  => 'Uses keyboard: yes',
+    tsf  => 'Uses tty: yes',
+    tcf  => 'Uses tty: yes',
+    tls  => 'Uses tty: yes',
+    sck  => 'Uses G2: yes',
+    cck  => 'Uses G2: yes',
+    lck  => 'Uses G2: yes',
+    rsf  => 'Uses ptr: yes',
+    rsa  => 'Uses ptr: yes',
+    rrb  => 'Uses ptr: yes',
+    psf  => 'Uses ptr: yes',
+    pcf  => 'Uses ptr: yes',
+    psa  => 'Uses ptr: yes',
+    lds  => 'Uses G2: yes',
+    lda  => 'Uses G2: yes',
+    wcga => 'Uses G2: yes',
+    raef => 'Uses G2: yes',
+    rlpd => 'Uses G2: yes',
+    beg  => 'Uses G2: yes',
+    spb  => 'Uses G2: yes',
+    cpb  => 'Uses G2: yes',
+    lpb  => 'Uses G2: yes',
+    wbl  => 'Uses G2: yes',
+    dprs => 'Uses dataphone: yes',
+    dpsf => 'Uses dataphone: yes',
+    dpcf => 'Uses dataphone: yes',
+    dprc => 'Uses dataphone: yes',
+    crsf => 'Uses cdr: yes',
+    crrb => 'Uses cdr: yes',
+);
+
+# Parse all the files for labels only
+my $stage    = 1;
+my $curlabel = "";    # Last defined label
+foreach my $file (@ARGV) {
+    parse_file($file);
+}
+
+# Now go back and find the details about things
+$stage    = 2;
+$curlabel = "";       # Last defined label
+foreach my $file (@ARGV) {
+    parse_file($file);
+}
+
+#print Dumper(\%Label);
+print_output();
+exit(0);
+
+sub parse_file {
+    my $file = shift;
+    open( my $IN, "<", $file ) || die("Cannot read $file: $!\n");
+    while ( my $line = <$IN> ) {
+        chomp($line);    # Lose the end of line
+        parse_line($line);
+    }
+    close($IN);
+}
+
+sub parse_line {
+    my $line = shift;
+
+    # Lose leading whitespace and comments
+    $line =~ s{^\s+}{};
+    $line =~ s{\s*".*}{};
+    return if ( $line =~ m{^$} );    # Ignore empty lines
+    return if ( $line =~ m{=} );     # Ignore assignments
+                                     #print("$line\n") if ($stage==2);
+
+    # Capture and define useful labels
+    if ( $line =~ s{^([a-z0-9\.]+):\s*}{} ) {
+        my $label = $1;
+
+        # Only do non-numeric labels
+        if ( !( $label =~ m{^\d+$} ) ) {
+
+            # Define the label in stage 1
+            $Label{$label}{def} = 1 if ( $stage == 1 );
+            $curlabel = $label;
+        }
+    }
+    return if ( $stage == 1 );    # Only labels in stage 1
+
+    # Stage 2: break the remainder up into statements
+    foreach my $statement ( split( /\s*;\s*/, $line ) ) {
+        my @expr = split( /\s+/, $statement );
+
+        # Does it use the MQ?
+        $Label{$curlabel}{usemq} = 1 if ( $UseMQ{ $expr[0] } );
+
+        # Does it modify the MQ?
+        if ( $ModMQ{ $expr[0] } ) {
+            $Label{$curlabel}{usemq} = 1;
+            $Label{$curlabel}{modmq} = 1;
+        }
+
+        # Does it modify memory
+        if ( $ModMem{ $expr[0] } ) {
+            die("ModMem but no argument\n") if ( !defined( $expr[1] ) );
+            $Label{$curlabel}{modmem}{ $expr[1] } = 1;
+        }
+
+        # Does it use memory
+        if ( $UseMem{ $expr[0] } ) {
+
+            # We should die if no expr[1], but there's one use of
+            # law in the kernel that stops us doing this
+            $Label{$curlabel}{usemem}{ $expr[1] } = 1
+              if ( defined( $expr[1] ) );
+        }
+
+        # Routine calls
+        $Label{$curlabel}{calls}{ $expr[1] } = 1
+          if ( ( $expr[0] eq "jms" ) && defined( $expr[1] ) );
+
+        # Any kernel mode instructions?
+        $Label{$curlabel}{kmode}{ $Kmode{ $expr[0] } } = 1
+          if ( $Kmode{ $expr[0] } );
+    }
+}
+
+sub print_output {
+    foreach $curlabel ( sort( keys(%Label) ) ) {
+
+        # Does it have anything useful?
+        my $count = keys( %{ $Label{$curlabel} } );
+        next if ( $count == 1 );    # Nope
+
+        print("Function $curlabel\n");
+        print("==============\n");
+        print("Purpose:\n");
+        print("Arguments:\n");
+        print("Returns:\n");
+
+        print("Uses MQ: yes\n")
+          if ( defined( $Label{$curlabel}{usemq} )
+            && !defined( $Label{$curlabel}{usemq} ) );
+        print("Modifies MQ: yes\n")
+          if ( defined( $Label{$curlabel}{usemq} ) );
+
+        my $usemem =
+          join( ', ', sort( keys( %{ $Label{$curlabel}{usemem} } ) ) );
+        print("Uses memory: $usemem\n") if ( $usemem ne '' );
+        my $modmem =
+          join( ', ', sort( keys( %{ $Label{$curlabel}{modmem} } ) ) );
+        print("Modifies memory: $modmem\n") if ( $modmem ne '' );
+        my $calls = join( ', ', sort( keys( %{ $Label{$curlabel}{calls} } ) ) );
+        print("Calls: $calls\n") if ( $calls ne '' );
+
+        foreach my $kmode ( sort( keys( %{ $Label{$curlabel}{kmode} } ) ) ) {
+            print("$kmode\n");
+        }
+
+        print("Comments:\n");
+        print("\n\n");
+    }
+}
