@@ -111,6 +111,7 @@ foreach my $file (@ARGV) {
 
 #print Dumper(\%Label);
 print_output();
+print_callgraph();
 exit(0);
 
 sub parse_file {
@@ -225,4 +226,29 @@ sub print_output {
         print("Comments:\n");
         print("\n\n");
     }
+}
+
+# Print a graphview call graph file
+sub print_callgraph {
+    open(my $OUT, ">", "kernel_calls.gv")
+				|| die("Can't write kernel_calls.gv: $!\n");
+    print $OUT <<EOF;
+digraph callgraph {
+ratio=compress; size="16.53,11.69";
+{rank=same; ".capt" ".chdir" ".chmod" ".chown" ".close" ".creat" ".exit"
+        ".fork" ".halt" ".link" ".open" ".read" ".rele" ".rename" ".rmes"
+        ".save" ".seek" ".setuid" ".smes" ".status" ".sysloc" ".tell"
+        ".unlink" ".write"}
+EOF
+    foreach $curlabel ( sort( keys(%Label) ) ) {
+	my $count = keys( %{ $Label{$curlabel} } );
+        next if ( $count == 2 );
+
+	my $calls = join( '"; "', sort( keys( %{ $Label{$curlabel}{calls} } ) ) );
+	if ( $calls ne '' ) {
+	    print($OUT "\"$curlabel\" -> { \"$calls\" ; }\n");
+ 	}
+    }
+    print($OUT "}\n");
+    close($OUT);
 }
