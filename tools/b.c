@@ -26,15 +26,14 @@
 int fin = 0;
 int fout = 1;
 
-int symtab[500] = { /* , type = 1, value = 1, name = 4 */
-  1, 5,'a','u','t','o',0,
-  1, 6,'e','x','t','r','n',0,
-  1,10,'g','o','t','o',0,
-  1,11,'r','e','t','u','r','n',0,
-  1,12,'i','f',0,
-  1,13,'w','h','i','l','e',0,
-  1,14,'e','l','s','e',0,
-  0
+int symtab[500] = { /* class value name */
+  1, 5,'a','u','t','o', 0 ,
+  1, 6,'e','x','t','r','n', 0 ,
+  1,10,'g','o','t','o', 0 ,
+  1,11,'r','e','t','u','r','n', 0 ,
+  1,12,'i','f', 0 ,
+  1,13,'w','h','i','l','e', 0 ,
+  1,14,'e','l','s','e', 0 ,
 };
 
 int ctab[] = {
@@ -64,8 +63,10 @@ int peekc = 0;
 int eof = 0;
 int line = 1;
 int *csym = 0;
+int *ns;
 int cval = 0;
-int isn = 1;
+int isn = 0;
+int nisn = 0;
 int nerror = 0;
 int nauto = 0;
 
@@ -84,19 +85,19 @@ int main(int argc, char **argv) {
   }
 
   while (!eof) {
+    ns = symtab + 51;
     extdef();
-//    blkend();
+    blkend();
   }
   xflush();
-  
+ 
   exit(nerror);
 }
 
 int *lookup() {
   int *np, *sp, *rp;
- 
   rp = symtab;
-  while (*rp) {
+  while (rp < ns) {
     np = rp + 2;
     sp = symbuf;
     while (*np==*sp) {
@@ -110,18 +111,18 @@ int *lookup() {
     rp = np + 1;
   }
   sp = symbuf;
-  np = rp + 2;
-  if (np >= symtab + 490) {
+  if (ns >= symtab + 490) {
     error("sf");
     exit(1);
   }
-loop:
-  *np = *sp;
-  np = np + 1;
-  sp = sp + 1;
-  if (*sp)
-    goto loop;
-  *np = 0;
+  *ns = 0;
+  ns[1] = 0;
+  ns = ns + 2;  
+  while (*ns = *sp) {
+    ns = ns + 1;
+    sp = sp + 1;
+  }
+  ns = ns + 1;
   return rp;
 }
 
@@ -150,13 +151,13 @@ symbol() {
 loop:
   ct = ctab[c];
  
-  if (ct==0) { /* EOT */
+  if (ct==0) { /* eof */
     eof++;
     return(0);
   }
  
   if (ct==126) { /* white space */
-    if (c=='\n')  /* newline */
+    if (c=='\n')
       line = line + 1;
     c = xread();
     goto loop;
@@ -188,7 +189,7 @@ com:
 com1:
     if (c==4) {
       eof++;
-      error('*/'); /* end of text */
+      error('*/'); /* eof */
       return(0);
     }
     if (c=='\n')
@@ -201,7 +202,7 @@ com1:
     c = xread();
     goto loop;
   }
-  if (ct==124) {    /* number */
+  if (ct==124) { /* number */
     cval = 0;
     if (c=='0')
       b = 8;
@@ -214,26 +215,26 @@ com1:
     peekc = c;
     return(21);
   }
-  if (c=='\'') {    /* ' */
+  if (c=='\'') { /* ' */
     getcc();
     return(21);
   }
-  if (ct==123) {    /* letter */
+  if (ct==123) { /* letter */
     sp = symbuf;
     while(ctab[c]==123 | ctab[c]==124) {
       if (sp<symbuf+9) *sp++ = c;
       c = xread();
     }
-    *sp = '\0';
+    *sp = 0;
     peekc = c;
     csym = lookup();
-    if (csym[0]==1) {    /* keyword */
+    if (csym[0]==1) { 
       cval = csym[1];
-      return(19);
+      return(19); /* keyword */
     }
-    return(20);
+    return(20); /* name */
   }
-  if (ct==127) {    /* unknown */
+  if (ct==127) { /* unknown */
     error('sy');
     c = xread();
     goto loop;
@@ -309,32 +310,40 @@ void expr(int lev) {
   int o;
 
   o = symbol();
-  
-  if (o==21) { /* constant */
+ 
+  if (o==21) { /* number */
 case21:
     gen('n',5); /* litrl */
-    number(cval); 
+    number(cval);
     xwrite('\n');
     goto loop;
   }
    
   if (o==20) { /* name */
     if (*csym==0) { /* not seen */
-//      if((peeksym=symbol())==6) { /* ( */
-        *csym = 6;  /* extern */
-//      }
-//      else {
-//        if(csym[2]==0)  /* unseen so far */
-//          csym[2] = isn++;
-//      }
+      if((peeksym=symbol())==6) { /* ( */
+        *csym = 6; /* extrn */
+      } else {
+        *csym = 2; /* internal */
+        csym[1] = ++isn;
+      }
     }
-    if(*csym==6)  /* extern */
-      gens('x',csym+2);
-    else
+    if(*csym==5) /* auto */
       gen('a',csym[1]);
+    else {
+      xwrite('x ');
+      if (*csym==6) { /* extrn */
+        xwrite('.');
+        name(csym+2);
+      } else { /* internal */
+        xwrite('l');
+        number(csym[1]);
+      }    
+      xwrite('\n');
+    }
     goto loop;
   }
-  
+ 
   if (o==34) { /* ! */
     expr(1);
     gen('u',4); /* unot */
@@ -343,7 +352,7 @@ case21:
 
   if (o==41) { /* - */
     peeksym = symbol();
-    if (peeksym==21) { /* constant */
+    if (peeksym==21) { /* number */
       peeksym = -1;
       cval = -cval;
       goto case21;
@@ -352,19 +361,19 @@ case21:
     gen('u',2); /* umin */
     goto loop;
   }
-  
+ 
   if (o==47) { /* & */
     expr(1);
     gen('u',1); /* uadr */
     goto loop;
   }
-  
+ 
   if (o==42) { /* * */
     expr(1);
     gen('u',3); /* uind */
     goto loop;
   }
-  
+ 
   if (o==6) { /* ( */
     peeksym = o;
     pexpr();
@@ -390,27 +399,27 @@ loop:
     gen('b',3); /* band */
     goto loop;
   }
-  if (lev>=7 & o>=60 & o<=61) {  /* == != */
+  if (lev>=7 & o>=60 & o<=61) { /* == != */
     expr(6);
     gen('b',o-56); /* beq bne */
     goto loop;
   }
-  if (lev>=6 & o>=62 & o<=65) {  /* <= < >= > */
+  if (lev>=6 & o>=62 & o<=65) { /* <= < >= > */
     expr(5);
     gen('b',o-56); /* ble blt bge bgt */
     goto loop;
   }  
-  if (lev>=4 & o>=40 & o<=41) {  /* + - */
+  if (lev>=4 & o>=40 & o<=41) { /* + - */
     expr(3);
     gen('b',o-28); /* badd bmin */
     goto loop;
   }  
-  if (lev>=3 & o>=42 & o<=43) {  /* * / */
+  if (lev>=3 & o>=42 & o<=43) { /* * / */
     expr(2);
     gen('b',o-27); /* bmul bdiv */
     goto loop;
   }  
-  if (lev>=3 & o==44) {  /* % */
+  if (lev>=3 & o==44) { /* % */
     expr(2);
     gen('b',14); /* bmod */
     goto loop;
@@ -438,260 +447,12 @@ loop:
           return;
         }
       }
-      gen('n',3);
+      gen('n',3); /* call */
     }
     goto loop;
   }
-  
+ 
   peeksym = o;
-}
-
-declare(kw) {
-//  extern csym[], symbol, paraml[], parame[];
-//  extern error, cval, peeksym, exit;
-//  int t[], n, o;
-  int o;
-
-  while((o=symbol())==20) {        /* name */
-    *csym = kw;
-#if 0
-    while((o=symbol())==4) {    /* [ */
-      if((o=symbol())==21) {    /* const */
-        if(csym[1]>=020)
-          error('de'); //error("Bad vector");
-        csym[3] = cval;
-        o = symbol();
-      }
-      if (o!=5)        /* ] */
-        goto syntax;
-      csym[1] += 020;
-    }
-#endif
-    if(kw==5) {        /* auto */
-      csym[1] = nauto;
-      nauto++;
-      *csym = -1;
-    }
-    if (o!=9)    /* , */
-      goto done;
-  }
-done:
-  if(o==1 | o==7)    /* ; or ')' */
-    return;
-syntax:
-  error('[]'); //error("Declaration syntax");
-}
-
-extdef() {
-//  extern eof, cval;
-//  extern symbol, block, printf, pname, csym[];
-//  extern error;
-  auto o, c, *cs;
-//  char s;
-
-  o = symbol();
-  if(o==0 | o==1)    /* EOF */
-    return;
-
-  if(o!=20)
-    goto syntax;
-
-  csym[0] = 6;
-  cs = csym + 2;
-  xwrite('.');
-  name(cs);
-  xwrite(': ');
-  xwrite('.+');
-  xwrite('1\n');
-//  s = ".data; %p:1f\n";
-  o=symbol();
-  
-  if (o==6) { /* ( */
-    nauto = 2;
-    declare(5);
-    statement(1);
-    gen('n',7); /* retrn */
-    return;
-  }
-
-  if (o==2) { /* $( */
-    peeksym = o;
-    nauto = 2;
-    statement(1);
-    gen('n',7); /* retrn */
-    return;
-  }
-  
-  if (o==21) { /* const */
-    printf(".data; %p: %o\n", cs, cval);
-    if((o=symbol())!=1)    /* ; */
-      goto syntax;
-    return;
-  }
-  
-  if (o==1) { /* ; */
-    printf(".bss; %p: .=.+2\n", cs);
-    return;
-  }
-  
-  if (o==4) { /* [ */
-    c = 0;
-    if((o=symbol())==21) {    /* const */
-      c = cval<<1;
-      o = symbol();
-    }
-    if(o!=5)        /* ] */
-      goto syntax;
-    if((o=symbol())==1) {    /* ; */
-      printf(".bss; 1:.=.+%o\n", c);
-      return;
-    }
-    printf("1:");
-    while(o==21) {        /* const */
-      printf("%o\n", cval);
-      c =- 2;
-      if((o=symbol())==1)    /* ; */
-        goto done;
-      if(o!=9)        /* , */
-        goto syntax;
-      else
-        o = symbol();
-    }
-    goto syntax;
-done:
-    if(c>0)
-      printf(".=.+%o\n", c);
-    return;
-  }
-  
-  if (o==0) /* EOF */
-    return;
-
-syntax:
-  error('xx');
-  statement(0);
-}
-
-statement(d) {
-//  extern symbol, error, blkhed, eof, peeksym;
-//  extern blkend, csym[], rcexpr, block[], tree[], regtab[];
-//  extern jumpc, jump, label, contlab, brklab, cval;
-//  extern swp[], isn, pswitch, peekc, slabel;
-//  extern efftab[], declare, deflab, swtab[], swsiz, branch;
-
-//  int o, o1, o2, np[];
-  int o, o1, o2, n, *np;
-
-stmt:
-  o = symbol();
-  
-  if (o==0) /* EOF */
-  {
-    error('fe'); //"Unexpected EOF");
-    return;
-  }
-  
-  if (o==1 || o==3) /* ; } */
-    return;
-  
-  if (o==2) { /* { */
-    if(d) {
-      declist();
-      gen('s',nauto); /* setop */
-    }
-    while (!eof) {
-      o = symbol();
-      if (o==3) /* } */
-        return;
-      peeksym = o;
-      statement(0);
-    }
-    error('$)'); //error("Missing '}'");
-    return;
-  }
-
-  if (o==19) { /* keyword */
-
-    if (cval==10) { /* goto */
-      expr(15);
-      gen('n',6); /* goto */
-      goto semi;
-    }
-    
-    if (cval==11) { /* return */
-      if((peeksym=symbol())==6)    /* ( */
-        pexpr();
-      gen('n',7); /* retrn */
-      goto semi;
-    }
-    
-    if (cval==12) { /* if */
-      pexpr();
-      o1 = isn;
-      isn++;
-      jumpc(o1);
-      statement(0);
-      o = symbol();
-      if (o==19 & cval==14) { /* else */
-        o2 = isn;
-        isn++;
-        jump(o2);
-        label(o1);
-        statement(0);
-        label(o2);
-        return;
-      }
-      peeksym = o;
-      label(o1);
-      return;
-    }
-
-    if (cval==13) {  /* while */
-      o1 = isn;
-      isn++;
-      label(o1);
-      pexpr();
-      o2 = isn;
-      isn++;
-      jumpc(o2);
-      statement(0);
-      jump(o1);
-      label(o2);
-      return;
-    }
-
-    error('sx');
-    goto syntax;
-  }
-
-  if (o==20) { /* name */
-    if (peekc==':') {
-      peekc = 0;
-      if (csym[0]>0) {
-        error('rd');
-        goto stmt;
-      }
-      csym[0] = 2;
-      csym[1] = 020;    /* int[] */
-//      if (csym[2]==0)
-//        csym[2] = isn++;
-//      slabel();
-      goto stmt;
-    }
-  }
-
-  peeksym = o;
-  expr(15);
-  gen('s',nauto); /* setop */
-
-semi:
-  o = symbol();
-  if (o==1)        /* ; */
-    return;
-
-syntax:
-  error('sz');
-  goto stmt;
 }
 
 pexpr()
@@ -706,21 +467,257 @@ pexpr()
   error('()');
 }
 
-declist()
-{
-//	extern peeksym, peekc, csym[], cval;
-	auto o;
+declare(kw) {
+//  extern csym[], symbol, paraml[], parame[];
+//  extern error, cval, peeksym, exit;
+//  int t[], n, o;
+  int o;
 
-	while((o=symbol())==19 & cval<10)
-		declare(cval);
-	peeksym = o;
+  while((o=symbol())==20) { /* name */
+    if (kw==6) { /* extrn */
+      *csym = 6;
+      o = symbol();      
+    } else { /* auto/param */
+      *csym = 5; /* auto */
+      csym[1] = nauto;
+      o = symbol();      
+      if (kw==5 & o==21) { /* auto & number */
+        gen('y',nauto); /* aryop */
+        nauto = nauto + cval;
+        o = symbol();
+      }
+      nauto++;
+    }
+    if (o!=9) /* , */
+      goto done;
+  }
+done:
+  if(o==1 & kw!=8 | o==7 & kw==8) /* auto/extrn ;   param ')' */
+    return;
+syntax:
+  error('[]'); /* declaration syntax */
 }
 
-gens(o,n) {
-  xwrite(o);
-  xwrite(' .');
-  name(n);
-  xwrite('\n');
+extdef() {
+//  extern eof, cval;
+//  extern symbol, block, printf, pname, csym[];
+//  extern error;
+  auto o, c;
+
+  o = symbol();
+  if(o==0 | o==1) /* eof ; */
+    return;
+
+  if(o!=20) /* name */
+    goto syntax;
+
+  csym[0] = 6; /* extrn */
+  xwrite('.');
+  name(csym + 2);
+  xwrite(': ');
+  o=symbol();
+ 
+  if (o==2 | o==6) { /* $( ( */
+    xwrite('.+');
+    xwrite('1\n');
+    nauto = 2;
+    if (o==6) { /* ( */
+      declare(8); /* param */
+      if ((o=symbol())!=2) /* $( */
+        goto syntax;
+    }
+    while((o=symbol())==19 && cval<10) /* auto extrn */
+      declare(cval);
+    peeksym = o;
+    gen('s',nauto); /* setop */
+    stmtlist();        
+    gen('n',7); /* retrn */  
+    return;
+  }
+
+  if (o==21) { /* number */
+    number(cval);
+    xwrite('\n');
+    return;
+  }
+  
+  if (o==1) { /* ; */
+    xwrite('0\n');
+    return;
+  }
+  
+  if (o==4) { /* [ */
+    c = 0;
+    if ((o=symbol())==21) { /* number */
+      c = cval;
+      o = symbol();
+    }
+    if (o!=5) /* ] */
+      goto syntax;
+    xwrite('.+');
+    xwrite('1\n');
+    if ((o=symbol())==1) /* ; */
+      goto done;
+    while (o==21) { /* number */
+      number(cval);
+      xwrite('\n');
+      c--;
+      if ((o=symbol())==1) /* ; */
+        goto done;
+      if (o!=9) /* , */
+        goto syntax;
+      else
+        o = symbol();
+    }
+    goto syntax;
+done:
+    if (c>0) {
+      xwrite('.=');
+      xwrite('.+');
+      number(c);
+      xwrite('\n');
+    }
+    return;
+  }    
+
+  if (o==0) /* eof */
+    return;
+
+syntax:
+  error('xx');
+  stmt();
+}
+
+stmtlist() {
+  int o;
+  while (!eof) {
+    if ((o = symbol())==3) /* $) */
+      return;
+    peeksym = o;
+    stmt();
+  }
+  error('$)'); /* missing $) */
+}
+
+stmt() {
+//  extern symbol, error, blkhed, eof, peeksym;
+//  extern blkend, csym[], rcexpr, block[], tree[], regtab[];
+//  extern jumpc, jump, label, contlab, brklab, cval;
+//  extern swp[], isn, pswitch, peekc, slabel;
+//  extern efftab[], declare, deflab, swtab[], swsiz, branch;
+
+//  int o, o1, o2, np[];
+  int o, o1, o2;
+
+next:
+  o = symbol();
+ 
+  if (o==0) /* eof */
+  {
+    error('fe'); /* Unexpected eof */
+    return;
+  }
+ 
+  if (o==1 || o==3) /* ; $) */
+    return;
+ 
+  if (o==2) { /* $( */
+    stmtlist();
+    return;
+  }
+
+  if (o==19) { /* keyword */
+
+    if (cval==10) { /* goto */
+      expr(15);
+      gen('n',6); /* goto */
+      goto semi;
+    }
+   
+    if (cval==11) { /* return */
+      if((peeksym=symbol())==6) /* ( */
+        pexpr();
+      gen('n',7); /* retrn */
+      goto semi;
+    }
+   
+    if (cval==12) { /* if */
+      pexpr();
+      isn++;
+      o1 = isn;
+      jumpc(o1);
+      stmt();
+      o = symbol();
+      if (o==19 & cval==14) { /* else */
+        isn++;
+        o2 = isn;
+        jump(o2);
+        label(o1);
+        stmt();
+        label(o2);
+        return;
+      }
+      peeksym = o;
+      label(o1);
+      return;
+    }
+
+    if (cval==13) { /* while */
+      isn++;
+      o1 = isn;
+      label(o1);
+      pexpr();
+      isn++;
+      o2 = isn;
+      jumpc(o2);
+      stmt();
+      jump(o1);
+      label(o2);
+      return;
+    }
+
+    error('sx');
+    goto syntax;
+  }
+
+  if (o==20 & peekc==':') { /* name : */
+    peekc = 0;
+    if (!*csym) {
+      *csym = 2; /* param */
+      ++isn;
+      csym[1] = isn;
+    } else if (*csym != 2) {
+      error('rd');
+      goto next;
+    }
+    label(csym[1]);
+    goto next;
+  }
+
+  peeksym = o;
+  expr(15);
+  gen('s',nauto); /* setop */
+
+semi:
+  o = symbol();
+  if (o==1) /* ; */
+    return;
+
+syntax:
+  error('sz');
+  goto next;
+}
+
+blkend() {
+  while (nisn < isn) {
+    ++nisn;
+    xwrite('l');
+    number(nisn);
+    xwrite(': ');
+    xwrite('ll');
+    number(nisn);
+    xwrite('\n');    
+  }
 }
 
 gen(o,n) {
@@ -731,26 +728,23 @@ gen(o,n) {
 }
 
 jumpc(n) {
-  xwrite('f'); /* ifop */
-  xwrite(' .');
+  xwrite('f '); /* ifop */
+  xwrite('l');
   number(n);
   xwrite('\n');
 }
 
-jump(lbl) {
-  xwrite('t'); /* traop */
-  xwrite(' .');
-  number(lbl);
+jump(n) {
+  xwrite('t '); /* traop */
+  xwrite('ll');
+  number(n);
   xwrite('\n');
 }
 
-label(lbl) {
-  xwrite('.');
-  number(lbl);
-  xwrite(': ');
-  xwrite('t ');
-  xwrite('.+');
-  xwrite('1\n');
+label(n) {
+  xwrite('ll');
+  number(n);
+  xwrite(':\n');
 }
 
 printn(n) {
@@ -780,7 +774,7 @@ error(code)
 {
   extern line;
   int f;
-  
+ 
   nerror++;
   xflush();
   f = fout;
@@ -793,6 +787,8 @@ error(code)
   }
   printn(line);
   xwrite('\n');
+  if (nerror==20)
+    exit(20);
   fout = f;
 }
 

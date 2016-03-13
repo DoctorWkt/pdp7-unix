@@ -78,7 +78,7 @@ getc: 0
    dac cibufp
    jmp getc+1
 1:
-   lac 0o4
+   lac o4
    jmp getc i
 
 putc: 0
