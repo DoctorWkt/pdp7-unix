@@ -25,6 +25,7 @@ sma = 0740100			" OPR: skip on minus AC
 sza = 0740200			" OPR: skip on zero AC
 snl = 0740400			" OPR: skip on non-zero link
 skp = 0741000			" OPR: skip unconditionally
+spa = 0741100			" OPR: skip on positive AC
 sna = 0741200			" OPR: skip on non-zero AC
 szl = 0741400			" OPR: skip on zero link
 rtl = 0742010			" OPR: rotate two left
