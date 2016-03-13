@@ -55,3 +55,14 @@ seeing any breaks after the sys read in init.s. The read only reads one
 word, so I was expecting to see it react after one or perhaps two characters
 typed at the keyboard, or even the \r character.
 
+## Sun Mar 13 21:11:26 AEST 2016
+
+Phil made essentially the same change. He noted in an e-mail: entering
+dmr<CTRL/J> at the login: prompt got me a password: prompt. Entering
+dmr<CTRL/J> there gave me a question mark. Which may be either: I was wrong
+in my guess about "password" file format, or where home directories should
+be located...
+
+So the next step is to dissect init.s in more detail. I've changed the as7
+assembler so that we can #ifdef the code around dsprestart in s7.s but keep
+the Graphics-2 code still in the file.
