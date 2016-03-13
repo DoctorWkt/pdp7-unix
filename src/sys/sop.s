@@ -25,6 +25,7 @@ sma = 0740100			" OPR: skip on minus AC
 sza = 0740200			" OPR: skip on zero AC
 snl = 0740400			" OPR: skip on non-zero link
 skp = 0741000			" OPR: skip unconditionally
+spa = 0741100			" OPR: skip on positive AC
 sna = 0741200			" OPR: skip on non-zero AC
 szl = 0741400			" OPR: skip on zero link
 rtl = 0742010			" OPR: rotate two left
@@ -43,7 +44,7 @@ mul = 0653122			" EAE: multiply
 idiv = 0653323			" EAE: integer divide
 lacq = 0641002			" EAE: load AC with MQ
 clq = 0650000			" EAE: clear MQ
-omq = 0650002			" EAE: OR MQ into AC
+omq = 0640002			" EAE: OR MQ into AC
 cmq = 0650004			" EAE: complement MQ
 lmq = 0652000			" EAE: load MQ from AC
 
