@@ -36,3 +36,11 @@ dsprestart at 03516, and we do make it to the dpcf instruction
 at 03527, but we don't get past here. We don't make it down
 to the sma instruction at 03531 or the ksf instruction at
 03537,
+
+## wkt Sun Mar 13 14:41:30 AEST 2016
+
+I've commented out some of the Graphics-2 code around dsprestart and
+pibreak in s7.s. With this code removed, I now see the login: prompt
+being written by the init child. It's not responding to keyboard
+characters, but I haven't traced the code yet.
+
