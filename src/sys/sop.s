@@ -43,7 +43,7 @@ mul = 0653122			" EAE: multiply
 idiv = 0653323			" EAE: integer divide
 lacq = 0641002			" EAE: load AC with MQ
 clq = 0650000			" EAE: clear MQ
-omq = 0650002			" EAE: OR MQ into AC
+omq = 0640002			" EAE: OR MQ into AC
 cmq = 0650004			" EAE: complement MQ
 lmq = 0652000			" EAE: load MQ from AC
 
