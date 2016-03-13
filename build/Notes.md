@@ -44,3 +44,14 @@ pibreak in s7.s. With this code removed, I now see the login: prompt
 being written by the init child. It's not responding to keyboard
 characters, but I haven't traced the code yet.
 
+## wkt Sun Mar 13 15:06:53 AEST 2016
+
+Using the modified kernel and the normal init.s, I've set breakpoints
+at 0352, the dac after krb in dsprestart, and at 10253 the lac char
+straight after the sys read in init.s.
+
+I'm seeing breaks at 0352 for the four characters "ken\r", but I'm not
+seeing any breaks after the sys read in init.s. The read only reads one
+word, so I was expecting to see it react after one or perhaps two characters
+typed at the keyboard, or even the \r character.
+
