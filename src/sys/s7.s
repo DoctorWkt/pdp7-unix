@@ -98,7 +98,7 @@ dsprestart:
 
 1: sna ral			" dataphone flag set (bit 7)??
    jmp .+3			"  no
-   dpcf				" clear dataphone flag
+   raef				" XXX: fix comment
    jmp piret			" return
    sma				" light pen flags (bit 2)
    jmp 1f			"  no
