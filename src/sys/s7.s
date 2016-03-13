@@ -5,26 +5,28 @@ pibreak:			" priority interrupt break processing "chain"
    dac .ac			" save interrupt AC
 	"** CROSSED OUT....
 
-   " dpsf		" Warren commented this code out to try and
-   " jmp 1f		" disable the Graphics-2 I/O
+#ifdef GRAPHICS2
+   dpsf
+   jmp 1f		" disable the Graphics-2 I/O
 
-   " dpcf
-   " dprs
-   " dac dpstat
-   " sma ral
-   " jmp 2f
-   " dprc
-   " dac dpchar
-   " -1
-   " dac dpread
-   " lac dpstat
-   " ral
-" 2:
-   " sma
-   " jmp piret
-   " -1
-   " dac dpwrite
-   " jmp piret	"** END OF CROSSOUT
+   dpcf
+   dprs
+   dac dpstat
+   sma ral
+   jmp 2f
+   dprc
+   dac dpchar
+   -1
+   dac dpread
+   lac dpstat
+   ral
+2:
+   sma
+   jmp piret
+   -1
+   dac dpwrite
+   jmp piret	"** END OF CROSSOUT
+#endif
 
 1: clsf			" clock overflow (line frequency ticks)?
    jmp 1f		"  no
@@ -88,26 +90,26 @@ cnop:			" fetched as constant in iread
    dac .dspb
    jmp piret
 dsprestart:
-			" Warren commented this out to try and
-			" disable the Graphics-2 I/O
-   " lac d1
-   " dac .dspb			" set .dsbp = 1
-   " lac dspbufp			" load display buf pointer
-   " beg				" start display processor
-   " -10
-   " dac .dsptm			" set .dsptm = -10 (10 ticks)
-   " jmp piret
+#ifdef GRAPHICS2
+   lac d1
+   dac .dspb			" set .dsbp = 1
+   lac dspbufp			" load display buf pointer
+   beg				" start display processor
+   -10
+   dac .dsptm			" set .dsptm = -10 (10 ticks)
+   jmp piret
 
-" 1: sna ral			" dataphone flag set (bit 7)??
-   " jmp .+3			"  no
-   " raef				" XXX: fix comment
-   " jmp piret			" return
-   " sma				" light pen flags (bit 2)
-   " jmp 1f			"  no
-   " lda				" G-2: load display address
-   " dac .lpba			" save
-   " rlpd				" G-2: resume after light pen stop
-   " jmp piret
+1: sna ral			" dataphone flag set (bit 7)??
+   jmp .+3			"  no
+   raef				" XXX: fix comment
+   jmp piret			" return
+   sma				" light pen flags (bit 2)
+   jmp 1f			"  no
+   lda				" G-2: load display address
+   dac .lpba			" save
+   rlpd				" G-2: resume after light pen stop
+   jmp piret
+#endif
 
 1: ksf				" (TTY) keyboard flag set?
    jmp 1f			"  no

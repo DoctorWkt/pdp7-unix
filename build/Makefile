@@ -1,6 +1,8 @@
 # Build the kernel, the filesystem and run SimH
+# Put any defines for as7 here
+#DEFINES=
 
-AS=../tools/as7
+AS=../tools/as7 $(DEFINES)
 MKFS=../tools/mkfs7
 SYS=../src/sys
 
@@ -18,7 +20,7 @@ coldboot:
 	$(AS) -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-9].s
 
 image.fs:
-	$(MKFS) --debug --format simh proto
+	$(MKFS) --format simh proto
 
 clean:
 	rm -f a.rim image.fs a.lst

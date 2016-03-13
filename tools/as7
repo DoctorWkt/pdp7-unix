@@ -38,10 +38,13 @@ my $debug = 0;		# Run in debug mode
 my $format = 'a7out';	# output format
 my $namelist = 0;	# output n.out file
 my $output = 'a.out';	# output file
+my @cppdefs;		# C pre-processor defines
+my @cppundefs;		# C pre-processor undefines
 
 # keep this near the GetOptions call to make it easy to add documentation!
 sub usage {
-    die("Usage: $0 [--debug] [--format=a7out|list|ptr|rim ] [--out file] file1.s [file2.s ...]\n")
+    die("Usage: $0 [-Dmacro] [-Umacro] [--debug] [--format=a7out|list|ptr|rim ]\n" .	
+	"\t[--out file] file1.s [file2.s ...]\n");
 }
 
 GetOptions(
@@ -49,6 +52,8 @@ GetOptions(
     'format|f=s' => \$format,
     'namelist|n' => \$namelist,
     'output|o=s' => \$output,
+    'D|D=s' => \@cppdefs,
+    'U|U=s' => \@cppundefs,
 ) or usage();
 
 usage() if ( @ARGV < 1 );
@@ -265,9 +270,18 @@ sub err {
 # Open and parse the given file
 sub parse_file {
     $file = shift;
-    open( my $IN, "<", $file ) || die("Cannot read $file: $!\n");
+
+    # Get the C pre-processor command-line arguments
+    my $defines= join(' ', map { "-D$_" } @cppdefs) || "";
+    my $undefines= join(' ', map { "-U$_" } @cppundefs) || "";
+  
+    open( my $IN, "-|", "cpp -trigraphs $defines $undefines $file" )
+				|| die("Cannot pipe cpp $file: $!\n");
     $lineno = 0;
     while ( $line = <$IN> ) {
+	# Lose any C pre-processor comment lines
+	next if ($line=~ m{^#});
+
 	$lineno++;
         chomp($line);		# Lose the end of line
         $origline = $line;
