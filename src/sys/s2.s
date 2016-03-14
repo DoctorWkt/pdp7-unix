@@ -116,7 +116,7 @@
    lac u.base			" ???
    jms iget			" ???
    lac ii			" ???
-   dzm d.i			" Zero the i-num in the directory? Why?
+   dac d.i			" Save the i-num in the directory entry
    jms copy; name; d.name; 4	" Copy the new link name into the directory entry
    lac i.uniq			" Copy the i-node unique number into
    dac d.uniq			" the directory entry
