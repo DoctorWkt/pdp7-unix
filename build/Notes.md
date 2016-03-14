@@ -75,3 +75,17 @@ comments. It seems that "dd" has to be a i-num 4 and "system" at i-num 3.
 I've modified mkfs7 and the proto file to allow this to occur. I've also
 make link counts negative. This now gets init past the link syscall, but
 it then dies on the open("sh") immediately after that.
+
+## wkt Mon Mar 14 20:20:44 AEST 2016
+
+A transcription error in s2.s link caused the new link's d.inum to be zero
+and not the correct value. Fixed. I've eyeballed the fs differences and
+they look OK to me. init is still erroring. Not sure why yet.
+
+It's the open call directly after the link that's failing. Why, if the open
+is for the link we just created.
+
+When I dike out the chdir syscalls and put a sh in system, we can open this
+one, bounce up to high mem, read the shell into 10000 and then exec this
+code. So the rest of init is OK, but there's still a bug opening the link
+we just created.
