@@ -86,32 +86,33 @@ namei: 0
    sad 8 i
    skp
    jmp 2f
-   lac d.i
-   isz namei
+   lac d.i		" Get the i-number into AC
+   isz namei		" Skip over the argument and return
    jmp namei i
 2:
    isz di
    isz 9f+t
    jmp 1b
-   jmp namei i
+   jmp namei i		" Didn't find it, return zero in AC
 t = t+2
-
+                        " Given an i-number in AC, fetch that i-node
+                        " from disk and store it in the inode buffer
 iget: 0
-   dac ii
-   cll; idiv; 5
-   dac 9f+t
-   lacq
-   tad d2
-   dac 9f+t+1
-   jms dskrd
+   dac ii		" Store the i-number in ii
+   cll; idiv; 5		" Divide by 5: 5 inodes in a block
+   dac 9f+t		" Store the remainder in 9f+t: the i-node
+   lacq			" number within the block
+   tad d2		" Add 2 to the quotient to get the block number
+   dac 9f+t+1		" and store in 9f+t+1
+   jms dskrd		" Get the block
    lac 9f+t
-   cll; mul; 12
-   lacq
-   tad dskbufp
+   cll; mul; 12		" Multiply the i-num within the block by 12
+   lacq			" to get the offset into the block
+   tad dskbufp		" Add on the base of the disk buffer
    dac 9f+t
    dac .+2
-   jms copy; ..; inode; 12
-   jmp iget i
+   jms copy; ..; inode; 12	" Copy 12 words from buffer to inode
+   jmp iget i		" and return
 
 iput: 0
    lac 9f+t+1

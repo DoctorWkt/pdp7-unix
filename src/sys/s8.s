@@ -219,7 +219,7 @@ userdata:			" "ustruct" (swappable)
    u.dspbuf: 0
    u.intflg: 1
       .=userdata+64
-ii: .=.+1			" number of i-node in inode:
+ii: .=.+1			" The current i-node number stored in inode
 inode:				" disk inode in memory:
    i.flags: .=.+1		" inode flags
 				" 400000 in use
