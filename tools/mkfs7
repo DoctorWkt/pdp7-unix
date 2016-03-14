@@ -139,8 +139,11 @@ sub allocate_blocks {
 sub allocate_inode {
     my $inum = shift;
     return ( $nextinum++ ) if ( !defined($inum) );
-    die("i-num $inum already allocated\n") if ( $inum < $nextinum );
-    $nextinum = $inum + 1;
+    if ( $inum < $nextinum ) {
+        print("i-num $inum already allocated, ignoring this\n")
+    } else {
+        $nextinum = $inum + 1;
+    }
     return ($inum);
 }
 
@@ -197,10 +200,10 @@ sub fill_inode {
     $inum = allocate_inode() if ( !defined($inum) );
     my ( $blocknum, $offset ) = get_inode_block_offset($inum);
 
-    # Fill in the easy fields
+    # Fill in the easy fields. Link count is negative
     $Block[$blocknum][ $offset + I_UID ]  = $uid;
     $Block[$blocknum][ $offset + I_SIZE ] = $size;
-    $Block[$blocknum][ $offset + I_NLKS ] = 1;
+    $Block[$blocknum][ $offset + I_NLKS ] = -1 & MAXINT;	
 
     my $i = $offset;
     foreach my $datablocknum (@blklist) {
@@ -289,7 +292,8 @@ sub add_direntry {
     # Move up to the next position in the directory.
     $dirref->[1] += D_NUMWORDS;
 
-    increment_file_length( $dirref->[2], D_NUMWORDS ); # update directory inode i.size
+    # Update the directory inode's i.size, another 8 words
+    increment_file_length( $dirref->[2], D_NUMWORDS );
 
     # If we have filled the directory up, allocate another block to it
     if ( $dirref->[1] == WORDSPERBLK ) {
@@ -324,8 +328,10 @@ sub make_dir {
     dprint("Pushing dir block $dirblock inum $inum to dirstack\n");
     push( @Dirstack, [ $dirblock, 0, $inum ] );
 
-    # Add a "dd" entry to this directory
-    add_direntry( "dd", DD_INUM );
+    # Add a "dd" entry to this directory. We get the i-num from
+    # the first entry in the Dirstack
+    add_direntry( "dd", $Dirstack[0]->[2] );
+    dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
     dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
 }
