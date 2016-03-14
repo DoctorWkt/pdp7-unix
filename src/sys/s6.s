@@ -40,57 +40,60 @@ itrunc: 0
    dac i.flags
    jmp itrunc i
 t = t+4
-
+			" Given a pointer to a 4-word filename after
+			" the jms to namei, and with AC holding the
+			" i-num of the directory it is in, return the
+			" i-number of the filename, or 0 if not found
 namei: 0
-   jms iget
+   jms iget		" Get the inode from the i-num in the AC
    -1
    tad namei i
    dac 9f+t+1
    isz namei
    lac i.flags
-   and o20
+   and o20		" Is this a directory?
    sna
-   jmp namei i
+   jmp namei i		" No, loop back
    -8
-   tad i.size
+   tad i.size		" Subtract 8 from the file's size
    cma
    lrss 3
    dac 9f+t
    sna
    jmp namei i
-   dzm di
+   dzm di		" Store zero in di
 1:
    lac di
 
 "** 01-s1.pdf page 35
 
-   jms dget
+   jms dget		" Get a directory entry from the dirblock
    lac d.i
    sna
    jmp 2f
    lac 9f+t+1
    dac 8
-   lac d.name
-   sad 8 i
+   lac d.name		" Compare the four words of the filename in the
+   sad 8 i		" directory entry with the argument to namei
    skp
-   jmp 2f
+   jmp 2f		" No match
    lac d.name+1
    sad 8 i
    skp
-   jmp 2f
+   jmp 2f		" No match
    lac d.name+2
    sad 8 i
    skp
-   jmp 2f
+   jmp 2f		" No match
    lac d.name+3
    sad 8 i
    skp
-   jmp 2f
-   lac d.i		" Get the i-number into AC
+   jmp 2f		" No match
+   lac d.i		" A match. Get the i-number into AC
    isz namei		" Skip over the argument and return
    jmp namei i
 2:
-   isz di
+   isz di		" No match, move up to the next direntry
    isz 9f+t
    jmp 1b
    jmp namei i		" Didn't find it, return zero in AC
