@@ -89,3 +89,8 @@ When I dike out the chdir syscalls and put a sh in system, we can open this
 one, bounce up to high mem, read the shell into 10000 and then exec this
 code. So the rest of init is OK, but there's still a bug opening the link
 we just created.
+
+## wkt Mon Mar 14 21:23:30 AEST 2016
+I had wrong permission bit values in mkfs7 which was stopping the shell
+open once we had changed user-id to the real user. Now fixed, and we
+can now get to a shell prompt.
