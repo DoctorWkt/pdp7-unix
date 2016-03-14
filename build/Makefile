@@ -13,14 +13,14 @@ run: a.rim image.fs
 
 a.rim:
 	$(AS) -f rim  -o a.rim $(SYS)/sop.s $(SYS)/s[1-8].s
-	$(AS) -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-8].s
+	$(AS) -n -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-8].s
 
 coldboot:
 	$(AS) -f rim  -o a.rim $(SYS)/sop.s $(SYS)/s[1-9].s
-	$(AS) -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-9].s
+	$(AS) -n -f list -o a.lst $(SYS)/sop.s $(SYS)/s[1-9].s
 
 image.fs:
 	$(MKFS) --format simh proto
 
 clean:
-	rm -f a.rim image.fs a.lst
+	rm -f a.rim image.fs a.lst n.out
