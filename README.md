@@ -16,11 +16,11 @@ as the files 0*.pdf.
 Update mid-March 2016: We've written an assembler, a user-mode simulator and
 commented several source files. We now have these utilities running:
 as, cat, chmod, chown, chrm, cp, date, ln, ls, mv, stat. We have a working
-shell with some functionality missing. We have begun work on building a
-filesystem.
+shell with some functionality missing. We have a working filesystem and
+we can now boot the kernel, launch init, login and get to a shell prompt.
 
-Things to do: finish the filesystem creation tool, finish the shell, write the
-missing utilities, try to bring the system up on a PDP-7 system. We have
+Things to do: finish the shell, write the missing utilities, to bring the
+system fully up on a PDP-7 system and fix any bugs. We have
 a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
@@ -34,6 +34,7 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /src/sys   holds the modified source code of the kernel
 * /src/other holds PDP-7 source code which did not come from the scanned files
 * /tools     holds the source for the tools written to assist the project
+* /build     is an area to build the kernel & filesystem and run them
 * /misc	     holds miscellaneous notes and information
 * /pdp7parse holds a Java parser for pdp7 source code
 
