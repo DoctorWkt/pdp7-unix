@@ -66,3 +66,12 @@ be located...
 So the next step is to dissect init.s in more detail. I've changed the as7
 assembler so that we can #ifdef the code around dsprestart in s7.s but keep
 the Graphics-2 code still in the file.
+
+## wkt Mon Mar 14 19:51:08 AEST 2016
+
+Phil realised that it was the link syscall which was failing. It seems to
+need a directory at i-num 4. I fiddled a bit and added some more kernel
+comments. It seems that "dd" has to be a i-num 4 and "system" at i-num 3.
+I've modified mkfs7 and the proto file to allow this to occur. I've also
+make link counts negative. This now gets init past the link syscall, but
+it then dies on the open("sh") immediately after that.
