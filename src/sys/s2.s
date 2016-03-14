@@ -92,41 +92,41 @@
    jmp sysexit
 
 .link:
-   jms arg
-   dac 0f
+   jms arg			" Save the argument pointers in
+   dac 0f			"0f, 1f and 2f
    jms arg
    dac 1f
    jms arg
    dac 2f
-   lac d4
-   jms namei; 0:0
-      jms error
-   jms namei; 1:0
-      jms error
+   lac d4			" Search the directory at i-num 4
+   jms namei; 0:0		" for the first argument
+      jms error			" Didn't find it
+   jms namei; 1:0		" In the i-num found by 1st namei,
+      jms error			" search for 2nd argument, err not found
    dac u.base
    jms copy; 2:0; name; 4
-   lac u.cdir
-   jms namei; name
+   lac u.cdir			" Search the process' current directory
+   jms namei; name		" for the third argument
       skp
-   jms error
+   jms error			" Error if it already exists
    lac d1
-   dac mode			" save mode bits for access
+   dac mode			" Save mode bits for access
    jms access
-   jms dslot
-   lac u.base
-   jms iget
-   lac ii
-   dzm d.i
-   jms copy; name; d.name; 4
-   lac i.uniq
-   dac d.uniq
+   jms dslot			" ???
+   lac u.base			" ???
+   jms iget			" ???
+   lac ii			" ???
+   dzm d.i			" Zero the i-num in the directory? Why?
+   jms copy; name; d.name; 4	" Copy the new link name into the directory entry
+   lac i.uniq			" Copy the i-node unique number into
+   dac d.uniq			" the directory entry
    -1
-   tad i.nlks			" decrement link count!
+   tad i.nlks			" Decrement link count, i.e. one more link
    dac i.nlks
 "** 01-s1.pdf page 9
-   jms iput
-   jms dput
-   jmp okexit
+   jms iput			" Save the i-node and directory entry for
+   jms dput			" the new link
+   jmp okexit			" and return OK
 
 .unlink:
    jms argname
