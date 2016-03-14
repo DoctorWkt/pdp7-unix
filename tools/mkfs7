@@ -43,8 +43,8 @@ use constant I_DIRECTORY  => 0000020;
 use constant I_FILE       => 0000000;
 use constant I_OWNERREAD  => 0000010;
 use constant I_OWNERWRITE => 0000004;
-use constant I_WORLDREAD  => 0000010;
-use constant I_WORLDWRITE => 0000004;
+use constant I_WORLDREAD  => 0000002;
+use constant I_WORLDWRITE => 0000001;
 
 use constant I_LINK => 0000001;		# Never used in an i-node: just internal use
 
