@@ -97,6 +97,8 @@ sub get_inode_block_offset {
 # Mark a block as being in-use
 sub mark_block_inuse {
     my $usedblk = shift;
+    die("bad usedblk $usedblk\n") if ($usedblk >= NUMBLOCKS);
+
     dprint("Block $usedblk is in-use\n");
     print("Free block $usedblk is being used\n")
       if ( $Freelist[$usedblk] );
@@ -143,8 +145,11 @@ sub get_inode {
         {
             my $usedptr = $Block[$blocknum][$o];
             next if ( $usedptr == 0 );
+	    die("bad usedptr $usedptr in i-node $inode\n") if ($usedptr >= NUMBLOCKS);
+
             mark_block_inuse($usedptr);
             foreach my $indo ( 0 .. WORDSPERBLK - 1 ) {
+
                 my $usedblk = $Block[$usedptr][$indo];
                 next if ( $usedblk == 0 );
                 push( @used, $usedblk );
@@ -187,7 +192,7 @@ sub print_direntry {
     my ( $inum, $name ) = @_;
     my ( $flags, $uid, $links, $size, $uniq ) = get_inode( $inum, 0 );
     if ( !defined($flags) ) {
-        printf( "%4d unallocated i-node\n", $inum );
+        printf( "%4d unallocated i-node in this dir named %s\n", $inum, $name );
         return;
     }
 

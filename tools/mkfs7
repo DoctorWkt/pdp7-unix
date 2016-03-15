@@ -332,6 +332,11 @@ sub make_dir {
     # the first entry in the Dirstack
     add_direntry( "dd", $Dirstack[0]->[2] );
     dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
+
+    # Also add a "." entry to this directory
+    add_direntry( ".", $inum );
+    dprint("Added a . entry to ourselves\n");
+
     dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
 }

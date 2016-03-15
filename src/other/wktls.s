@@ -39,7 +39,7 @@ entryloop:
    sna
      jmp 1f		" No, don't print out the inode number
 
-   lac bufptr		" Print out the inode number as 5 digits
+   lac bufptr i		" Print out the inode number as 5 digits
    jms octal; -5
 
 1: isz bufptr		" Move up to the filename
@@ -50,7 +50,7 @@ entryloop:
    lac bufptr
    dac statfile		" Copy the pointer to the status call
    lac statbufptr	" Get the file's details into the statbuf
-   sys status; statfile:0; 0
+   sys status; curdir; statfile:0
    spa
      jms fileend
 
@@ -70,15 +70,16 @@ entryloop:
    sys write; l; 1	" Yes, print an l
    jmp 2f
 1: lac fd1
-   sys write; minus; 1	" Not a dir, not large, print an s
+   sys write; s; 1	" Not a dir, not large, print an s
 
 2: lac s.perm		" Readable by owner?
    and ureadmask
    sna
      jmp 1f
    lac fd1
-1: sys write; r; 1	" Yes, print an r
+   sys write; r; 1	" Yes, print an r
    jmp 2f
+1: lac fd1
    sys write; minus; 1	" No, print a - sign
 
 2: lac s.perm		" Writable by owner?
