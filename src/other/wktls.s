@@ -35,6 +35,9 @@ fileloop:
 " Each directory entry is eight words. We need to print out
 " the filename which is in words 2 to 5. Word 1 is the inum.
 entryloop:
+   lac bufptr i		" Is the inode number zero?
+   sna
+     jmp skipentry	" Yes, skip this entry
    lac longopt		" Are we printing out in long format?
    sna
      jmp 1f		" No, don't print out the inode number
@@ -116,6 +119,9 @@ entryloop:
    sys write; space; 1	" Print a space
 
    lac s.nlinks		" Print the number of links out
+			" but first make it positive
+   cma
+   tad d1
    jms octal; -2
    lac s.uid		" Print the user-id out
    jms octal; -3
@@ -130,6 +136,10 @@ printname:
 
    lac bufptr		" Add 7 to the bufptr
    tad d7
+   skp
+
+skipentry:
+   tad d8		" Or add 8 if we skipped this entry entirely
    dac bufptr
    -8
    tad count		" Decrement the count of words by 8
@@ -175,10 +185,11 @@ octal: 0
 
 longopt: 0		" User set the -l option when this is 1
 fd: 0			" File descriptor for the directory
-fd1: 1			" File descriptor 1
+d1: fd1: 1		" File descriptor 1
 d4: 4
 d5: 5
 d7: 7
+d8: 8
 o40: 040
 o60: 060
 count: 0		" Count of # of directory words read in
