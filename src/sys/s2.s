@@ -1,33 +1,38 @@
 "** 01-s1.pdf page 7
 " s2
 
+	" file status (stat) system call
+	" AC/ pointer to status (inode) buffer (12 words)
+	"   sys status; dir_name_ptr; file_name_ptr
 .status:
-   jms arg
+   jms arg			" fetch directory name pointer
    dac .+5
-   jms arg
+   jms arg			" fetch file name pointer
    dac .+6
-   lac u.cdir
-   jms namei; ..
-      jms error
-   jms namei; ..
-      jms error
-   jms iget
-   lac u.ac
-   and o17777
-   jms betwen; o10000; o17762
-      jms error
-   dac .+3
-   jms copy; inode; ..; 12
-   lac d.i
-   dac 9 i
+   lac u.cdir			" get current working directory
+   jms namei; ..		" look up source directory
+      jms error			"  not found: return error to user
+   jms namei; ..		" look up file
+      jms error			"  not found: return error
+   jms iget			" read file inode
+   lac u.ac			" get user buffer pointer
+   and o17777			" truncate to 13 bits
+   jms betwen; o10000; o17762	" is user memory (but not last 14 wds)?
+      jms error			"  no: error
+   dac .+3			" save as copy destination
+   jms copy; inode; ..; 12	" copy inode to user buffer
+   lac d.i			" copy i-num from last dnode read ??
+   dac 9 i			" save thru index 9 (pre-increment) ??
    jmp okexit
 
+	" capture display?
 .capt:
    lac u.ac
    dac u.dspbuf
    jms movdsp
    jmp sysexit
 
+	" release display?
 .rele:
    dzm u.dspbuf
    law dspbuf
@@ -35,22 +40,22 @@
    jmp sysexit
 
 .chmod:
-   jms isown
-   lac u.ac
-   and o17
-   lmq
-   lac i.flags
-   and o777760
-   omq
-   dac i.flags
-   jms iput
+   jms isown			" check if user owns file arg
+   lac u.ac			" get new permissions
+   and o17			" mask to read/write bits
+   lmq				" save in MQ
+   lac i.flags			" get file flags
+   and o777760			" clear permissions
+   omq				" or in new permissions from MQ
+   dac i.flags			" save in inode
+   jms iput			" write inode back
    jmp okexit
 
 .chown:
-   jms isown
-   lac u.ac
-   dac i.uid
-   jms iput
+   jms isown			" check if user owns file arg
+   lac u.ac			" get new owner
+   dac i.uid			" save in inode
+   jms iput			" write inode back
    jmp okexit
 
 .getuid:			" getuid system call
@@ -103,7 +108,7 @@
       jms error			" Didn't find it
    jms namei; 1:0		" In the i-num found by 1st namei,
       jms error			" search for 2nd argument, err not found
-   dac u.base
+   dac u.base			" save in user data
    jms copy; 2:0; name; 4
    lac u.cdir			" Search the process' current directory
    jms namei; name		" for the third argument
@@ -111,11 +116,11 @@
    jms error			" Error if it already exists
    lac d1
    dac mode			" Save mode bits for access
-   jms access
-   jms dslot			" ???
-   lac u.base			" ???
-   jms iget			" ???
-   lac ii			" ???
+   jms access			" check access (or return error to user)
+   jms dslot			" allocate directory slot
+   lac u.base			" get source file i-number
+   jms iget			" read inode in
+   lac ii			" get the i-num
    dac d.i			" Save the i-num in the directory entry
    jms copy; name; d.name; 4	" Copy the new link name into the directory entry
    lac i.uniq			" Copy the i-node unique number into
@@ -129,47 +134,56 @@
    jmp okexit			" and return OK
 
 .unlink:
-   jms argname
-   dac u.base
-   lac d1			" mode bit 1 (write?)
+   jms argname			" fetch filename, inode
+   dac u.base			" save i-number
+   lac d1			" write mode bit
    dac mode			" save for access call
-   jms access
-   dac d.i
-   jms dput
-   lac u.base
-   jms iget
-   isz i.nlks			" increment link count
+   jms access			" check access or return error (reads inode)
+   dzm d.i			" clear directory i-num
+   jms dput			" write directory entry back
+   lac u.base			" get i-number back
+   jms iget			" read inode back
+   isz i.nlks			" increment link count (kept as negative count)
    jmp 1f			"  not zero
    jms itrunc			" zero links: free blocks
    dzm i.flags			" clear status (free inode)
 1:
-   jms iput
+   jms iput			" write inode back to disk
    jmp sysexit
 
 .setuid:			" setuid system call
    lac u.uid			" load current user id
-   sma				" negative?
-   jms error			" no: error!!
+   sma				" negative (super user)
+   jms error			"  no: error!!
    lac u.ac			" load user AC
    dac u.uid			" save as new uid
    jmp sysexit
 
+	" rename system call:
+	"   sys rename; old_name_ptr; new_name_ptr
+	" Questions:
+	"   when is directory entry read??
+	"   is access check on directory or src file??
+	"   check for existing file with new name??
+	"   when is directory entry written back??
 .rename:
-   jms arg
-   dac 0f
-   jms arg
-   dac 1f
-   lac u.cdir
-   jms namei; 0:0
-      jms error
-   lac d1				" mode bit 1 (write?)
-   dac mode				" save for access call
-   jms access
-   jms copy; 1:0; d.name; 4
+   jms arg			" fetch first arg (old name pointer)
+   dac 0f			" save for namei
+   jms arg			" fetch second arg (new name pointer)
+   dac 1f			" save for copy
+   lac u.cdir			" get CWD
+   jms namei; 0:0		" search for (old) name
+      jms error			"  not found: return error
+   lac d1			" get write mode bit
+   dac mode			" save for access call
+   jms access			" access OK? (or return error to user)
+   jms copy; 1:0; d.name; 4	" copy new name into directory entry
    jmp okexit
 
-	" time system call returns line (mains) frequency ticks since boot?
-	" note: returns uptime!?
+	" time system call returns line (mains) frequency ticks
+	" high order bits returned in AC, low order in MQ
+	" s.tim is located in "system" block (written to disk)
+	" so this is a running count of uptime since first boot!
 	" at 60Hz, 36 bits would last 36+ years!
 .time:
    lac s.tim			" load high order bits
@@ -179,14 +193,14 @@
    jmp sysexit
 
 .chdir:
-   jms argname
-   jms iget
-   lac i.flags
-   and o20
-   sna
-   jms error
-   lac ii
-   dac u.cdir
+   jms argname			" fetch argument as filename
+   jms iget			" (re)read inode(???)
+   lac i.flags			" get flags
+   and o20			" get directory bit
+   sna				" is a directory?
+   jms error			"  no: return error to user
+   lac ii			" yes: get i-number
+   dac u.cdir			" save as current working directory
 "** 01-s1.pdf page 10
    jmp okexit
 
@@ -223,27 +237,27 @@
 .creat:
    lac d1			" mode bit 1 (write)
    dac mode			" save for access call
-   jms arg
-   dac .+2
-   jms copy; ..; name; 4
+   jms arg			" get name pointer
+   dac .+2			" save for copy
+   jms copy; ..; name; 4	" copy filename to "name"
    lac u.cdir
-   jms namei; name
-      jmp 1f
-   jms iget
-   jms access
-   lac i.flags
-   and o20
-   sna
-   jmp .+4
-   lac u.uid
-   sma
-   jms error
-   jms itrunc
+   jms namei; name		" look up in current working directory
+      jmp 1f			"  not found
+   jms iget			" file exists: read inode
+   jms access			" check access (or return error to user)
+   lac i.flags			" get flags
+   and o20			" get directory bit
+   sna				" is a directory?
+   jmp .+4			"  no: skip to truncate
+   lac u.uid			" get user
+   sma				" is super user?
+   jms error			"  no: error
+   jms itrunc			" yes: truncate
    cla
-   jms dacisize
+   jms dacisize			" clear i.size
    jmp open1
 1:
-   jms access
+   jms access			" here if not found
    lac u.ac			" get access bits from user AC (zero for lock!)
    and o17			" mask to permissions
    jms icreat
@@ -254,30 +268,30 @@ open1:				" common exit for open/creat
 
 "** 01-s1.pdf page 11
 .close:
-   jms finac
-   dzm f.flags
-   jms fput
+   jms finac			" get fnode (open file)
+   dzm f.flags			" clear flags
+   jms fput			" write fnode back to u.ofiles
    jmp sysexit
 
 .read:
-   jms arg
-   and o17777
-   dac u.base
-   jms arg
-   dac u.count
-   lac u.base
-   jms betwen; o10000; o17777
-      jms error
-   tad u.count
-   jms betwen; u.base; o17777
-      jms error
-   dac u.limit
+   jms arg			" get argument
+   and o17777			" mask to address
+   dac u.base			" save as I/O base
+   jms arg			" get second argument
+   dac u.count			" save as count
+   lac u.base			" get base
+   jms betwen; o10000; o17777	" end inside user memory?
+      jms error			"  no: error
+   tad u.count			" get end of buffer
+   jms betwen; u.base; o17777	" inside buffer/user memory?
+      jms error			"  no: error
+   dac u.limit			" yes: save as I/O limit
 1:
-   jms finac
-   lac f.flags
-   and d1
-   sza
-   jms error
+   jms finac			" get fnode for fd in user AC
+   lac f.flags			" get open file flags
+   and d1			" get write bit
+   sza				" open for write?
+   jms error			"  yes: error
    lac i.flags			" get inode flags
    and o40			" get special file bit
    sna				" special?

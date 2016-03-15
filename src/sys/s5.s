@@ -17,15 +17,15 @@ dskswap: 0
 t = t+1
 
 access: 0
-   lac i.flags
+   lac i.flags			" get inode flags
    lmq				" save in MQ
    lac u.uid			" get user id
    spa				" negative?
    jmp access i			"  yes: super user, return
    sad i.uid			" compare to file owner
    lrs 2			"  same: shift flags down two
-   lacq				" get flags back
-   and mode			" mode from system call
+   lacq				" get inode flags back
+   and mode			" AND with mode from system call
    sza				" access allowed?
    jmp access i			"  yes: return
    jms error			" no: return error from system call
@@ -256,18 +256,24 @@ movdsp: 0
    ion
    jmp movdsp i
 
+	" fetch user argument from word after "sys" call, return in AC
 arg: 0
-   lac u.rq+8 i
-   isz u.rq+8
+   lac u.rq+8 i			" fetch word after return PC
+   isz u.rq+8			" bump PC
    jmp arg i
 
+	" fetch user pathname argument from pointer word after "sys" call
+	" into "name" and look it up (in current working directory)
+	" if lookup fails: returns error to user (not caller)
+	" if lookup OK: returns with file i-inode read (into "inode")
+	"	and i-number in AC
 argname: 0
-   jms arg
-   dac .+2
-   jms copy; ..; name; 4
-   lac u.cdir
-   jms namei; name
-      jms error
+   jms arg			" fetch name pointer
+   dac .+2			" save as copy source
+   jms copy; ..; name; 4	" copy to "name"
+   lac u.cdir			" get CWD
+   jms namei; name		" look up file
+      jms error			"  failed: return error directly to user
    jmp argname i
 
 seektell: 0
@@ -288,13 +294,16 @@ seektell: 0
    lac f.badd
    jmp seektell i
 
+	" system call helper
+	" fetch system call argument name pointer from after "sys" call
+	" read inode; if current user is not owner, return error to user
 isown: 0
    jms argname
    jms iget
-   lac u.uid
-   sma
-   sad i.uid
-   skp
-   jms error
+   lac u.uid			" get user id
+   sma				" super user?
+   sad i.uid			"  no: does user own file?
+   skp				"   yes, or super user
+   jms error			"    not super user, not owner: return error
    jmp isown i
 
