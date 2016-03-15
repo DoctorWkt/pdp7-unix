@@ -12,7 +12,7 @@ main:
    dac name
 
    lac statbufptr	" Get the file's details into the statbuf
-   sys status; statfile:0; 0
+   sys status; curdir; statfile:0
    spa
      jmp badfile
 
@@ -32,15 +32,16 @@ main:
    sys write; l; 1	" Yes, print an l
    jmp 2f
 1: lac fd1
-   sys write; minus; 1	" Not a dir, not large, print an s
+   sys write; s; 1	" Not a dir, not large, print an s
 
 2: lac s.perm		" Readable by owner?
    and ureadmask
    sna
      jmp 1f
    lac fd1
-1: sys write; r; 1	" Yes, print an r
+   sys write; r; 1	" Yes, print an r
    jmp 2f
+1: lac fd1
    sys write; minus; 1	" No, print a - sign
 
 2: lac s.perm		" Writable by owner?
@@ -77,6 +78,9 @@ main:
    sys write; space; 1	" Print a space
 
    lac s.nlinks		" Print the number of links out
+                        " but first make it positive
+   cma
+   tad d1
    jms octal; -2
    lac s.uid		" Print the user-id out
    jms octal; -3
@@ -139,7 +143,7 @@ octal: 0
    jmp octal i		" and return from subroutine
 
 longopt: 0		" User set the -l option when this is 1
-fd1: 1			" File descriptor 1, stdout
+d1: fd1: 1		" File descriptor 1, stdout
 d4: 4
 d5: 5
 d8: 8
@@ -177,3 +181,4 @@ w: 0167
 minus: 055
 space: 040
 newline: 012
+curdir: <. 040; 040040; 040040; 040040          " i.e. "."
