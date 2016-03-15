@@ -94,3 +94,10 @@ we just created.
 I had wrong permission bit values in mkfs7 which was stopping the shell
 open once we had changed user-id to the real user. Now fixed, and we
 can now get to a shell prompt.
+
+## wkt Wed Mar 16 06:20:24 AEST 2016
+The shell is working, but we have to move the binaries into the user's directory
+to get them to work. ls wasn't working because there was no way to open the current
+directory. I've taken the decision to add a "." entry to each directory in the filesystem,
+so now we can run things like ls, cat, date. We have a minimally working kernel!
+
