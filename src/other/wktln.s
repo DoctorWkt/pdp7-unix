@@ -3,22 +3,24 @@
 main:
 
    lac 017777 i		" Load the pointer pointer in 017777
-   sad d8		" to see if we have two
-     jmp nofiles	" No arguments, stop now
+   sad d12		" to see if we have three
+     jmp nofiles	" Not enough arguments, stop now
    lac 017777           " Move five words past the argument word count
    tad d5               " so that AC points at the first argument
    dac name1		" and save it
    tad d4		" Then do the same for the second name
    dac name2
+   tad d4		" and the third name
+   dac name3
 
-   sys link; name1:0; name2:0		" Link the file
+   sys link; name1:0; name2:0; name3:0		" Link the file
    spa
      jmp badfile	" Print out an error on failure
    sys exit
 
 
 nofiles:
-   lac d8
+   lac d1
    sys write; 1f; 5             " Write "No files\n" to stderr
    sys exit                     " and exit
 
@@ -27,9 +29,9 @@ nofiles:
 badfile:
    lac name1                    " Get the pointer to the filename
    dac 1f                       " Store it in 1f below
-   lac d8                       " Load fd 8 which is stderr
+   lac d1                       " Load fd 1 which is stdout
    sys write; 1:0; 4            " Write the four words of the filename
-   lac d8
+   lac d1
    sys write; 1f; 2             " and then write " ?\n"
    sys exit
 
@@ -38,4 +40,4 @@ badfile:
 d1: 1
 d4: 4
 d5: 5
-d8: 8
+d12: 12

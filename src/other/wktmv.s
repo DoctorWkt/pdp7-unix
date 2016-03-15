@@ -18,8 +18,8 @@ main:
 
 
 nofiles:
-   lac d8
-   sys write; 1f; 5             " Write "No files\n" to stderr
+   lac d1
+   sys write; 1f; 5             " Write "No files\n" to stdout
    sys exit                     " and exit
 
 1: <tw>; <o 040;  <fi>;<le>;<s 012
@@ -27,9 +27,9 @@ nofiles:
 badfile:
    lac name1                    " Get the pointer to the filename
    dac 1f                       " Store it in 1f below
-   lac d8                       " Load fd 8 which is stderr
+   lac d1                       " Load fd 1 which is stdout
    sys write; 1:0; 4            " Write the four words of the filename
-   lac d8
+   lac d1
    sys write; 1f; 2             " and then write " ?\n"
    sys exit
 
