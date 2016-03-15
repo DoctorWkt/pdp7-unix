@@ -43,24 +43,25 @@ t = t+4
 			" Given a pointer to a 4-word filename after
 			" the jms to namei, and with AC holding the
 			" i-num of the directory it is in, return the
-			" i-number of the filename, or 0 if not found
+			" i-number of the filename (and skip)
+			" return zero in AC if not found (no skip)
 namei: 0
    jms iget		" Get the inode from the i-num in the AC
    -1
-   tad namei i
-   dac 9f+t+1
-   isz namei
+   tad namei i		" get argptr-1
+   dac 9f+t+1		" save in t1
+   isz namei		" skip over argument
    lac i.flags
-   and o20		" Is this a directory?
-   sna
-   jmp namei i		" No, loop back
+   and o20		" get directory bit
+   sna			" Is this a directory?
+   jmp namei i		"  no: return without skip
    -8
    tad i.size		" Subtract 8 from the file's size
    cma
    lrss 3
-   dac 9f+t
-   sna
-   jmp namei i
+   dac 9f+t		" negative count of directory entries in t0
+   sna			" any?
+   jmp namei i		"  no: return without skip
    dzm di		" Store zero in di
 1:
    lac di
@@ -68,10 +69,10 @@ namei: 0
 "** 01-s1.pdf page 35
 
    jms dget		" Get a directory entry from the dirblock
-   lac d.i
-   sna
-   jmp 2f
-   lac 9f+t+1
+   lac d.i		" get i-num
+   sna			" in use?
+   jmp 2f		"  no
+   lac 9f+t+1		" get argptr-1
    dac 8
    lac d.name		" Compare the four words of the filename in the
    sad 8 i		" directory entry with the argument to namei
@@ -90,13 +91,13 @@ namei: 0
    skp
    jmp 2f		" No match
    lac d.i		" A match. Get the i-number into AC
-   isz namei		" Skip over the argument and return
+   isz namei		" give skip return
    jmp namei i
 2:
    isz di		" No match, move up to the next direntry
-   isz 9f+t
-   jmp 1b
-   jmp namei i		" Didn't find it, return zero in AC
+   isz 9f+t		" any left?
+   jmp 1b		"  yes: keep going
+   jmp namei i		" Didn't find it, return zero in AC (without skip)
 t = t+2
                         " Given an i-number in AC, fetch that i-node
                         " from disk and store it in the inode buffer
