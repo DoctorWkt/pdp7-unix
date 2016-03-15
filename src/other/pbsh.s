@@ -178,18 +178,18 @@ eol:
    sys open; argv0; 0		" try cwd (no link required)
    sma
     jmp 1f
-   jmp cmderr
+   " jmp cmderr
 
-"   sys unlink; exectemp		" remove old temp file, if any
-"   sys link; system; argv0; exectemp
-"   spa
-"     jmp cmderr
-"   sys open; exectemp; 0
-"   spa
-"     jmp cmderr
-"   dac cmdfd
-"   sys unlink; exectemp
-"   skp
+   sys unlink; exectemp		" remove old temp file, if any
+   sys link; system; argv0; exectemp
+   spa
+     jmp cmderr
+   sys open; exectemp; 0
+   spa
+     jmp cmderr
+   dac cmdfd
+   sys unlink; exectemp
+   skp
 
 1:  dac cmdfd			" save command file descriptor
    cla				" check for input redirection
