@@ -38,7 +38,8 @@
 
    lacq			" Get back the days in this month from MQ
 			" which we had at the jmp 3f way back
-   jms decprnt; -2	" and print them out
+   tad d1		" and print them out +1
+   jms decprnt; -2
    jms seventy		" followed by " 1970 "
    lac hours
    jms decprnt; -2	" Print the number of hours
