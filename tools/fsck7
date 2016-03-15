@@ -1,0 +1,324 @@
+#!/usr/bin/perl
+#
+# fsck7: Check a PDP-7 filesystem for consistency
+#
+# (c) 2016 Warren Toomey, GPL3
+#
+use strict;
+use warnings;
+use Fcntl qw(:flock SEEK_SET);
+use Data::Dumper;
+use Getopt::Long qw(GetOptions);
+
+Getopt::Long::Configure qw(gnu_getopt);
+
+# Constants
+use constant NUMBLOCKS     => 8000;    # Number of blocks on a surface
+use constant WORDSPERBLK   => 64;      # 64 words per block
+use constant LASTFREEBLOCK => 6399;    # That's what s9.s uses
+use constant NUMINODEBLKS  => 710;     # Number of i-node blocks
+use constant FIRSTINODEBLK => 2;       # First i-node block number
+use constant INODESIZE     => 12;      # Size of an i-node
+use constant INODESPERBLK => int( WORDSPERBLK / INODESIZE );
+use constant DIRENTSIZE => 8;          # Size of an directory entry
+use constant DIRENTSPERBLK => WORDSPERBLK / DIRENTSIZE;
+
+use constant MAXINT => 0777777;        # Biggest unsigned integer
+use constant SIGN   => 0400000;        # Sign bit
+use constant BYTESPERWORD  => 4;       # We encode each word into 4 bytes
+
+# i-node field offsets
+use constant I_FLAGS  => 0;
+use constant I_DISKPS => 1;
+use constant I_UID    => 8;
+use constant I_NLKS   => 9;
+use constant I_SIZE   => 10;
+use constant I_UNIQ   => 11;
+
+use constant I_NUMBLKS => 7;           # Seven block pointers in i-node
+
+# i-node flag masks
+use constant I_USED       => 0400000;
+use constant I_LARGE      => 0200000;
+use constant I_SPECIAL    => 0000040;
+use constant I_DIRECTORY  => 0000020;
+use constant I_FILE       => 0000000;
+use constant I_OWNERREAD  => 0000010;
+use constant I_OWNERWRITE => 0000004;
+use constant I_WORLDREAD  => 0000002;
+use constant I_WORLDWRITE => 0000001;
+
+use constant I_LINK => 0000001;    # Never used in an i-node: just internal use
+
+# Directory field offsets
+use constant D_INUM     => 0;
+use constant D_NAME     => 1;
+use constant D_UNIQ     => 5;
+use constant D_NUMWORDS => 8;      # Eight words in a direntry
+
+# Globals
+my $debug = 0;
+my @Block;                         # Array of blocks and words in each block
+my @Freelist;                      # List of free block numbers
+my @Usedlist;                      # List of in-use block numbers
+my @Usedinode;                     # List of i-nodes in use
+my @Dirdone;                       # List of directory i-nodes already processed
+
+# Debug printing
+sub dprint {
+    print(@_) if ($debug);
+}
+
+sub dprintf {
+    printf(@_) if ($debug);
+}
+
+### read a word from a file in SimH format
+### return -1 on EOF
+sub read_word {
+    my $F = shift;
+
+    # Convert four bytes into one 18-bit word
+    return -1 if ( read( $F, my $four, 4 ) != 4 );    # Not enough bytes read
+    my ( $b1, $b2, $b3, $b4 ) = unpack( "CCCC", $four );
+    return (
+        ( $b1 & 0xff ) | ( ( $b2 & 0xff ) << 8 ) | ( ( $b3 & 0xff ) << 16 ) |
+          ( ( $b4 & 0xff ) << 24 ) );
+}
+
+# Return blocknumber and offset for a specific i-node
+sub get_inode_block_offset {
+    my $inum     = shift;
+    my $blocknum = FIRSTINODEBLK + int( $inum / INODESPERBLK );
+    my $offset   = INODESIZE * ( $inum % INODESPERBLK );
+    return ( $blocknum, $offset );
+}
+
+# Mark a block as being in-use
+sub mark_block_inuse {
+    my $usedblk = shift;
+    dprint("Block $usedblk is in-use\n");
+    print("Free block $usedblk is being used\n")
+      if ( $Freelist[$usedblk] );
+    print("In-use block $usedblk is being re-used\n")
+      if ( $Usedlist[$usedblk] );
+    $Usedlist[$usedblk] = 1;
+}
+
+# Given an i-node number and a flag mask, return true
+# if the flags contains that mask, 0 otherwise
+sub is_inode {
+    my ( $inode,    $mask )   = @_;
+    my ( $blocknum, $offset ) = get_inode_block_offset($inode);
+    my $flags = $Block[$blocknum][ $offset + I_FLAGS ];
+    return ( $flags & $mask );
+}
+
+# Given an i-node number, return the flags, uid, # link,
+# file size, uniq number and list of disk blocks for
+# the i-node (if $wantblocks is true).
+# Return undef if the i-node is not used.
+sub get_inode {
+    my ( $inode,    $wantblocks ) = @_;
+    my ( $blocknum, $offset )     = get_inode_block_offset($inode);
+    my $flags = $Block[$blocknum][ $offset + I_FLAGS ];
+    my $uid   = $Block[$blocknum][ $offset + I_UID ];
+    my $links = $Block[$blocknum][ $offset + I_NLKS ];
+    my $size  = $Block[$blocknum][ $offset + I_SIZE ];
+    my $uniq  = $Block[$blocknum][ $offset + I_UNIQ ];
+
+    # Skip unused i-nodes
+    return (undef) if ( ( $flags & I_USED ) == 0 );
+
+    # Return now if they don't want the blocks
+    return ( $flags, $uid, $links, $size, $uniq ) if ( !$wantblocks );
+
+    # Build a list of in-use blocks
+    my @used;
+    if ( $flags & I_LARGE ) {
+
+        # Large file
+        foreach
+          my $o ( $offset + I_DISKPS .. $offset + I_DISKPS + I_NUMBLKS - 1 )
+        {
+            my $usedptr = $Block[$blocknum][$o];
+            next if ( $usedptr == 0 );
+            mark_block_inuse($usedptr);
+            foreach my $indo ( 0 .. WORDSPERBLK - 1 ) {
+                my $usedblk = $Block[$usedptr][$indo];
+                next if ( $usedblk == 0 );
+                push( @used, $usedblk );
+            }
+        }
+    }
+    else {
+        # Small file
+        foreach
+          my $o ( $offset + I_DISKPS .. $offset + I_DISKPS + I_NUMBLKS - 1 )
+        {
+            my $usedblk = $Block[$blocknum][$o];
+            next if ( $usedblk == 0 );
+            push( @used, $usedblk );
+        }
+    }
+    return ( $flags, $uid, $links, $size, $uniq, @used );
+}
+
+# Given the address of a four word argument string in
+# a block, return a copy of the string in ASCII format.
+# Lose any trailing spaces as well.
+sub word2filename {
+    my ( $block, $offset ) = @_;
+    my $result = "";
+
+    foreach ( 1 .. 4 ) {
+
+        my $word = $Block[$block][ $offset++ ];
+        my $c1   = ( $word >> 9 ) & 0177;
+        my $c2   = $word & 0177;
+        $result .= chr($c1) . chr($c2);
+    }
+    $result =~ s{ *$}{};
+    return ($result);
+}
+
+# Print out a directory entry
+sub print_direntry {
+    my ( $inum, $name ) = @_;
+    my ( $flags, $uid, $links, $size, $uniq ) = get_inode( $inum, 0 );
+    if ( !defined($flags) ) {
+        printf( "%4d unallocated i-node\n", $inum );
+        return;
+    }
+
+    # Get the text perm characters
+    my ( $p1, $p2, $p3, $p4, $p5 ) = ( 's', '-', '-', '-', '-' );
+    $p1 = 'l' if ( $flags & I_LARGE );
+    $p1 = 'i' if ( $flags & I_SPECIAL );
+    $p1 = 'd' if ( $flags & I_DIRECTORY );
+    $p2 = 'r' if ( $flags & I_OWNERREAD );
+    $p3 = 'w' if ( $flags & I_OWNERWRITE );
+    $p4 = 'r' if ( $flags & I_WORLDREAD );
+    $p5 = 'w' if ( $flags & I_WORLDWRITE );
+
+    # Convert links and uid
+    $links = MAXINT - $links + 1;
+    $uid = -1 if ( $uid == MAXINT );
+
+    printf( "%4d %s%s%s%s%s %2d %3d %5d %s\n",
+        $inum, $p1, $p2, $p3, $p4, $p5, $links, $uid, $size, $name );
+}
+
+# Given a directory's i-num and name, check it
+sub check_directory {
+    my ( $inode, $name ) = @_;
+    my @dirtocheck;    # List of dirs to check
+
+    print("Directory $name, i-node $inode\n");
+
+    my ( $flags, $uid, $links, $size, $uniq, @used ) = get_inode( $inode, 1 );
+    if ( !defined($flags) ) {
+        print("Directory $name has empty i-node $inode\n");
+        return;
+    }
+
+    if ( ( $flags & I_DIRECTORY ) == 0 ) {
+        print("Directory $name i-node $inode not a directory\n");
+        return;
+    }
+    $Dirdone[$inode] = 1;
+
+    # Read the contents of the data blocks
+    foreach my $block (@used) {
+        for (
+            my $direntoff = 0 ;
+            $direntoff < WORDSPERBLK ;
+            $direntoff += DIRENTSIZE
+          )
+        {
+            my $inum = $Block[$block][ $direntoff + D_INUM ];
+            my $direntname = word2filename( $block, $direntoff + D_NAME );
+            next if ( $inum == 0 );
+            print_direntry( $inum, "$name/$direntname" );
+
+            # Check sub-directories
+            if ( is_inode( $inum, I_DIRECTORY ) && ( !$Dirdone[$inum] ) ) {
+                push( @dirtocheck, [ $inum, "$name/$direntname" ] );
+            }
+        }
+    }
+    print("\n");
+
+    # Now check the subdirs
+    foreach my $d (@dirtocheck) {
+        check_directory( $d->[0], $d->[1] );
+    }
+
+}
+
+# Keep this near the GetOptions call to make it easy to add documentation!
+sub usage {
+    die("Usage: $0 [--debug] imagefile\n");
+}
+
+### MAIN PROGRAM
+
+GetOptions( 'debug|d' => \$debug, )
+  or usage();
+
+usage() if ( @ARGV < 1 );
+
+# Open the image and skip the first surface
+open( my $IN, "<", $ARGV[0] ) || die("Can't open $ARGV[0]: $!\n");
+seek($IN, NUMBLOCKS*WORDSPERBLK*BYTESPERWORD, SEEK_SET) ||
+                                die("Cannot seek: $!\n");
+
+# Now read the filesystem into the Block array
+foreach my $block ( 0 .. NUMBLOCKS - 1 ) {
+    foreach my $posn ( 0 .. WORDSPERBLK - 1 ) {
+        my $word = read_word($IN);
+        last if ( $word == -1 );
+        $Block[$block][$posn] = $word;
+    }
+}
+
+# Build and check the free list
+my $freeptr = $Block[0][0];
+while ( $freeptr != 0 ) {
+
+    # Add nine blocks to the free list
+    foreach my $posn ( 1 .. 9 ) {
+        my $freeblock = $Block[$freeptr][$posn];
+        if ( $freeblock != 0 ) {
+            print("Block $freeblock multiply free\n")
+              if ( $Freelist[$freeblock] );
+            $Freelist[$freeblock] = 1;
+        }
+    }
+
+    # Move the pointer up
+    $freeptr = $Block[$freeptr][0];
+}
+
+# Check the list of i-nodes
+foreach my $inode ( 0 .. NUMINODEBLKS * INODESPERBLK - 1 ) {
+
+    my ( $flags, $uid, $links, $size, $uniq, @used ) = get_inode( $inode, 1 );
+    next if ( !defined($flags) );
+    $Usedinode[$inode] = 1;
+    dprint("I-node $inode in use\n");
+
+    # Check number of links is not zero
+    print("I-node $inode link count 0\n") if ( $links == 0 );
+
+    # Mark all the file's blocks in-use
+    foreach my $b (@used) {
+        mark_block_inuse($b);
+    }
+    dprint("\n");
+}
+
+# Now check the directories. We start with dd at i-num 4.
+check_directory( 4, "dd" );
+
+exit(0);
