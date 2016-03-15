@@ -101,3 +101,9 @@ to get them to work. ls wasn't working because there was no way to open the curr
 directory. I've taken the decision to add a "." entry to each directory in the filesystem,
 so now we can run things like ls, cat, date. We have a minimally working kernel!
 
+## wkt Wed Mar 16 09:50:13 AEST 2016
+I uncommented the code in Phil's shell to link binaries from the
+system directory so that we can run them in the current directory.
+I fixed a few home-grown utilities, and I added word-read permissions
+to dd and system. cp works, so does stat. A few things not working yet
+like chrm, mv, ln.
