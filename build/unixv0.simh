@@ -3,10 +3,11 @@ set cpu eae
 set cpu history=100
 show cpu
 
-set tti 8b
+set tti unix
 set rb ena
 att rb image.fs
 show dev
 
 load -S a.rim
 dep pc 0100
+cont
