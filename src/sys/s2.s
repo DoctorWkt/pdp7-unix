@@ -178,6 +178,7 @@
    dac mode			" save for access call
    jms access			" access OK? (or return error to user)
    jms copy; 1:0; d.name; 4	" copy new name into directory entry
+   jms dput			" and write it to disk
    jmp okexit
 
 	" time system call returns line (mains) frequency ticks

@@ -210,6 +210,9 @@ sub print_direntry {
     $links = MAXINT - $links + 1;
     $uid = -1 if ( $uid == MAXINT );
 
+    # Warn about empty filename
+    $name= "EMPTY FILENAME" if ($name=~ m{/$});
+
     printf( "%4d %s%s%s%s%s %2d %3d %5d %s\n",
         $inum, $p1, $p2, $p3, $p4, $p5, $links, $uid, $size, $name );
 }
