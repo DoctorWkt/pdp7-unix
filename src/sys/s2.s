@@ -268,7 +268,7 @@ open1:				" common exit for open/creat
 
 "** 01-s1.pdf page 11
 .close:
-   jms finac			" get fnode (open file)
+   jms finac			" get fnode (open file) for fd in user AC
    dzm f.flags			" clear flags
    jms fput			" write fnode back to u.ofiles
    jmp sysexit
@@ -328,16 +328,16 @@ open1:				" common exit for open/creat
    jms finac			" get fnode with fd from user AC
    lac f.flags			" get open file table flags
    and d1			" open for write?
-   sna				"  yes, skip
+   sna				" if yes, skip
    jms error			"   no: error
    lac i.flags			" get inode flags
-   and o40			" get special bit?
+   and o40			" get device bit
 "** 01-s1.pdf page 12
    sna				" special?
    jmp 1f			"  no
-   iof				" special file (device node)
+   iof				" yes, special: turn interrupts off
    lac ii			" get i number
-   tad sww			" get write routine
+   tad sww			" get write routine entry addr
    dac .+1
    jmp .. i			" dispatch to write routine
 1:				" here with regular file
