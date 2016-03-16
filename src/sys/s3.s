@@ -122,8 +122,8 @@ badcal:				" bad (unimplemented) system call
 	" MQ/ message
 .rmes:
    jms awake
-   lac o100000			" mark this process to "not ready"
-   tad u.ulistp i
+   lac o100000			" mark this process "not ready"
+   tad u.ulistp i		" by incrementing status
    dac u.ulistp i
    law 2
    tad u.ulistp
