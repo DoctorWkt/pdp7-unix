@@ -242,11 +242,13 @@ dspnl: 0			" only called once!
 dspinit: 0
    lac dspbufp3			" get pointer to dspbuf+3
    dac dsploc			" store location
-   lac o400000			" display "TRAP" instruction
+   lac o400000			" display "TRAP" instruction (end of list)
    dac dspbuf+3			" save in buffer
    dzm dsplno			" clear display line number
    jmp dspinit i
 
+	" "move display" (change display buffer pointer)
+	" called with new buffer pointer in AC??
 movdsp: 0
    iof
    cdf

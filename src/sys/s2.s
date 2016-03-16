@@ -27,8 +27,8 @@
 
 	" capture display?
 .capt:
-   lac u.ac
-   dac u.dspbuf
+   lac u.ac			" get user AC
+   dac u.dspbuf			" save as user display buffer
    jms movdsp
    jmp sysexit
 
