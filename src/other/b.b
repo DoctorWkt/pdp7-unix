@@ -1,73 +1,26 @@
-/* b.c - B compiler for PDP-7 Unix
+/* b.b - B compiler for PDP-7 Unix
 
-   Implemented in a subset of the C language compatible with B.
    Coding style and organization based on lastc1120c.c
- 
+  
    (C) 2016 Robert Swierczek, GPL3
- 
-   To compile hello.b:
+  
+   To compile the compiler with b.c:
       gcc -Wno-multichar b.c -o b
-      ./b hello.b hello.s
-      perl as7 --out a.out bl.s hello.s bi.s
-      perl a7out a.out
+      ./b b.b b.s
+      perl as7 --out b.out bl.s b.s bi.s
+
+   To compile hello.b:
+      perl a7out b.out hello.b hello.s
+      perl as7 --out h.out bl.s hello.s bi.s
+      perl a7out h.out
+   
+   To compile the compiler with itself:
+      perl a7out b.out b.b b2.s
+      perl as7 --out b2.out bl.s b2.s bi.s
 */
 
-#ifdef _WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory.h>
-#include <fcntl.h>
-
-/* runtime */
-int fin;
-int fout = 1;
-
-xread() {
-  char buf[1];
-  if (read(fin, buf, 1) <= 0)
-  return 4;
-  return buf[0];
-}
-
-xwrite(c) {
-  char buf[2];
-  if (c & 0xff00) {
-    buf[0] = (c >> 8) & 0xff;
-    buf[1] = c & 0xff;
-    write(fout, buf, 2);
-  } else {
-    buf[0] = c & 0xff;
-    write(fout, buf, 1);
-  }
-}
-
-xflush() {
-}
-#define eof xeof
-#define read xread
-#define write xwrite
-#define flush xflush
-
-main(int argc, char **argv) {
-  extern symtab[], eof, *ns, nerror;
-  extern fin, fout;
-
-  if (argc > 1) {
-    if (argc > 2) {
-      if ((fout = creat(argv[2], 0777))<0) {
-        error('fo');
-        return;
-      }
-    }
-    if ((fin = open(argv[1],0))<0) {
-      error('fi');
-      return;
-    }
-  }
+main() {
+  extrn symtab, eof, ns, nerror;
 
   while (!eof) {
     ns = symtab + 51;
@@ -76,9 +29,9 @@ main(int argc, char **argv) {
   }
 }
 
-int *lookup() {
-  extern symtab[], symbuf[], eof, *ns, nerror;
-  auto *np, *sp, *rp;
+lookup() {
+  extrn symtab, symbuf, eof, ns, nerror;
+  auto np, sp, rp;
 
   rp = symtab;
   while (rp < ns) {
@@ -112,8 +65,8 @@ int *lookup() {
 }
 
 symbol() {
-  extern symbuf[], ctab[], peeksym, peekc, eof, line, *csym, cval;
-  auto b, c, ct, *sp;
+  extrn symbuf, ctab, peeksym, peekc, eof, line, csym, cval;
+  auto b, c, ct, sp;
 
   if (peeksym>=0) {
     c = peeksym;
@@ -138,7 +91,7 @@ loop:
   }
  
   if (ct==126) { /* white space */
-    if (c=='\n')
+    if (c=='*n')
       line = line+1;
     c = read();
     goto loop;
@@ -163,19 +116,19 @@ loop:
       return(3);
   }
   if (c=='/') {
-    if (subseq('*',1,0))
+    if (subseq('**',1,0))
       return(43);
 com:
     c = read();
 com1:
     if (c==4) {
       eof = 1;
-      error('*/'); /* eof */
+      error('**/'); /* eof */
       return(0);
     }
-    if (c=='\n')
+    if (c=='*n')
       line = line+1;
-    if (c!='*')
+    if (c!='**')
       goto com;
     c = read();
     if (c!='/')
@@ -196,7 +149,7 @@ com1:
     peekc = c;
     return(21);
   }
-  if (c=='\'') { /* ' */
+  if (c=='*'') { /* ' */
     getcc();
     return(21);
   }
@@ -224,7 +177,7 @@ com1:
 }
 
 subseq(c,a,b) {
-  extern peekc;
+  extrn peekc;
 
   if (!peekc)
     peekc = read();
@@ -235,32 +188,32 @@ subseq(c,a,b) {
 }
 
 getcc() {
-  extern cval;
+  extrn cval;
   auto c;
 
   cval = 0;
-  if ((c = mapch('\'')) < 0) return;
+  if ((c = mapch('*'')) < 0) return;
   cval = c;
-  if ((c = mapch('\'')) < 0) return;
+  if ((c = mapch('*'')) < 0) return;
   cval = cval * 512 + c;
-  if ((c = mapch('\'')) >= 0)
+  if ((c = mapch('*'')) >= 0)
   error('cc');
 }
 
 mapch(c) {
-  extern peekc;
+  extrn peekc;
   auto a;
 
   if((a=read())==c)
     return(-1);
  
-  if (a=='\n' | a==0 | a==4) {
+  if (a=='*n' | a==0 | a==4) {
     error('cc');
     peekc = a;
     return(-1);
   }
 
-  if (a=='*') {
+  if (a=='**') {
     a=read();
 
     if (a=='0')
@@ -276,19 +229,19 @@ mapch(c) {
       return('}');
 
     if (a=='t')
-      return('\t');
+      return('*t');
 
     if (a=='r')
-      return('\r');
+      return('*r');
 
     if (a=='n')
-      return('\n');
+      return('*n');
   }
   return(a);
 }
 
 expr(lev) {
-  extern peeksym, *csym, cval, isn;
+  extrn peeksym, csym, cval, isn;
   auto o;
 
   o = symbol();
@@ -301,7 +254,7 @@ case21:
     }
     gen('n',5); /* litrl */
     number(cval);
-    write('\n');
+    write('*n');
     goto loop;
   }
 
@@ -326,7 +279,7 @@ case21:
         write('l');
         number(csym[1]);
       }
-      write('\n');
+      write('*n');
     }
     goto loop;
   }
@@ -455,7 +408,7 @@ pexpr()
 }
 
 declare(kw) {
-  extern *csym, cval, nauto;
+  extrn csym, cval, nauto;
   auto o;
 
   while((o=symbol())==20) { /* name */
@@ -484,7 +437,7 @@ syntax:
 }
 
 extdef() {
-  extern peeksym, *csym, cval, nauto;
+  extrn peeksym, csym, cval, nauto;
   auto o, c;
 
   o = symbol();
@@ -502,7 +455,7 @@ extdef() {
  
   if (o==2 | o==6) { /* $( ( */
     write('.+');
-    write('1\n');
+    write('1*n');
     nauto = 2;
     if (o==6) { /* ( */
       declare(8); /* param */
@@ -522,18 +475,18 @@ extdef() {
     if (symbol()!=21) /* number */
       goto syntax;
     number(-cval);
-    write('\n');
+    write('*n');
     return;
   }
 
   if (o==21) { /* number */
     number(cval);
-    write('\n');
+    write('*n');
     return;
   }
 
   if (o==1) { /* ; */
-    write('0\n');
+    write('0*n');
     return;
   }
 
@@ -546,7 +499,7 @@ extdef() {
     if (o!=5) /* ] */
       goto syntax;
     write('.+');
-    write('1\n');
+    write('1*n');
     if ((o=symbol())==1) /* ; */
       goto done;
     while (o==21 | o==41) { /* number - */
@@ -556,7 +509,7 @@ extdef() {
         cval = -cval;
       }
       number(cval);
-      write('\n');
+      write('*n');
       c = c-1;
       if ((o=symbol())==1) /* ; */
         goto done;
@@ -571,7 +524,7 @@ done:
       write('.=');
       write('.+');
       number(c);
-      write('\n');
+      write('*n');
     }
     return;
   }
@@ -585,7 +538,7 @@ syntax:
 }
 
 stmtlist() {
-  extern peeksym, eof;
+  extrn peeksym, eof;
   auto o;
 
   while (!eof) {
@@ -598,7 +551,7 @@ stmtlist() {
 }
 
 stmt() {
-  extern peeksym, peekc, *csym, cval, isn, nauto;
+  extrn peeksym, peekc, csym, cval, isn, nauto;
   auto o, o1, o2;
 
 next:
@@ -701,7 +654,7 @@ syntax:
 }
 
 blkend() {
-  extern isn, nisn;
+  extrn isn, nisn;
 
   while (nisn < isn) {
     nisn = nisn+1;
@@ -710,7 +663,7 @@ blkend() {
     write(':');
     write('ll');
     number(nisn);
-    write('\n');
+    write('*n');
   }
 }
 
@@ -718,21 +671,21 @@ gen(o,n) {
   write(o);
   write(' ');
   number(n);
-  write('\n');
+  write('*n');
 }
 
 jumpc(n) {
   write('f '); /* ifop */
   write('l');
   number(n);
-  write('\n');
+  write('*n');
 }
 
 jump(n) {
   write('t '); /* traop */
   write('ll');
   number(n);
-  write('\n');
+  write('*n');
 }
 
 label(n) {
@@ -757,7 +710,7 @@ number(x) {
   printn(x);
 }
 
-name(int *s) {
+name(s) {
   while (*s) {
     write(*s);
     s = s+1;
@@ -766,9 +719,9 @@ name(int *s) {
 
 error(code)
 {
-  extern line, eof, *csym, nerror, fout;
+  extrn line, eof, csym, nerror, fout;
   auto f;
- 
+
   if (eof | nerror==20) {
     eof = 1;
     return;
@@ -784,23 +737,23 @@ error(code)
     write(' ');
   }
   printn(line);
-  write('\n');
+  write('*n');
   flush();
   fout = f;
 }
 
 /* storage */
 
-int symtab[300] = { /* class value name */
+symtab[300] /* class value name */
   1, 5,'a','u','t','o', 0 ,
   1, 6,'e','x','t','r','n', 0 ,
   1,10,'g','o','t','o', 0 ,
   1,11,'r','e','t','u','r','n', 0 ,
   1,12,'i','f', 0 ,
   1,13,'w','h','i','l','e', 0 ,
-  1,14,'e','l','s','e', 0 };
+  1,14,'e','l','s','e', 0 ;
 
-int ctab[] = {
+ctab[]
     0,127,127,127,  0,127,127,127,  /* NUL SOH STX ETX EOT ENQ ACK BEL */
   127,126,126,127,127,127,127,127,  /* BS  TAB LF  VT  FF  CR  SO  SI  */
   127,127,127,127,127,127,127,127,  /* DLE DC1 DC2 DC3 DC4 NAK SYN ETB */
@@ -816,17 +769,17 @@ int ctab[] = {
   127,123,123,123,123,123,123,123,  /*  `   a   b   c   d   e   f   g  */
   123,123,123,123,123,123,123,123,  /*  h   i   j   k   l   m   n   o  */
   123,123,123,123,123,123,123,123,  /*  p   q   r   s   t   u   v   w  */
-  123,123,123,  2, 48,  3,127,127}; /*  x   y   z   {   |   }   ~  DEL */
+  123,123,123,  2, 48,  3,127,127;  /*  x   y   z   {   |   }   ~  DEL */
 
-int symbuf[10];
-int peeksym = -1;
-int peekc;
-int eof;
-int line = 1;
-int *csym;
-int *ns;
-int cval;
-int isn;
-int nisn;
-int nerror;
-int nauto;
+symbuf[10];
+peeksym -1;
+peekc;
+eof;
+line 1;
+csym;
+ns;
+cval;
+isn;
+nisn;
+nerror;
+nauto;

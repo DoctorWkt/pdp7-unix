@@ -545,7 +545,8 @@ sub eae {
 
         # Save the AC's sign into LINK
         my $newlink = ( $AC << 1 ) & LINKMASK;
-        $AC = ( ( $LINK | $AC ) >> $step ) & MAXINT;
+#        $AC = ( ( $LINK | $AC ) >> $step ) & MAXINT;
+        $AC = ( ( ($newlink * -1) | $AC ) >> $step ) & MAXINT;   # XXX Not sure if this is correct!?!?!
         $LINK = $newlink;
         $PC++;
         return;
@@ -1301,8 +1302,8 @@ sub word2ascii {
     my $c1     = ( $word >> 9 ) & 0177;
     my $c2     = $word & 0177;
     my $result = "";
-    $result .= (($c1 >= 32) && ($c1 <= 126)) ? chr($c1) : ' ';
-    $result .= (($c2 >= 32) && ($c2 <= 126)) ? chr($c2) : ' ';
+    if (($c1 >= 1) && ($c1 <= 126)) { $result .= chr($c1); }
+    if (($c2 >= 1) && ($c2 <= 126)) { $result .= chr($c2); }
     return ($result);
 }
 
@@ -1313,6 +1314,7 @@ sub mem2arg {
     my $addr   = shift;
     my $result = "";
 
+    $addr &= MAXADDR;
     foreach ( 1 .. 4 ) {
 
         # Stop if the address leave the 8K word address space
