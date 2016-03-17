@@ -104,7 +104,7 @@ badcal:				" bad (unimplemented) system call
    lac u.dspbuf
    sna				" process using display?
    jmp .+3			"  no
-   law dspbuf			"   yes
+   law dspbuf			"   yes: get default display buffer
    jms movdsp			"   move display
    jms awake
    lac u.ulistp i

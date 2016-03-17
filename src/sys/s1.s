@@ -107,7 +107,7 @@ swap: 0
    lac u.dspbuf
    sna				" process using display??
    jmp 2f			"  no
-   law dspbuf
+   law dspbuf			" reset to default display buffer
    jms movdsp
 2:
    iof				" disable interrupts
@@ -123,7 +123,7 @@ swap: 0
    lac u.dspbuf
    sza				" using display?
 "** 01-s1.pdf page 4
-   jms movdsp			"  yes.
+   jms movdsp			"  yes. switch to user display bufferx
 3:
    dzm uquant			" no. reset process tick count
    iof

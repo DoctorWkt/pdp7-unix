@@ -80,7 +80,7 @@ cnop:			" fetched as constant in iread
 1: lds				" load display status (see 03-scope.pdf pg 25)
    sma ral			" edges flag??
    jmp 1f			"  not set
-   cdf				" clear display flags?
+   cdf				" clear display flags
    lac .dspb
    sna
    jmp piret

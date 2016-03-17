@@ -125,7 +125,7 @@ coldentry:
    law 3072			" initialize display....
    wcga
    jms dspinit
-   law dspbuf
+   law dspbuf			" set display buffer to default
    jms movdsp
    cla				" read system block from disk
    jms dskio; 06000
