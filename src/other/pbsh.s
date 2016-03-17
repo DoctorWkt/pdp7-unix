@@ -280,11 +280,15 @@ parent:
 "	try to read any messages) the shell's blocked smes call returned an
 "	error indication that the target process did not exist. Thus the
 "	shell's smes became, in effect, the equivalent of wait.
-   dac pid
-   lac delimchar
+"
+"	PLB: The "exit" system call code apears to "fall" into the
+"	rmes code So Dennis' memory of what the shell did may have
+"	been correct, but not for the reason he remembered.
+   dac pid			" save child pid
+   lac delimchar		" get command delimiter
    sad o46			" ampersand?
     jmp newcom			"  yes: go back without wait
-   lac pid
+   lac pid			" no: get pid
    sys smes			" hang until child exits
 2: lac delimchar
    sad o73			" semi?

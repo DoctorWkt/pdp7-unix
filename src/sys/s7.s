@@ -80,7 +80,7 @@ cnop:			" fetched as constant in iread
 1: lds				" load display status (see 03-scope.pdf pg 25)
    sma ral			" edges flag??
    jmp 1f			"  not set
-   cdf				" clear display flags?
+   cdf				" clear display flags
    lac .dspb
    sna
    jmp piret
@@ -101,7 +101,7 @@ dsprestart:
 
 1: sna ral			" dataphone flag set (bit 7)??
    jmp .+3			"  no
-   raef				" XXX: fix comment
+   raef				" "resume after edges flag"
    jmp piret			" return
    sma				" light pen flags (bit 2)
    jmp 1f			"  no
@@ -114,9 +114,9 @@ dsprestart:
 1: ksf				" (TTY) keyboard flag set?
    jmp 1f			"  no
 
-   lac ttydelay		" get TTY delay
-   sma				"
-   isz ttydelay
+   lac ttydelay			" get TTY delay
+   sma				" minus (waiting for output)?
+   isz ttydelay			"  no: increment??? (make more positive)
    krb				" read keyboard buffer
    dac char			" save in char
    sad o375			" interrupt char (TTY ALT MODE?)
@@ -128,12 +128,12 @@ dsprestart:
    jms wakeup			" wake processes
    dac sfiles+0			" clear sleep word
    lac char			" get character
-   sad o212			" odd condition (break???)
+   sad o212			" new line (with parity)??
    skp				"  yes
    jmp piret			"   no: done
-   lac sfiles+1			" get ttyout wait word
-   sma				" bit for process 1 already set?
-   xor o400000			" no, make it so
+   lac sfiles+1			" get ttyout sleep word
+   sma				" highest bit set?
+   xor o400000			" no, make it so (why???)
    dac sfiles+1			" save back
 
 "** 01-s1.pdf page 43
@@ -259,7 +259,7 @@ ttyrestart: 0
    jmp piret
 
 		"** BEGIN CROSSED OUT
-1: spb					" graphic 2 push button flag set?
+1: spb					" any graphic-2 push button?
    jmp 1f				"  no
 
    cpb					" clear push button flag
@@ -268,11 +268,11 @@ ttyrestart: 0
 
 "** 01-s1.pdf page 45
 
-   and o2000
-   sna
-   jmp piret
-   jms dspinit
-   lac sfiles+6
+   and o2000				" get push button 7
+   sna					" set?
+   jmp piret				"  no: done
+   jms dspinit				" yes: reset display buffer
+   lac sfiles+6				" wake up anyone sleeping on display
    jms wakeup
    dac sfiles+6
    cla					" clear button lights

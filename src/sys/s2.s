@@ -27,16 +27,16 @@
 
 	" capture display?
 .capt:
-   lac u.ac
-   dac u.dspbuf
-   jms movdsp
+   lac u.ac			" get user AC
+   dac u.dspbuf			" save as user display buffer
+   jms movdsp			" switch to user display buffer
    jmp sysexit
 
 	" release display?
 .rele:
-   dzm u.dspbuf
-   law dspbuf
-   jms movdsp
+   dzm u.dspbuf			" clear user display buffer pointer
+   law dspbuf			" get default display buffer
+   jms movdsp			" change to it
    jmp sysexit
 
 .chmod:
