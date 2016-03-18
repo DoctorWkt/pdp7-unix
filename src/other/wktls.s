@@ -1,4 +1,4 @@
-" Warren's version of ls. ls [-l]
+" Warren's version of ls. ls [-l] [dirname]
 "
 " When -l is used, you see
 "
@@ -9,13 +9,39 @@
 
 main:
 
-   lac 017777 i		" Load the pointer pointer in 017777
-   sad d4		" to see if we have any arguments
-     jmp 1f		" No arguments, so no long option
-   lac fd1
-   dac longopt		" Yes an argument, set the long option
+   lac 017777           " Move five words past the argument word count
+   tad d5		" so that AC points at the first argument
+   dac argptr
+
+argloop:
+   lac 017777 i		" Do we have any arguments?
+   sad d4
+     jmp 1f		" Leave the loop if no further arguments
+
+   lac argptr i		" Is this one -l?
+   sad minusell
+     jmp setlong
+
+   lac argptr		" It wasn't -l, so save it as the dir to open
+   dac 8f
+   dac 9f
+   skp
+
+setlong:
+   dac longopt		" It was -l, so set longopt non-zero
+
+   lac argptr		" Move the arg pointer up to the next one
+   tad d4
+   dac argptr
+
+   -4
+   tad 017777 i
+   dac 017777 i		" Decrement the arg count and loop back
+   jmp argloop
+
+
 1:
-   sys open; curdir; 0	" Open up the current directory
+   sys open; 9:curdir; 0 " Open up the directory, curdir if no arguments
    spa
      sys exit		" Unable, so die now
    dac fd		" Save the fd
@@ -53,7 +79,7 @@ entryloop:
    lac bufptr
    dac statfile		" Copy the pointer to the status call
    lac statbufptr	" Get the file's details into the statbuf
-   sys status; curdir; statfile:0
+   sys status; 8:curdir; statfile:0
    spa
      jms fileend
 
@@ -184,6 +210,7 @@ octal: 0
    jmp octal i		" and return from subroutine
 
 longopt: 0		" User set the -l option when this is 1
+argptr:  0		" Pointer to the next argument
 fd: 0			" File descriptor for the directory
 d1: fd1: 1		" File descriptor 1
 d4: 4
@@ -230,3 +257,4 @@ space: 040
 newline: 012
 
 curdir: <. 040; 040040; 040040; 040040		" i.e. "."
+minusell: <-l>
