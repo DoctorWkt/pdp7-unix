@@ -104,6 +104,11 @@ so now we can run things like ls, cat, date. We have a minimally working kernel!
 ## wkt Wed Mar 16 09:50:13 AEST 2016
 I uncommented the code in Phil's shell to link binaries from the
 system directory so that we can run them in the current directory.
-I fixed a few home-grown utilities, and I added word-read permissions
+I fixed a few home-grown utilities, and I added world-read permissions
 to dd and system. cp works, so does stat. A few things not working yet
 like chrm, mv, ln.
+
+## wkt Sat Mar 19 06:31:52 AEST 2016
+The shell now has code to link binaries in from the system directory, and mkfs7 has
+been modified to optionally create . and .., so things are mostly working now including
+chdir.
