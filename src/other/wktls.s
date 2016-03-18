@@ -240,6 +240,7 @@ s.uid: 0
 s.nlinks: 0
 s.size: 0
 s.uniq: 0
+s.inum: 0
 largemask:  0200000  		" large file, bigger than 4096 words
 isdirmask:  000020  		" is a directory
 ureadmask:  000010  		" user read
