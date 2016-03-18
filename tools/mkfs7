@@ -221,10 +221,18 @@ sub fill_inode {
     return ($inum);
 }
 
+# Increase the file size of an i-node
 sub increment_file_length {
     my ( $inum, $incr) = @_;
     my ( $blocknum, $offset ) = get_inode_block_offset($inum);
     $Block[$blocknum][ $offset + I_SIZE ] += $incr;
+}
+
+# Increase the link count of an i-node
+sub increment_link_count {
+    my $inum = shift;
+    my ( $blocknum, $offset ) = get_inode_block_offset($inum);
+    $Block[$blocknum][ $offset + I_NLKS ] --;
 }
 
 # Convert an ASCII string into an array of 18-bit word values
@@ -305,6 +313,9 @@ sub add_direntry {
         # And add this new block to the directory's i-node
         add_block_to_inode( $nextblock, $dirref->[2] );
     }
+
+    # Finally, increment the link count
+    increment_link_count($inum);
 }
 
 # Given a name, perms, a user-id and an optional i-node number, make a
@@ -328,12 +339,7 @@ sub make_dir {
     dprint("Pushing dir block $dirblock inum $inum to dirstack\n");
     push( @Dirstack, [ $dirblock, 0, $inum ] );
 
-    # Add a "dd" entry to this directory. We get the i-num from
-    # the first entry in the Dirstack
-    add_direntry( "dd", $Dirstack[0]->[2] );
-    dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
-
-    # Also add a "." entry to this directory
+    # Add a "." entry to this directory if requested
     if ($wantdot) {
       add_direntry( ".", $inum );
       dprint("Added a . entry to ourselves\n");
@@ -344,6 +350,11 @@ sub make_dir {
       add_direntry( "..", $Dirstack[-2]->[2] );
       dprintf("Added a .. entry to i-num %d\n", $Dirstack[-2]->[2] );
     }
+
+    # Finally, add a "dd" entry to this directory. We get the
+    # i-num from the first entry in the Dirstack
+    add_direntry( "dd", $Dirstack[0]->[2] );
+    dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
 
     dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
