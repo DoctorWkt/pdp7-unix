@@ -70,28 +70,28 @@ chkwrp:
    jmp error
 
 comand:
-   lac char
+   lac char		" Get the character entered
    sad o141
-   jmp ca
+   jmp ca		" a command, append lines of text
    sad o143
-   jmp cc
+   jmp cc		" c command, change lines of text
    sad o144
-   jmp cd
+   jmp cd		" d command, delete lines of text
    sad o160
-   jmp cp
+   jmp cp		" p command, print lines of text
    sad o161
-   jmp cq
+   jmp cq		" q command, quit the editor
    sad o162
-   jmp cr
+   jmp cr		" r command, read in a file
    sad o163
-   jmp cs
+   jmp cs		" s command, substitute text
    sad o167
-   jmp cw
+   jmp cw		" w command, write out the file
    sad o12
-   jmp cnl
+   jmp cnl		" newline
    sad o75
-   jmp ceq
-   jmp error
+   jmp ceq		" = command
+   jmp error		" unrecognised, give an error
 ca:
    jms newline
    jms setfl
@@ -334,10 +334,10 @@ setfl: 0
    jmp i setfl
 
 newline: 0
-   jms getsc; tal
+   jms getsc; tal	" Get a character into tal
    sad o12
-   jmp i newline
-   jmp error
+   jmp i newline	" Return if a newline
+   jmp error		" else an error
 
 addres: 0
    dzm minflg "..) [stray scan mark?]

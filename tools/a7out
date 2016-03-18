@@ -13,8 +13,10 @@ use Data::Dumper;
 ### Global variables ###
 my $debug      = 0;    # Debug flag
 my $singlestep = 0;    # Are we running in single-step mode?
+my $coverage   = 0;    # Print out code coverage
 my %Breakpoint;        # Hash of defined breakpoints
 my @Mem;               # 8K 18-bit words of main memory
+my @CC;		       # Code coverage: what addrs executed instructions
 my @FD;                # Array of open filehandles
 my @ISBINARY;          # Array of filehandle flags: ASCII or binary files?
 
@@ -49,10 +51,16 @@ while ( defined( $ARGV[0] ) && ( $ARGV[0] =~ m{^-} ) ) {
         shift(@ARGV);
         $Breakpoint{ oct( shift(@ARGV) ) } = 1;
     }
+
+    # -c: print out code coverage
+    if ( $ARGV[0] eq "-c" ) {
+        shift(@ARGV);
+        $coverage= 1;
+    }
 }
 
 # Check the arguments
-die("Usage: $0 [-d] [-b breakpoint] a.outfile [arg1 arg2 ...]\n")
+die("Usage: $0 [-c] [-d] [-b breakpoint] a.outfile [arg1 arg2 ...]\n")
   if ( @ARGV < 1 );
 
 # Load the a.out file into memory
@@ -63,7 +71,15 @@ set_arguments();
 #dump_memory(0, MAXADDR, 0);
 #exit(0);
 simulate();
+print_coverage() if ($coverage);
 exit(0);
+
+# Print out the code coverage
+sub print_coverage {
+  foreach my $addr (0 .. MAXADDR ) {
+    printf("%06o: %d\n", $addr, $CC[$addr]) if ($CC[$addr]);
+  }
+}
 
 ### Load the a.out file into memory
 sub load_code {
@@ -212,7 +228,8 @@ sub simulate {
     while (1) {
 
         # Get the instruction pointed to by PC and decode it
-        my $instruction = $Mem[$PC];
+	# Also do code coverage
+        my $instruction = $Mem[$PC]; $CC[$PC]++;
         my $opcode      = ( $instruction >> 12 ) & 074;
         my $indirect    = ( $instruction >> 13 ) & 1;
         my $addr        = $instruction & MAXADDR;
@@ -694,6 +711,7 @@ sub cal {
 # Exit system call
 sub sys_exit {
     dprintf( "exit system call, pid %06o\n", $$ );
+    print_coverage() if ($coverage);
     exit(0);
 }
 
