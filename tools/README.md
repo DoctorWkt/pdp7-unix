@@ -16,6 +16,10 @@ An assembler for PDP-7 assembler files
 
 A prototypical compiler for the B language
 
+## fsck7
+
+Check and dump the details of a PDP-7 filesystem image for SimH
+
 ## mkfs7
 
 Makes a PDP-7 filesystem image for SimH
