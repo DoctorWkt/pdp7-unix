@@ -2,7 +2,7 @@
 " s2
 
 	" file status (stat) system call
-	" AC/ pointer to status (inode) buffer (12 words)
+	" AC/ pointer to status (inode) buffer + i-num (13 words)
 	"   sys status; dir_name_ptr; file_name_ptr
 .status:
    jms arg			" fetch directory name pointer
