@@ -27,6 +27,7 @@ dd 	         drwr- -1 4
         cp       frwr- -1 ../bin/cp
         date     frwr- -1 ../bin/date
         ds       frwr- -1 ../bin/ds
+        ed       frwr- -1 ../bin/ed
 	init     frwr- -1 ../bin/init
         ln       frwr- -1 ../bin/ln
         ls       frwr- -1 ../bin/ls
