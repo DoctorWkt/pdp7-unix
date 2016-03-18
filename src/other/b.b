@@ -20,7 +20,7 @@
 */
 
 main() {
-  extrn symtab, eof, ns, nerror;
+  extrn symtab, eof, ns;
 
   while (!eof) {
     ns = symtab + 51;
@@ -30,7 +30,7 @@ main() {
 }
 
 lookup() {
-  extrn symtab, symbuf, eof, ns, nerror;
+  extrn symtab, symbuf, eof, ns;
   auto np, sp, rp;
 
   rp = symtab;
@@ -368,8 +368,7 @@ loop:
     expr(15);
     if (symbol() != 5)
       error('[]');
-    gen('b',12); /* badd */
-    gen('u',3); /* uind */
+    gen('n',4); /* vector */
     goto loop;
   }
   if (o==6) { /* ( */

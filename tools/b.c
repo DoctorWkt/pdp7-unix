@@ -53,7 +53,7 @@ xflush() {
 #define flush xflush
 
 main(int argc, char **argv) {
-  extern symtab[], eof, *ns, nerror;
+  extern symtab[], eof, *ns;
   extern fin, fout;
 
   if (argc > 1) {
@@ -77,7 +77,7 @@ main(int argc, char **argv) {
 }
 
 int *lookup() {
-  extern symtab[], symbuf[], eof, *ns, nerror;
+  extern symtab[], symbuf[], eof, *ns;
   auto *np, *sp, *rp;
 
   rp = symtab;
@@ -415,8 +415,7 @@ loop:
     expr(15);
     if (symbol() != 5)
       error('[]');
-    gen('b',12); /* badd */
-    gen('u',3); /* uind */
+    gen('n',4); /* vector */
     goto loop;
   }
   if (o==6) { /* ( */
