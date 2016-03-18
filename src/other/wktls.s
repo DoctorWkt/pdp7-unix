@@ -5,7 +5,7 @@
 "    inum [dls][r-][w-][r-][w-] nlink uid size name
 "
 " with numbers in octal. All filenames need to be 8 characters
-" long or less, or ls will crash.
+" long or less, or ls will crash when used with a7out. 
 
 main:
 
