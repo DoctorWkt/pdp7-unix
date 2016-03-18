@@ -254,7 +254,7 @@ changedir:
    skp
 1:  lac 0f			" increment argvp
    tad d4
-   sad 0f
+   dac 0f
    -4				" decrement argc
    tad argc
    dac argc
