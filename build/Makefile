@@ -18,7 +18,10 @@ TEST_SOURCE_DIR=../src/tests
 CMDDIR=bin
 TESTDIR=tests
 
-all: a.rim image.fs
+# fs file
+FS_FILE=image.fs
+
+all: a.rim $(FS_FILE)
 
 run: all
 	pdp7 unixv0.simh
@@ -33,6 +36,7 @@ coldboot:
 
 image.fs: cmd others
 	$(MKFS) --format simh proto
+	$(FSCK) $(FS_FILE)
 
 dirs:
 	mkdir -p $(CMDDIR)
@@ -89,11 +93,14 @@ runtests: tests
 #	$(A7OUT) $(TESTDIR)/testmul
 #	$(A7OUT) $(TESTDIR)/write_test
 
-sdump: image.fs
-	$(SDUMP) image.fs
+sdump: $(FS_FILE)
+	$(SDUMP) $(FS_FILE)
+
+fsck: $(FS_FILE)
+	$(FSCK) $(FS_FILE)
 
 clean:
-	rm -f a.rim image.fs a.lst n.out
+	rm -f a.rim $(FS_FILE) a.lst n.out
 	rm -rf $(CMDDIR)
 	rm -rf $(TESTDIR)
 
