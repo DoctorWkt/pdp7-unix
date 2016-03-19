@@ -78,7 +78,7 @@ cnop:			" fetched as constant in iread
 
 		"** BEGIN CROSSED OUT
 1: lds				" load display status (see 03-scope.pdf pg 25)
-   sma ral			" edges flag??
+   sma ral			" display trap set? (and rotate left)
    jmp 1f			"  not set
    cdf				" clear display flags
    lac .dspb
@@ -99,11 +99,11 @@ dsprestart:
    dac .dsptm			" set .dsptm = -10 (10 ticks)
    jmp piret
 
-1: sna ral			" dataphone flag set (bit 7)??
+1: sma ral			" edges flag set?? (and rotate)
    jmp .+3			"  no
    raef				" "resume after edges flag"
    jmp piret			" return
-   sma				" light pen flags (bit 2)
+   sma				" light pen flag?
    jmp 1f			"  no
    lda				" G-2: load display address
    dac .lpba			" save
