@@ -31,7 +31,7 @@ coldboot:
 	$(AS) -f rim  -o a.rim $(SYS_SOURCE_DIR)/sop.s $(SYS_SOURCE_DIR)/s[1-9].s
 	$(AS) -n -f list -o a.lst $(SYS_SOURCE_DIR)/sop.s $(SYS_SOURCE_DIR)/s[1-9].s
 
-image.fs: cmd others runtests
+image.fs: cmd others
 	$(MKFS) --format simh proto
 
 dirs:
