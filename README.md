@@ -27,12 +27,15 @@ and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
 ## Running
 
-You will need the latest version of [simh](http://simh.trailing-edge.com/) built and compiled. You can check out simh [here](https://github.com/simh/simh). To make the php7 simulator:
+You will need the version 4.0 of [simh](http://simh.trailing-edge.com/) built and compiled. You can check out simh [here](https://github.com/simh/simh). To make the php7 simulator:
 
 `make pdp7`
 
 The pdp7 binary will appear in `BIN/pdp7`
 
+To run pdp7 unix type
+
+`make run` from the root directory.
 
 ## Source Tree
 
