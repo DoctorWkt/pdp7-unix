@@ -203,7 +203,7 @@ sub fill_inode {
     # Fill in the easy fields. Link count is negative
     $Block[$blocknum][ $offset + I_UID ]  = $uid;
     $Block[$blocknum][ $offset + I_SIZE ] = $size;
-    $Block[$blocknum][ $offset + I_NLKS ] = -1 & MAXINT;	
+    $Block[$blocknum][ $offset + I_NLKS ] = 0;	
 
     my $i = $offset;
     foreach my $datablocknum (@blklist) {
@@ -233,6 +233,7 @@ sub increment_link_count {
     my $inum = shift;
     my ( $blocknum, $offset ) = get_inode_block_offset($inum);
     $Block[$blocknum][ $offset + I_NLKS ] --;
+    $Block[$blocknum][ $offset + I_NLKS ] &= MAXINT;
 }
 
 # Convert an ASCII string into an array of 18-bit word values
@@ -332,8 +333,8 @@ sub make_dir {
 
     # Add this to the previous directory
     # and fill the i-node with the details
-    add_direntry( $dirname, $inum );
     fill_inode( $inum, $perms, I_DIRECTORY, $uid, 0, $dirblock );
+    add_direntry( $dirname, $inum );
 
     # Make this the top directory on the dirstack
     dprint("Pushing dir block $dirblock inum $inum to dirstack\n");

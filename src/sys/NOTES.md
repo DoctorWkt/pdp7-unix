@@ -21,14 +21,24 @@ one surface reserved for backup
 
 first disk block is copy of "system data"
         contains time, free block information, process (user) list?!!
+	first words points to the first block in the free list
+```
 
-12 word inodes (5 per block)
-710 sectors of inodes (max 3550 files)
+free block format
+-----------------
+```
+Each block in the free list contains words 1 to 9 which are free block
+numbers if positive, or zero for empty positions. Word 0 in the block
+points at the next block in the free list, or zero if there is no next
+block.
 ```
 
 inode format
 ------------
 ```
+12 word inodes (5 per block)
+710 sectors of inodes (max 3550 files)
+
    i.flags
         400000  in use
         200000  large file
@@ -41,28 +51,30 @@ inode format
             01  world write
    i.dskps      7 block numbers (all indirect blocks if "large file")
    i.uid        owner
-   i.nlks       link count (negative)
-   i.size       size (in words?)
+   i.nlks       link count (negative i.e. -1, -2, -3 -4 etc.)
+   i.size       size (in words)
    i.uniq       unique value assigned at creation
 ```
 
-directory files can (only) be truncated by superuser
 
 directory node (dnode) format
 -----------------------------
 ```
-   d.i          i-number of file
+   d.i          i-number of file or zero if an empty entry
    d.name       four words, space padded
    d.uniq       i.uniq value of file
 		two unused words, so 8 words/entry, 8 entries/block
+
+directory files can (only) be truncated by superuser
 ```
 
 i numbers
 ---------
 ```
   1     core file?? (written by "sys save" or bad system call)
-  2     "dd"??? "root" directory
-  3     "system"??? default process cdir, must contain "init", "dd"
+  3     "system" default process cdir, must contain "init", "sh"
+  4     "dd" directory that contains system and user dirs
+        All dirs must have a link back to dd
 
   6     "ttyin" special file
   7     "keyboard" (graphic-2) special file
