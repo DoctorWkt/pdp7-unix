@@ -7,6 +7,7 @@ A7OUT=../tools/a7out
 MKFS=../tools/mkfs7
 SDUMP=../tools/sdump
 FSCK=../tools/fsck7
+PDP7=pdp7
 
 # source directories
 SYS_SOURCE_DIR=../src/sys
@@ -24,7 +25,7 @@ FS_FILE=image.fs
 all: a.rim $(FS_FILE)
 
 run: all
-	pdp7 unixv0.simh
+	$(PDP7) unixv0.simh
 
 a.rim:
 	$(AS) -f rim  -o a.rim $(SYS_SOURCE_DIR)/sop.s $(SYS_SOURCE_DIR)/s[1-8].s

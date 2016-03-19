@@ -25,6 +25,15 @@ system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
+## Running
+
+You will need the latest version of [simh](http://simh.trailing-edge.com/) built and compiled. You can check out simh [here](https://github.com/simh/simh). To make the php7 simulator:
+
+`make pdp7`
+
+The pdp7 binary will appear in `BIN/pdp7`
+
+
 ## Source Tree
 
 The code in the original scans are (c) Novell who own the rights to the Unix
@@ -37,7 +46,7 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /tools     holds the source for the tools written to assist the project
 * /build     is an area to build the kernel & filesystem and run them
 * /misc	     holds miscellaneous notes and information
-* /pdp7parse holds a Java parser for pdp7 source code
+
 
 ## Travis Status
 
