@@ -20,7 +20,7 @@ TESTDIR=tests
 
 all: a.rim image.fs
 
-run: a.rim image.fs
+run: all
 	pdp7 unixv0.simh
 
 a.rim:
