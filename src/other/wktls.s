@@ -162,10 +162,12 @@ printname:
 
    lac bufptr		" Add 7 to the bufptr
    tad d7
-   skp
+   jmp nextentry
 
 skipentry:
+   lac bufptr		" Add 8 to the bufptr if we skipped this entry entirely
    tad d8		" Or add 8 if we skipped this entry entirely
+nextentry:
    dac bufptr
    -8
    tad count		" Decrement the count of words by 8
