@@ -89,6 +89,9 @@ runtests: tests
 #	$(A7OUT) $(TESTDIR)/testmul
 #	$(A7OUT) $(TESTDIR)/write_test
 
+sdump: image.fs
+	$(SDUMP) image.fs
+
 clean:
 	rm -f a.rim image.fs a.lst n.out
 	rm -rf $(CMDDIR)
