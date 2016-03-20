@@ -25,19 +25,92 @@ system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
+## Running pdp7-unix
+
+You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  To compile it:
+
+`make pdp7`
+
+to run pdp-unix from the pdp7-unix source tree
+
+`make run`
+
+Press `ctl-e` to break out the simulator into simh
+
+A typical pdp7-unix on simh looks like:
+
+<pre>
+pdp7 unixv0.simh
+
+PDP-7 simulator V4.0-0 Beta        git commit id: e153b7f2
+CPU	idle disabled
+	8192W, EAE
+RB: buffering file in memory
+PDP-7 simulator configuration
+
+CPU	idle disabled
+CLK	60Hz, devno=00
+PTR	devno=01
+PTP	devno=02
+TTI	devno=03
+TTO	devno=04
+LPT	devno=65-66
+DRM	disabled
+RB	devno=71
+DT	devno=75-76, 8 units
+
+login: ken
+password: ken
+@ ln dd ken .
+@ ls
+dd      
+system  
+hello   
+.       
+@ ls system
+dd      
+ttyin   
+keyboard
+pptin   
+ttyout  
+display 
+pptout  
+as      
+cat     
+chmod   
+chown   
+chrm    
+cp      
+date    
+ds      
+ed      
+init    
+ln      
+ls      
+mv      
+password
+sh      
+stat    
+@ cat hello
+Hello, world
+@ 
+</pre>
+
+
 ## Source Tree
 
 The code in the original scans are (c) Novell who own the rights to the Unix
 source code. Everything that didn't come from the scanned files is GPLv3.
 
+* /build     is an area to build the kernel & filesystem and run them
+* /man		 holds man pages
+* /misc	     holds miscellaneous notes and information
 * /scans     holds the unmodified OCR versions of the scanned files
 * /src/cmd   holds the modified source code of the user-mode programs
 * /src/sys   holds the modified source code of the kernel
 * /src/other holds PDP-7 source code which did not come from the scanned files
 * /tools     holds the source for the tools written to assist the project
-* /build     is an area to build the kernel & filesystem and run them
-* /misc	     holds miscellaneous notes and information
-* /pdp7parse holds a Java parser for pdp7 source code
+
 
 ## Travis Status
 

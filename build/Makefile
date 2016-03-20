@@ -1,19 +1,29 @@
 # Build the kernel, the utilities, the filesystem and run SimH
 
+# tools
 AS=../tools/as7
 ASARGS=--format=ptr
 MKFS=../tools/mkfs7
+A7OUT=../tools/a7out 
+FSCK=../tools/fsck7
+PDP7=pdp7
 
+# source dirs
 SYSSRC=../src/sys
 CMDSRC=../src/cmd
 OTHERSRC=../src/other
-BINDIR=../bin
+TESTSRC=../src/tests
 
-all: cmd others a.rim image.fs
+# targets
+BINDIR=bin
+TESTDIR=tests
+IMAGEFILE=image.fs
+
+all: cmd others a.rim image
 
 # Manually make all before make run
-run:
-	pdp7 unixv0.simh
+run: clean all
+	$(PDP7) unixv0.simh
 
 a.rim:
 	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
@@ -23,11 +33,14 @@ coldboot:
 	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 
-image.fs:
+image:
 	$(MKFS) --format simh proto
+	$(FSCK) $(IMAGEFILE)
 
 clean:
-	rm -f a.rim image.fs a.lst n.out $(BINDIR)/*
+	rm -f a.rim $(IMAGEFILE) a.lst n.out
+	rm -rf $(BINDIR)
+	rm -rf $(TESTDIR)
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -55,6 +68,8 @@ cmd: dirs
 #	$(AS) $(ASARGS) -o $(BINDIR)/dsw    $(CMDSRC)/dsw.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ed     $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
 	$(AS) $(ASARGS) -o $(BINDIR)/init   $(CMDSRC)/init.s
+	$(AS) $(ASARGS) -o $(BINDIR)/maksys $(CMDSRC)/maksys.s
+	$(AS) $(ASARGS) -o $(BINDIR)/trysys $(CMDSRC)/trysys.s
 
 others: dirs
 	$(AS) $(ASARGS) -o $(BINDIR)/sh    	$(OTHERSRC)/pbsh.s	
@@ -63,6 +78,22 @@ others: dirs
 	$(AS) $(ASARGS) -o $(BINDIR)/wktcp	$(OTHERSRC)/wktcp.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/date  	$(OTHERSRC)/wktdate.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/ln  	$(OTHERSRC)/wktln.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ls  	$(OTHERSRC)/wktls.s		
 	$(AS) $(ASARGS) -o $(BINDIR)/mv    	$(OTHERSRC)/wktmv.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/stat  	$(OTHERSRC)/wktstat.s	
+
+tests:
+	mkdir -p $(TESTDIR)
+	$(AS) $(ASARGS) -o $(TESTDIR)/decimal_out  $(TESTSRC)/decimal_out.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/fork_test    $(TESTSRC)/fork_test.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/octal_test   $(TESTSRC)/octal_test.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/testmul      $(TESTSRC)/testmul.s
+	$(AS) $(ASARGS) -o $(TESTDIR)/write_test   $(TESTSRC)/write_test.s
+
+runtests: tests
+	$(A7OUT) $(TESTDIR)/decimal_out
+	$(A7OUT) $(TESTDIR)/fork_test
+	$(A7OUT) $(TESTDIR)/octal_test
+#	$(A7OUT) $(TESTDIR)/testmul
+#	$(A7OUT) $(TESTDIR)/write_test
+
+
