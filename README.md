@@ -29,7 +29,7 @@ and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
 You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
 
-pdp7-unix requires Perl5 to build.
+pdp7-unix requires [Perl5](https://www.perl.org/) to build.
 
 To compile it:
 
