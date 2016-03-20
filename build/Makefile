@@ -35,7 +35,7 @@ image:
 clean:
 	rm -f a.rim $(IMAGEFILE) a.lst n.out
 	rm -rf $(BINDIR)
-	rm -rr $(TESTDIR)
+	rm -rf $(TESTDIR)
 
 dirs:
 	mkdir -p $(BINDIR)
