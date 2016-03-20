@@ -34,14 +34,15 @@ To compile it:
 
 `make pdp7`
 
-On 64-bit systems, you may need to set the C compiler's optimisation
-level to -O1. To run pdp-unix from the pdp7-unix source tree, do:
-
-`make run`
-
 ## Running pdp7-unix
 
 You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
+On 64-bit systems, you may need to set the C compiler's optimisation
+level to -O1.
+
+To run pdp-unix from the pdp7-unix source tree, do:
+
+`make run`
 
 <pre>
 cd binaries

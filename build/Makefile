@@ -17,35 +17,39 @@ TESTSRC=../src/tests
 # targets
 BINDIR=bin
 TESTDIR=tests
-IMAGEFILE=image.fs
 BINARIES=../binaries/
 
 
-all: cmd others a.rim image copybinaries
+all: cmd others a.rim image.fs copybinaries
 
-# Manually make all before make run
+# The run rule has no dependencies so that the system can be booted easily
+# and frequently with make run. However, you have to manually make all first!
 run:
 	$(PDP7) unixv0.simh
 
+# Warm boot Unix kernel: boots into init and a login prompt
 a.rim:
 	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
 
+# Cold boot Unix kernel: attempts to build a minimal filesystem.
+# Don't use this one!
 coldboot:
 	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 
-image:
+# Filesystem image
+image.fs: cmd others
 	$(MKFS) --format simh proto
-	$(FSCK) $(IMAGEFILE)
+	$(FSCK) image.fs
 
 copybinaries:
 	mkdir -p $(BINARIES)
-	cp $(IMAGEFILE) $(BINARIES)
+	cp image.fs $(BINARIES)
 	cp a.rim $(BINARIES)
 
 clean:
-	rm -f a.rim $(IMAGEFILE) a.lst n.out
+	rm -f a.rim image.fs a.lst n.out
 	rm -rf $(BINDIR)
 	rm -rf $(TESTDIR)
 	rm -rf $(BINARIES)
@@ -53,41 +57,68 @@ clean:
 dirs:
 	mkdir -p $(BINDIR)
 
-cmd: dirs
-#	$(AS) $(ASARGS) -o $(BINDIR)/adm    $(CMDSRC)/adm.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/apr    $(CMDSRC)/apr.s
-	$(AS) $(ASARGS) -o $(BINDIR)/as     $(CMDSRC)/as.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/bc     $(CMDSRC)/bc.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/bi     $(CMDSRC)/bi.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/bl     $(CMDSRC)/bl.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/cas    $(CMDSRC)/cas.s
-	$(AS) $(ASARGS) -o $(BINDIR)/cat    $(CMDSRC)/cat.s
-	$(AS) $(ASARGS) -o $(BINDIR)/check  $(CMDSRC)/check.s
-	$(AS) $(ASARGS) -o $(BINDIR)/chmod  $(CMDSRC)/chmod.s
-	$(AS) $(ASARGS) -o $(BINDIR)/chown  $(CMDSRC)/chown.s
-	$(AS) $(ASARGS) -o $(BINDIR)/chrm   $(CMDSRC)/chrm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/cp     $(CMDSRC)/cp.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/db     $(CMDSRC)/db.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/dmabs  $(CMDSRC)/dmabs.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ds     $(CMDSRC)/ds.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/dskio  $(CMDSRC)/dskio.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/dskres $(CMDSRC)/dskres.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/dsksav $(CMDSRC)/dsksav.s
-#	$(AS) $(ASARGS) -o $(BINDIR)/dsw    $(CMDSRC)/dsw.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ed     $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
-	$(AS) $(ASARGS) -o $(BINDIR)/init   $(CMDSRC)/init.s
-	$(AS) $(ASARGS) -o $(BINDIR)/maksys $(CMDSRC)/maksys.s
-	$(AS) $(ASARGS) -o $(BINDIR)/trysys $(CMDSRC)/trysys.s
+# The commands that came from the original scans
+cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
+	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds $(BINDIR)/ed \
+	$(BINDIR)/init
 
-others: dirs
-	$(AS) $(ASARGS) -o $(BINDIR)/sh    	$(OTHERSRC)/pbsh.s	
-	$(AS) $(ASARGS) -o $(BINDIR)/ls    	$(OTHERSRC)/wktls.s	
-	$(AS) $(ASARGS) -o $(BINDIR)/wktcat	$(OTHERSRC)/wktcat.s	
-	$(AS) $(ASARGS) -o $(BINDIR)/wktcp	$(OTHERSRC)/wktcp.s	
-	$(AS) $(ASARGS) -o $(BINDIR)/date  	$(OTHERSRC)/wktdate.s	
-	$(AS) $(ASARGS) -o $(BINDIR)/ln  	$(OTHERSRC)/wktln.s
-	$(AS) $(ASARGS) -o $(BINDIR)/mv    	$(OTHERSRC)/wktmv.s	
-	$(AS) $(ASARGS) -o $(BINDIR)/stat  	$(OTHERSRC)/wktstat.s	
+$(BINDIR)/as: $(CMDSRC)/as.s
+	$(AS) $(ASARGS) -o $(BINDIR)/as $(CMDSRC)/as.s
+
+$(BINDIR)/cat: $(CMDSRC)/cat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/cat $(CMDSRC)/cat.s
+
+$(BINDIR)/check: $(CMDSRC)/check.s
+	$(AS) $(ASARGS) -o $(BINDIR)/check $(CMDSRC)/check.s
+
+$(BINDIR)/chmod: $(CMDSRC)/chmod.s
+	$(AS) $(ASARGS) -o $(BINDIR)/chmod $(CMDSRC)/chmod.s
+
+$(BINDIR)/chown: $(CMDSRC)/chown.s
+	$(AS) $(ASARGS) -o $(BINDIR)/chown $(CMDSRC)/chown.s
+
+$(BINDIR)/chrm: $(CMDSRC)/chrm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/chrm $(CMDSRC)/chrm.s
+
+$(BINDIR)/cp: $(CMDSRC)/cp.s
+	$(AS) $(ASARGS) -o $(BINDIR)/cp $(CMDSRC)/cp.s
+
+$(BINDIR)/ds: $(CMDSRC)/ds.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ds $(CMDSRC)/ds.s
+
+$(BINDIR)/ed: $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ed $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
+
+$(BINDIR)/init: $(CMDSRC)/init.s
+	$(AS) $(ASARGS) -o $(BINDIR)/init $(CMDSRC)/init.s
+
+# The commands that did not come from the scans
+others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
+	$(BINDIR)/ln $(BINDIR)/ls $(BINDIR)/mv $(BINDIR)/stat
+
+$(BINDIR)/sh: $(OTHERSRC)/pbsh.s
+	$(AS) $(ASARGS) -o $(BINDIR)/sh $(OTHERSRC)/pbsh.s
+
+$(BINDIR)/wktcat: $(OTHERSRC)/wktcat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/wktcat $(OTHERSRC)/wktcat.s
+
+$(BINDIR)/wktcp: $(OTHERSRC)/wktcp.s
+	$(AS) $(ASARGS) -o $(BINDIR)/wktcp $(OTHERSRC)/wktcp.s
+
+$(BINDIR)/date: $(OTHERSRC)/wktdate.s
+	$(AS) $(ASARGS) -o $(BINDIR)/date $(OTHERSRC)/wktdate.s
+
+$(BINDIR)/ln: $(OTHERSRC)/wktln.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ln $(OTHERSRC)/wktln.s
+
+$(BINDIR)/ls: $(OTHERSRC)/wktls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ls $(OTHERSRC)/wktls.s
+
+$(BINDIR)/mv: $(OTHERSRC)/wktmv.s
+	$(AS) $(ASARGS) -o $(BINDIR)/mv $(OTHERSRC)/wktmv.s
+
+$(BINDIR)/stat: $(OTHERSRC)/wktstat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/stat $(OTHERSRC)/wktstat.s
 
 tests:
 	mkdir -p $(TESTDIR)
