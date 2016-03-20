@@ -15,14 +15,14 @@ OTHERSRC=../src/other
 TESTSRC=../src/tests
 
 # targets
-BINDIR=../bin
-TESTDIR=../tests
+BINDIR=bin
+TESTDIR=tests
 IMAGEFILE=image.fs
 
 all: cmd others a.rim image
 
 # Manually make all before make run
-run: clean all
+run:
 	$(PDP7) unixv0.simh
 
 a.rim:

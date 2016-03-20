@@ -4,7 +4,7 @@ all: buildit
 buildit:
 	cd build && make all
 
-run:
+run: buildit
 	cd build && make run
 
 clean:
