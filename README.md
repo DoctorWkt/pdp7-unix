@@ -37,6 +37,33 @@ to run pdp-unix from the pdp7-unix source tree
 
 Press `ctl-e` to break out the simulator into simh
 
+A typical pdp7-unix on simh looks like:
+
+<pre>
+pdp7 unixv0.simh
+
+PDP-7 simulator V4.0-0 Beta        git commit id: e153b7f2
+CPU	idle disabled
+	8192W, EAE
+RB: buffering file in memory
+PDP-7 simulator configuration
+
+CPU	idle disabled
+CLK	60Hz, devno=00
+PTR	devno=01
+PTP	devno=02
+TTI	devno=03
+TTO	devno=04
+LPT	devno=65-66
+DRM	disabled
+RB	devno=71
+DT	devno=75-76, 8 units
+
+login: ken
+password: ken
+@ 
+</pre>
+
 
 ## Source Tree
 
