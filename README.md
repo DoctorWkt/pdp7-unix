@@ -31,13 +31,14 @@ You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You 
 
 `make pdp7`
 
-to run pdp-unix from the pdp7-unix source tree
+On 64-bit systems, you may need to set the C compiler's optimisation
+level to -O1. To run pdp-unix from the pdp7-unix source tree, do:
 
 `make run`
 
 Press `ctl-e` to break out the simulator into simh
 
-A typical pdp7-unix on simh looks like:
+A typical pdp7-unix session on simh looks like:
 
 <pre>
 pdp7 unixv0.simh
