@@ -61,6 +61,38 @@ DT	devno=75-76, 8 units
 
 login: ken
 password: ken
+@ ln dd ken .
+@ ls
+dd      
+system  
+hello   
+.       
+@ ls system
+dd      
+ttyin   
+keyboard
+pptin   
+ttyout  
+display 
+pptout  
+as      
+cat     
+chmod   
+chown   
+chrm    
+cp      
+date    
+ds      
+ed      
+init    
+ln      
+ls      
+mv      
+password
+sh      
+stat    
+@ cat hello
+Hello, world
 @ 
 </pre>
 
@@ -70,13 +102,15 @@ password: ken
 The code in the original scans are (c) Novell who own the rights to the Unix
 source code. Everything that didn't come from the scanned files is GPLv3.
 
+* /build     is an area to build the kernel & filesystem and run them
+* /man		 holds man pages
+* /misc	     holds miscellaneous notes and information
 * /scans     holds the unmodified OCR versions of the scanned files
 * /src/cmd   holds the modified source code of the user-mode programs
 * /src/sys   holds the modified source code of the kernel
 * /src/other holds PDP-7 source code which did not come from the scanned files
 * /tools     holds the source for the tools written to assist the project
-* /build     is an area to build the kernel & filesystem and run them
-* /misc	     holds miscellaneous notes and information
+
 
 ## Travis Status
 

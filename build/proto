@@ -32,13 +32,13 @@ dd 	         drwr- -1 4
         ln       frwr- -1 bin/ln
         ls       frwr- -1 bin/ls
         mv       frwr- -1 bin/mv
-	password frw-- -1 password
+	password frw-- -1 fs/password
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
 	$
     ken      drwr- 10
       system l----  3
-        hello     frwr- 10 hello
+        hello     frwr- 10 fs/hello
       $
     dmr      drwr- 12
       system l----  3
