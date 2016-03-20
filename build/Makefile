@@ -75,7 +75,6 @@ others: dirs
 	$(AS) $(ASARGS) -o $(BINDIR)/wktcp	$(OTHERSRC)/wktcp.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/date  	$(OTHERSRC)/wktdate.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/ln  	$(OTHERSRC)/wktln.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ls  	$(OTHERSRC)/wktls.s		
 	$(AS) $(ASARGS) -o $(BINDIR)/mv    	$(OTHERSRC)/wktmv.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/stat  	$(OTHERSRC)/wktstat.s	
 
