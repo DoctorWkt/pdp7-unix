@@ -3,11 +3,15 @@
 AS=../tools/as7
 ASARGS=--format=ptr
 MKFS=../tools/mkfs7
+A7OUT=../tools/a7out 
+FSCK=../tools/fsck7
 
 SYSSRC=../src/sys
 CMDSRC=../src/cmd
 OTHERSRC=../src/other
+TESTSRC=../src/tests
 BINDIR=../bin
+TESTDIR=../tests
 
 all: cmd others a.rim image.fs
 
@@ -25,12 +29,16 @@ coldboot:
 
 image.fs:
 	$(MKFS) --format simh proto
-
+	$(FSCK) image.fs
+	
 clean:
-	rm -f a.rim image.fs a.lst n.out $(BINDIR)/*
+	rm -f a.rim image.fs a.lst n.out
+	rm -rf $(BINDIR)
+	rm -rr $(TESTDIR)
 
 dirs:
 	mkdir -p $(BINDIR)
+	mkdir -p $(TESTDIR)
 
 cmd: dirs
 #	$(AS) $(ASARGS) -o $(BINDIR)/adm    $(CMDSRC)/adm.s
@@ -66,3 +74,20 @@ others: dirs
 	$(AS) $(ASARGS) -o $(BINDIR)/ls  	$(OTHERSRC)/wktls.s		
 	$(AS) $(ASARGS) -o $(BINDIR)/mv    	$(OTHERSRC)/wktmv.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/stat  	$(OTHERSRC)/wktstat.s	
+
+testit:
+	mkdir -p $(TESTDIR)
+	$(AS) $(ASARGS) -o $(TESTDIR)/decimal_out  $(TESTSRC)/decimal_out.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/fork_test    $(TESTSRC)/fork_test.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/octal_test   $(TESTSRC)/octal_test.s	
+	$(AS) $(ASARGS) -o $(TESTDIR)/testmul      $(TESTSRC)/testmul.s
+	$(AS) $(ASARGS) -o $(TESTDIR)/write_test   $(TESTSRC)/write_test.s
+
+runtests: tests
+	cd $(TESTDIR) && $(A7OUT) decimal_out
+	cd $(TESTDIR) && $(A7OUT) fork_test
+	cd $(TESTDIR) && $(A7OUT) octal_test
+#	cd $(TESTDIR) && $(A7OUT) testmul
+#	cd $(TESTDIR) && $(A7OUT) write_test
+
+
