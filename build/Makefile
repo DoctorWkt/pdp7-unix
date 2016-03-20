@@ -68,6 +68,8 @@ cmd: dirs
 #	$(AS) $(ASARGS) -o $(BINDIR)/dsw    $(CMDSRC)/dsw.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ed     $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
 	$(AS) $(ASARGS) -o $(BINDIR)/init   $(CMDSRC)/init.s
+	$(AS) $(ASARGS) -o $(BINDIR)/maksys $(CMDSRC)/maksys.s
+	$(AS) $(ASARGS) -o $(BINDIR)/trysys $(CMDSRC)/trysys.s
 
 others: dirs
 	$(AS) $(ASARGS) -o $(BINDIR)/sh    	$(OTHERSRC)/pbsh.s	
