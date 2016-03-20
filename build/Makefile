@@ -12,11 +12,12 @@ OTHERSRC=../src/other
 TESTSRC=../src/tests
 BINDIR=../bin
 TESTDIR=../tests
+IMAGEFILE=image.fs
 
-all: cmd others a.rim image.fs
+all: cmd others a.rim image
 
 # Manually make all before make run
-run:
+run: clean all
 	pdp7 unixv0.simh
 
 a.rim:
@@ -27,12 +28,12 @@ coldboot:
 	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 
-image.fs:
+image:
 	$(MKFS) --format simh proto
-	$(FSCK) image.fs
-	
+	$(FSCK) $(IMAGEFILE)
+
 clean:
-	rm -f a.rim image.fs a.lst n.out
+	rm -f a.rim $(IMAGEFILE) a.lst n.out
 	rm -rf $(BINDIR)
 	rm -rr $(TESTDIR)
 

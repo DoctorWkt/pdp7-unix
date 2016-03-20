@@ -25,6 +25,19 @@ system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
+## Running pdp7-unix
+
+You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  To compile it:
+
+`make pdp7`
+
+to run pdp-unix from the pdp7-unix source tree
+
+`make run`
+
+Press `ctl-e` to break out the simulator into simh
+
+
 ## Source Tree
 
 The code in the original scans are (c) Novell who own the rights to the Unix
@@ -37,7 +50,6 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /tools     holds the source for the tools written to assist the project
 * /build     is an area to build the kernel & filesystem and run them
 * /misc	     holds miscellaneous notes and information
-* /pdp7parse holds a Java parser for pdp7 source code
 
 ## Travis Status
 
