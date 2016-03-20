@@ -1,15 +1,19 @@
 # Build the kernel, the utilities, the filesystem and run SimH
 
+# tools
 AS=../tools/as7
 ASARGS=--format=ptr
 MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
 
+# source dirs
 SYSSRC=../src/sys
 CMDSRC=../src/cmd
 OTHERSRC=../src/other
 TESTSRC=../src/tests
+
+# targets
 BINDIR=bin
 TESTDIR=tests
 IMAGEFILE=image.fs
@@ -39,7 +43,6 @@ clean:
 
 dirs:
 	mkdir -p $(BINDIR)
-	mkdir -p $(TESTDIR)
 
 cmd: dirs
 #	$(AS) $(ASARGS) -o $(BINDIR)/adm    $(CMDSRC)/adm.s
@@ -76,7 +79,7 @@ others: dirs
 	$(AS) $(ASARGS) -o $(BINDIR)/mv    	$(OTHERSRC)/wktmv.s	
 	$(AS) $(ASARGS) -o $(BINDIR)/stat  	$(OTHERSRC)/wktstat.s	
 
-testit:
+tests:
 	mkdir -p $(TESTDIR)
 	$(AS) $(ASARGS) -o $(TESTDIR)/decimal_out  $(TESTSRC)/decimal_out.s	
 	$(AS) $(ASARGS) -o $(TESTDIR)/fork_test    $(TESTSRC)/fork_test.s	
@@ -85,10 +88,10 @@ testit:
 	$(AS) $(ASARGS) -o $(TESTDIR)/write_test   $(TESTSRC)/write_test.s
 
 runtests: tests
-	cd $(TESTDIR) && $(A7OUT) decimal_out
-	cd $(TESTDIR) && $(A7OUT) fork_test
-	cd $(TESTDIR) && $(A7OUT) octal_test
-#	cd $(TESTDIR) && $(A7OUT) testmul
-#	cd $(TESTDIR) && $(A7OUT) write_test
+	$(A7OUT) $(TESTDIR)/decimal_out
+	$(A7OUT) $(TESTDIR)/fork_test
+	$(A7OUT) $(TESTDIR)/octal_test
+#	$(A7OUT) $(TESTDIR)/testmul
+#	$(A7OUT) $(TESTDIR)/write_test
 
 
