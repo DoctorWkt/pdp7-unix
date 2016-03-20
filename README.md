@@ -111,6 +111,12 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /src/other holds PDP-7 source code which did not come from the scanned files
 * /tools     holds the source for the tools written to assist the project
 
+## Mailing List
+
+We have a
+[mailing list](http://minnie.tuhs.org/cgi-bin/mailman/listinfo/pdp7-unix)
+for those people actively involved in the restoration effort. Send e-mail
+to Warren Toomey (DoctorWkt) if you are keen to help out.
 
 ## Travis Status
 
