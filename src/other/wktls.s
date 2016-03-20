@@ -43,7 +43,7 @@ setlong:
 1:
    sys open; 9:curdir; 0 " Open up the directory, curdir if no arguments
    spa
-     sys exit		" Unable, so die now
+     jmp error
    dac fd		" Save the fd
    
 fileloop:
@@ -210,6 +210,18 @@ octal: 0
    sys write; space; 1
    isz octal		" Move return address 1 past the argument
    jmp octal i		" and return from subroutine
+
+error:
+   lac 9b
+   dac 1f
+   lac d1
+   sys write; 1:0; 4	" Write out the bad dirname
+   lac d1
+   sys write; mes; 1	" followed by "?\n"
+   sys exit
+
+mes:
+   077012               " String literal: " ?\n"
 
 longopt: 0		" User set the -l option when this is 1
 argptr:  0		" Pointer to the next argument
