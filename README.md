@@ -25,9 +25,8 @@ system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
-## Running pdp7-unix
 
-You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
+## Building pdp7-unix
 
 pdp7-unix requires [Perl5](https://www.perl.org/) to build.
 
@@ -39,6 +38,15 @@ On 64-bit systems, you may need to set the C compiler's optimisation
 level to -O1. To run pdp-unix from the pdp7-unix source tree, do:
 
 `make run`
+
+## Running pdp7-unix
+
+You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
+
+<pre>
+cd binaries
+pdp7 ../build/unixv0.simh
+</pre>
 
 Press `ctl-e` to break out the simulator into simh
 
