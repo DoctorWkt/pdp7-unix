@@ -15,8 +15,8 @@ OTHERSRC=../src/other
 TESTSRC=../src/tests
 
 # targets
-BINDIR=bin
-TESTDIR=tests
+BINDIR=../bin
+TESTDIR=../tests
 IMAGEFILE=image.fs
 
 all: cmd others a.rim image
