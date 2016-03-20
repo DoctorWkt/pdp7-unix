@@ -27,7 +27,11 @@ and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
 ## Running pdp7-unix
 
-You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  To compile it:
+You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
+
+pdp7-unix requires Perl5 to build.
+
+To compile it:
 
 `make pdp7`
 
@@ -111,6 +115,11 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /src/sys   holds the modified source code of the kernel
 * /src/other holds PDP-7 source code which did not come from the scanned files
 * /tools     holds the source for the tools written to assist the project
+
+## License
+
+pdp7-unix is under the [GPLv3](LICENSE)
+
 
 ## Mailing List
 
