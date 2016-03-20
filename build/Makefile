@@ -10,8 +10,8 @@ SYSSRC=../src/sys
 CMDSRC=../src/cmd
 OTHERSRC=../src/other
 TESTSRC=../src/tests
-BINDIR=../bin
-TESTDIR=../tests
+BINDIR=bin
+TESTDIR=tests
 IMAGEFILE=image.fs
 
 all: cmd others a.rim image
