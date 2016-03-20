@@ -6,6 +6,7 @@ ASARGS=--format=ptr
 MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
+PDP7=pdp7
 
 # source dirs
 SYSSRC=../src/sys
@@ -22,7 +23,7 @@ all: cmd others a.rim image
 
 # Manually make all before make run
 run: clean all
-	pdp7 unixv0.simh
+	$(PDP7) unixv0.simh
 
 a.rim:
 	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
