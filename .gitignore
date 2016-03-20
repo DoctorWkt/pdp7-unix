@@ -5,3 +5,6 @@
 build/a.lst
 build/a.rim
 build/image.fs
+build/n.out
+build/bin
+build/tests
