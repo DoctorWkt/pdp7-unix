@@ -18,8 +18,10 @@ TESTSRC=../src/tests
 BINDIR=bin
 TESTDIR=tests
 IMAGEFILE=image.fs
+BINARIES=../binaries/
 
-all: cmd others a.rim image
+
+all: cmd others a.rim image copybinaries
 
 # Manually make all before make run
 run:
@@ -37,10 +39,16 @@ image:
 	$(MKFS) --format simh proto
 	$(FSCK) $(IMAGEFILE)
 
+copybinaries:
+	mkdir -p $(BINARIES)
+	cp $(IMAGEFILE) $(BINARIES)
+	cp a.rim $(BINARIES)
+
 clean:
 	rm -f a.rim $(IMAGEFILE) a.lst n.out
 	rm -rf $(BINDIR)
 	rm -rf $(TESTDIR)
+	rm -rf $(BINARIES)
 
 dirs:
 	mkdir -p $(BINDIR)
