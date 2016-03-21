@@ -1176,18 +1176,17 @@ sub sys_time {
 # Status system call
 sub sys_status {
 
-    # This seems to called as follows:
-    #   law statbuf
-    #   sys status; scrname; dd
-    # but I can't tell if PC+1 or PC+2 holds the filename pointer.
-    # For now, I'll use PC+1. $AC seems to hold the pointer to the statbuf
-    # which, as far as we can tell is:
+    # AC holds the pointer to the stat buffer
+    # PC+1 is the directory holding the entry
+    # PC+2 is the directory entry we want to stat.
+    # The statbuf is:
     #   word 0:    permission bits
     #   words 1-7: disk block pointers
     #   word 8:    user-id
     #   word 9:    number of links
     #   word 10:   size in words
     #   word 11:   uniq, I have no idea what this is.
+    #   word 12:   i-number.
     # The permission bits are:
     #   200000  large file, bigger than 4096 words
     #   000020  directory
@@ -1195,23 +1194,23 @@ sub sys_status {
     #   000004  owner write
     #   000002  user write
     #   000001  user write
-    # XXX: We don't seem to have the i-node number in this structure?!
 
-    # Get the start address of the string
+    # Get the directory and file names
     # Convert this to a sensible ASCII filename
-    my $start    = $Mem[ $PC + 1 ];
-    my $filename = mem2arg($start);
-    dprintf( "status file %s statbuf %06o\n", $filename, $AC );
+    my $dirname = mem2arg($Mem[ $PC + 1 ]);
+    my $filename = mem2arg($Mem[ $PC + 2 ]);
+    dprintf( "status file %s/%s statbuf %06o\n", $dirname, $filename, $AC );
 
     # Get the file's details
-    my ( undef, undef, $mode, $nlink, $uid, undef, undef, $size ) =
-      stat($filename);
+    my ( undef, $ino, $mode, $nlink, $uid, undef, undef, $size ) =
+      stat("$dirname/$filename");
 
     # Set up the statbuf if we got a result
     if ($nlink) {
         $Mem[ $AC + 8 ]  = $uid & MAXINT;
-        $Mem[ $AC + 9 ]  = $nlink & MAXINT;
+        $Mem[ $AC + 9 ]  = (-$nlink) & MAXINT;
         $Mem[ $AC + 10 ] = $size & MAXINT;    # Yes, I know, not words
+        $Mem[ $AC + 12 ] = $ino & MAXINT;
 
         my $perms = 0;
         $perms = 01 if ( $mode & 02 );        # World writable
