@@ -124,11 +124,7 @@ login:
 2:
    lac nchar
    sys setuid		" Set the user's user-id
-#ifdef NO_DD
-   sys chdir; dotdot	" Change into the root directory (out of system)
-#else
    sys chdir; dd	" Change into the "dd" directory
-#endif
    sys chdir; dir	" and then the user's home directory
 
    lac d2		" Close file descriptor 2
@@ -253,8 +249,6 @@ m3:
 m3s = .-m3
 dd:
    <dd>;040040;040040;040040
-dotdot:
-   <..>;040040;040040;040040
 dir:
    040040;040040;040040;040040
 

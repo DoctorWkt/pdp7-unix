@@ -11,6 +11,7 @@ PDP7=pdp7
 # source dirs
 SYSSRC=../src/sys
 CMDSRC=../src/cmd
+ALTSRC=../src/alt
 OTHERSRC=../src/other
 TESTSRC=../src/tests
 
@@ -23,16 +24,16 @@ BINARIES=../binaries/
 all: cmd others a.rim image.fs copybinaries
 
 # Make alternative everything: no dd but . and ..
-alt: altcmd altothers alta.rim altimage.fs
+alt: altcmd altothers alt/a.rim alt/image.fs
 
 # The run rule has no dependencies so that the system can be booted easily
 # and frequently with make run. However, you have to manually make all first!
 run:
 	$(PDP7) unixv0.simh
 
-# Alternative run, use the altimage.fs
+# Alternative run, use the alt/image.fs
 altrun:
-	$(PDP7) altunixv0.simh
+	$(PDP7) alt/unixv0.simh
 
 # Warm boot Unix kernel: boots into init and a login prompt
 a.rim:
@@ -40,10 +41,11 @@ a.rim:
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
 
 # Alternative kernel: no dd, but . and ..
-alta.rim:
-	$(AS) -f rim -o alta.rim -DNO_DD $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
-	$(AS) -n -f list -o alta.lst -DNO_DD $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
-
+alt/a.rim:
+	$(AS) -f rim -o alt/a.rim $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
+		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
+	$(AS) -n -f list -o alt/a.lst $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
+		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
 
 # Cold boot Unix kernel: attempts to build a minimal filesystem.
 # Don't use this one!
@@ -57,9 +59,9 @@ image.fs: cmd others
 	$(FSCK) image.fs
 
 # Alternate filesystem image: . and .. but no dd
-altimage.fs: altcmd altothers
-	$(MKFS) -1 -2 -3 -o altimage.fs altproto
-	$(FSCK) -3 altimage.fs
+alt/image.fs: altcmd altothers
+	$(MKFS) -1 -2 -3 -o alt/image.fs alt/proto
+	$(FSCK) -3 alt/image.fs
 
 
 copybinaries:
@@ -68,9 +70,8 @@ copybinaries:
 	cp a.rim $(BINARIES)
 
 clean:
-	rm -f a.rim image.fs a.lst n.out altimage.fs alta.rim alta.lst
-	rm -rf $(BINDIR)
-	rm -rf $(TESTDIR)
+	rm -f a.rim image.fs a.lst n.out alt/image.fs alt/a.rim alt/a.lst
+	rm -rf $(BINDIR) $(TESTDIR)
 	rm -rf $(BINARIES)
 
 dirs:
@@ -83,8 +84,8 @@ cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
-	$(BINDIR)/chown $(BINDIR)/altchrm $(BINDIR)/cp $(BINDIR)/ds $(BINDIR)/ed \
-	$(BINDIR)/altinit
+	$(BINDIR)/chown $(BINDIR)/altchrm $(BINDIR)/cp $(BINDIR)/ds \
+	$(BINDIR)/ed $(BINDIR)/altinit
 
 $(BINDIR)/as: $(CMDSRC)/as.s
 	$(AS) $(ASARGS) -o $(BINDIR)/as $(CMDSRC)/as.s
@@ -104,8 +105,8 @@ $(BINDIR)/chown: $(CMDSRC)/chown.s
 $(BINDIR)/chrm: $(CMDSRC)/chrm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/chrm $(CMDSRC)/chrm.s
 
-$(BINDIR)/altchrm: $(OTHERSRC)/wktchrm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altchrm -DNO_DD $(OTHERSRC)/wktchrm.s
+$(BINDIR)/altchrm: $(ALTSRC)/chrm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altchrm $(ALTSRC)/chrm.s
 
 $(BINDIR)/cp: $(CMDSRC)/cp.s
 	$(AS) $(ASARGS) -o $(BINDIR)/cp $(CMDSRC)/cp.s
@@ -120,8 +121,8 @@ $(BINDIR)/init: $(CMDSRC)/init.s
 	$(AS) $(ASARGS) -o $(BINDIR)/init $(CMDSRC)/init.s
 
 # Alternative init: no dd directory
-$(BINDIR)/altinit: $(CMDSRC)/init.s
-	$(AS) $(ASARGS) -DNO_DD -o $(BINDIR)/altinit $(CMDSRC)/init.s
+$(BINDIR)/altinit: $(ALTSRC)/init.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altinit $(ALTSRC)/init.s
 
 # The commands that did not come from the scans
 others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \

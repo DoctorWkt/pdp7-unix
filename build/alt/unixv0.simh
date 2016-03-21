@@ -5,8 +5,8 @@ show cpu
 
 set tti unix
 set rb ena
-att rb altimage.fs
+att rb alt/image.fs
 show dev
 
-load -S alta.rim
+load -S alt/a.rim
 dep pc 0100

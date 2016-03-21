@@ -4,8 +4,6 @@
 pibreak:			" priority interrupt break processing "chain"
    dac .ac			" save interrupt AC
 	"** CROSSED OUT....
-
-#ifdef GRAPHICS2
    dpsf
    jmp 1f		" disable the Graphics-2 I/O
 
@@ -26,7 +24,6 @@ pibreak:			" priority interrupt break processing "chain"
    -1
    dac dpwrite
    jmp piret	"** END OF CROSSOUT
-#endif
 
 1: clsf			" clock overflow (line frequency ticks)?
    jmp 1f		"  no
@@ -90,7 +87,6 @@ cnop:			" fetched as constant in iread
    dac .dspb
    jmp piret
 dsprestart:
-#ifdef GRAPHICS2
    lac d1
    dac .dspb			" set .dsbp = 1
    lac dspbufp			" load display buf pointer
@@ -109,7 +105,6 @@ dsprestart:
    dac .lpba			" save
    rlpd				" G-2: resume after light pen stop
    jmp piret
-#endif
 
 1: ksf				" (TTY) keyboard flag set?
    jmp 1f			"  no
