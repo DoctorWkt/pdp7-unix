@@ -4,16 +4,16 @@
    sys intrp
    jms init1			" Fork the first child connected to ttyin/ttyout
    jms init2			" Fork the second child connected to keyboard/display
-1:
+l:
    sys rmes			" Wait for a child to exit
    sad pid1
      jmp 1f			" It was child 1, so jump to 1f and restart it
    sad pid2
      jms init2			" It was child 2, so restart it
-   jmp 1			" and loop back. XXX: weird use of 1: not 1b. I don't like it!
+   jmp l			" and loop back.
 1:
    jms init1
-   jmp 1			" Weird use of 1: not 1b. I don't like it!
+   jmp l
 
 init1: 0
    sys fork			" Fork a child process
