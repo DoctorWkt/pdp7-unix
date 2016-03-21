@@ -283,11 +283,11 @@ rkbdi:
    lmq
    and o155
    sad o55
-   jmp 1f
+   jmp 1f			" -/=? map to =?-/ ???
    lacq
    and o137
    sad o134
-   skp
+   skp				" \| map to Ll ???
    jmp 2f
 1:
    lacq
