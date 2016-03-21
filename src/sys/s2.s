@@ -4,7 +4,13 @@
 	" file status (stat) system call
 	" AC/ pointer to status (inode) buffer + i-num (13 words)
 	"   sys status; dir_name_ptr; file_name_ptr
+	"   NO_DD version: sys status; file_name_ptr
 .status:
+#ifdef NO_DD
+   jms arg			" fetch file name pointer
+   dac .+3
+   lac u.cdir			" get current working directory
+#else
    jms arg			" fetch directory name pointer
    dac .+5
    jms arg			" fetch file name pointer
@@ -12,6 +18,7 @@
    lac u.cdir			" get current working directory
    jms namei; ..		" look up source directory
       jms error			"  not found: return error to user
+#endif
    jms namei; ..		" look up file
       jms error			"  not found: return error
    jms iget			" read file inode
@@ -103,7 +110,11 @@
    dac 1f
    jms arg
    dac 2f
+#ifdef NO_DD
+   lac u.cdir			" Search the current directory
+#else
    lac d4			" Search the directory at i-num 4
+#endif
    jms namei; 0:0		" for the first argument
       jms error			" Didn't find it
    jms namei; 1:0		" In the i-num found by 1st namei,

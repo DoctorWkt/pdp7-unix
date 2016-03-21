@@ -57,7 +57,7 @@ use constant D_UNIQ     => 5;
 use constant D_NUMWORDS => 8;      # Eight words in a direntry
 
 # Globals
-my $debug = 0;
+my ($debug, $no_dd) = (0,0);
 my @Block;                         # Array of blocks and words in each block
 my @Freelist;                      # List of free block numbers
 my @Usedlist;                      # List of in-use block numbers
@@ -271,7 +271,10 @@ sub usage {
 
 ### MAIN PROGRAM
 
-GetOptions( 'debug|d' => \$debug, )
+GetOptions(
+	'debug|d' => \$debug,
+	'no_dd|3' => \$no_dd,
+)
   or usage();
 
 usage() if ( @ARGV < 1 );
@@ -327,6 +330,10 @@ foreach my $inode ( 0 .. NUMINODEBLKS * INODESPERBLK - 1 ) {
 }
 
 # Now check the directories. We start with dd at i-num 4.
-check_directory( 4, "dd" );
+if ($no_dd) {
+  check_directory( 2, "" );
+} else {
+  check_directory( 4, "dd" );
+}
 
 exit(0);

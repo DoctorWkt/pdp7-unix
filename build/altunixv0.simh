@@ -1,0 +1,12 @@
+set cpu 8k
+set cpu eae
+set cpu history=100
+show cpu
+
+set tti unix
+set rb ena
+att rb altimage.fs
+show dev
+
+load -S alta.rim
+dep pc 0100

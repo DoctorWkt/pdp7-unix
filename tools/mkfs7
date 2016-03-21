@@ -55,7 +55,7 @@ use constant D_UNIQ     => 5;
 use constant D_NUMWORDS => 8;    # Eight words in a direntry
 
 # Globals
-my ($debug,$wantdot,$wantdotdot)=(0,0,0);
+my ($debug,$wantdot,$wantdotdot, $no_dd)=(0,0,0,0);
 my @Block;	# Array of blocks and words in each block
 my @Freelist;	# List of free block numbers
 my $nextinum   = 1;	# i-num 0 is never used
@@ -353,9 +353,11 @@ sub make_dir {
     }
 
     # Finally, add a "dd" entry to this directory. We get the
-    # i-num from the first entry in the Dirstack
-    add_direntry( "dd", $Dirstack[0]->[2] );
-    dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
+    # i-num from the first entry in the Dirstack. Sorry for the dbl negative.
+    if (!$no_dd) {
+      add_direntry( "dd", $Dirstack[0]->[2] );
+      dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
+    }
 
     dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
@@ -643,6 +645,7 @@ GetOptions(
     'debug|d'    => \$debug,
     'dot|1'      => \$wantdot,
     'dotdot|2'   => \$wantdotdot,
+    'no_dd|3'    => \$no_dd,
     'format|f=s' => \$format,
     'output|o=s' => \$output,
 ) or usage();
