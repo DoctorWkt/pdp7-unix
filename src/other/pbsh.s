@@ -332,7 +332,7 @@ rline: 0
 1:
    cla; sys read; char; 1 " Read in one character from stdin
    sna			" read ok?
-    sys exit		"  EOF: quit
+    jmp quit		" no
    lac char
    lrss 9		" Get it and shift down 9 bits
    sad o100		" '@' (kill) character?
@@ -353,6 +353,11 @@ rline: 0
    dac 8
    jmp 1b		" and loop back
 
+quit:
+   lac d1; sys smes	" wake up init
+   sys exit
+
+" copied from cat.s:
 putc: 0
    and o177			" Keep the lowest 7 bits and save into 2f+1
    dac 2f+1
