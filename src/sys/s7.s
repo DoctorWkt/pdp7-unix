@@ -77,18 +77,18 @@ cnop:			" fetched as constant in iread
 1: lds				" load display status (see 03-scope.pdf pg 25)
    sma ral			" display trap set? (and rotate left)
    jmp 1f			"  not set
-   cdf				" clear display flags
+   cdf				" display done executing; clear display flags
    lac .dspb
    sna
-   jmp piret
+   jmp piret			" return now if .dspb == 0
    tad dm3
    sna
-   jmp dsprestart
-   dac .dspb
+   jmp dsprestart		" start display if .dspb == 3
+   dac .dspb			" otherwise, .dspb -= 3 and return
    jmp piret
 dsprestart:
    lac d1
-   dac .dspb			" set .dsbp = 1
+   dac .dspb			" set .dspb = 1
    lac dspbufp			" load display buf pointer
    beg				" start display processor
    -10

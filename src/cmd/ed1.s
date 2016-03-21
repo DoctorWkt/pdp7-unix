@@ -100,7 +100,7 @@ ca:
 ca1:
    jms rline
    lac line
-   sad o56012
+   sad o56012		" . NL?
    jmp advanc
    jms append
    jmp ca1

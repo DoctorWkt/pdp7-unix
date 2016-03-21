@@ -79,8 +79,8 @@ dirs:
 
 # The commands that came from the original scans
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
-	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds $(BINDIR)/ed \
-	$(BINDIR)/init
+	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
+	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -113,6 +113,12 @@ $(BINDIR)/cp: $(CMDSRC)/cp.s
 
 $(BINDIR)/ds: $(CMDSRC)/ds.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ds $(CMDSRC)/ds.s
+
+$(BINDIR)/dskres: $(CMDSRC)/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dskres $(CMDSRC)/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+
+$(BINDIR)/dsksav: $(CMDSRC)/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dsksav $(CMDSRC)/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
 
 $(BINDIR)/ed: $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ed $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
