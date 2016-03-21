@@ -151,8 +151,8 @@ $(BINDIR)/ln: $(OTHERSRC)/wktln.s
 $(BINDIR)/ls: $(OTHERSRC)/wktls.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ls $(OTHERSRC)/wktls.s
 
-$(BINDIR)/altls: $(OTHERSRC)/wktls.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altls -DNO_DD $(OTHERSRC)/wktls.s
+$(BINDIR)/altls: $(ALTSRC)/wktls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altls $(ALTSRC)/wktls.s
 
 $(BINDIR)/mv: $(OTHERSRC)/wktmv.s
 	$(AS) $(ASARGS) -o $(BINDIR)/mv $(OTHERSRC)/wktmv.s

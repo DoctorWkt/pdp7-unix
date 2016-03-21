@@ -23,7 +23,6 @@ argloop:
      jmp setlong
 
    lac argptr		" It wasn't -l, so save it as the dir to open
-   dac 8f
    dac 9f
    skp
 
@@ -79,7 +78,7 @@ entryloop:
    lac bufptr
    dac statfile		" Copy the pointer to the status call
    lac statbufptr	" Get the file's details into the statbuf
-   sys status; 8:curdir; statfile:0
+   sys status; statfile:0
    spa
      jms fileend
 
