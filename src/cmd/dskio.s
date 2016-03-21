@@ -27,7 +27,7 @@ dskwr1: 0
    jmp i dskwr1
 
 
-iskio: 0
+dskio: 0
    cll; idiv; 80
    dac 2f
    lacq
