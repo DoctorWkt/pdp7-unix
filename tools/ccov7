@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+#
+# Load a code coverage report from SimH and a kernel assembly listing
+# from as7, and show which lines in the kernel were not executed.
+#
+# To capture the list of executed locations in SimH, run SimH but stop
+# before executing any code, e.g. dep pc 0100 but don't go.
+#
+# Run this command to log execution of locations 21-4545:
+#	set br 21-4545[200000000]
+#
+# Eventually, ctrl-E to stop execution. Now dump the results:
+#	show @brk.list break all
+#
+# which will output a BRK.LIST Then run this command:
+#	ccov7 BRK.LIST a.lst | less
+#
+#
+# (c) 2016 Warren Toomey, GPL3
+#
+use strict;
+use warnings;
+use Data::Dumper;
+
+die("Usage: $0 breaklist_file a.lst\n") if (@ARGV !=2);
+
+# Read in the breaklist file and work out which lines were not
+# used. We assume that [200000000] was used in SimH
+my @Unused;
+open(my $IN, "<", $ARGV[0]) || die("Can't open $ARGV[0]: $!\n");
+while (<$IN>) {
+  if (m{^(\d+):.*\[(\d+)\]}) {
+    $Unused[$1]=1 if ($2 == 200000000);
+  }
+}
+close($IN);
+
+# Now open the kernel listing file. Decorate those lines which
+# were not executed
+my $decoration= "\t NOT EXECUTED";
+
+open($IN, "<", $ARGV[1]) || die("Can't open $ARGV[1]: $!\n");
+while (<$IN>) {
+  chomp;
+  if (m{^(\d+):}) {		# Find a line starting with digits, trim
+    my $location= $1;		# leading zeroes, append $decoration
+    $location=~ s{^0+}{};	# if this is an unused location
+    $_ .= $decoration if (defined($Unused[$location]));
+  }
+  print("$_\n");
+}
+close($IN);
+exit(0);
