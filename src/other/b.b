@@ -79,8 +79,7 @@ symbol() {
   } else {
     if (eof)
       return(0);
-  else
-      c = read();
+    c = read();
   }
 loop:
   ct = ctab[c];
@@ -97,18 +96,18 @@ loop:
     goto loop;
   }
 
-  if (c=='=') {
+  if (c=='=')
     return(subseq('=',80,60));
-  }
-  if (c=='<') {
+
+  if (c=='<')
     return(subseq('=',63,62));
-  }
-  if (c=='>') {
+
+  if (c=='>')
     return(subseq('=',65,64));
-  }
-  if (c=='!') {
+
+  if (c=='!')
     return(subseq('=',34,61));
-  }
+
   if (c=='$') {
     if (subseq('(',0,1))
       return(2);
@@ -155,9 +154,12 @@ com1:
   }
   if (ct==123) { /* letter */
     sp = symbuf;
-    while(ctab[c]==123 | ctab[c]==124) {
-      if (sp<symbuf+9) { *sp = c; sp = sp+1; }
-      c = read();
+    while(ct==123 | ct==124) {
+      if (sp<symbuf+9) {
+        *sp = c;
+        sp = sp+1;
+      }
+      ct = ctab[c = read()];
     }
     *sp = 0;
     peekc = c;
@@ -192,19 +194,21 @@ getcc() {
   auto c;
 
   cval = 0;
-  if ((c = mapch('*'')) < 0) return;
+  if ((c = mapch('*'')) < 0)
+    return;
   cval = c;
-  if ((c = mapch('*'')) < 0) return;
+  if ((c = mapch('*'')) < 0)
+    return;
   cval = cval * 512 + c;
-  if ((c = mapch('*'')) >= 0)
-  error('cc');
+  if (mapch('*'') >= 0)
+    error('cc');
 }
 
 mapch(c) {
   extrn peekc;
   auto a;
 
-  if((a=read())==c)
+  if ((a=read())==c)
     return(-1);
  
   if (a=='*n' | a==0 | a==4) {
@@ -260,7 +264,7 @@ case21:
 
   if (o==20) { /* name */
     if (*csym==0) { /* not seen */
-      if((peeksym=symbol())==6) { /* ( */
+      if ((peeksym=symbol())==6) { /* ( */
         *csym = 6; /* extrn */
       } else {
         *csym = 2; /* internal */
@@ -268,7 +272,7 @@ case21:
         csym[1] = isn;
       }
     }
-    if(*csym==5) /* auto */
+    if (*csym==5) /* auto */
       gen('a',csym[1]);
     else {
       write('x ');
@@ -394,13 +398,10 @@ loop:
   peeksym = o;
 }
 
-pexpr()
-{
-  auto o, t;
-
-  if ((o=symbol())==6) { /* ( */
+pexpr() {
+  if (symbol()==6) { /* ( */
     expr(15);
-    if ((o=symbol())==7) /* ) */
+    if (symbol()==7) /* ) */
       return;
   }
   error('()');
@@ -429,7 +430,7 @@ declare(kw) {
       goto done;
   }
 done:
-  if(o==1 & kw!=8 | o==7 & kw==8) /* auto/extrn ;  param ')' */
+  if (o==1 & kw!=8 | o==7 & kw==8) /* auto/extrn ;  param ')' */
     return;
 syntax:
   error('[]'); /* declaration syntax */
@@ -440,10 +441,10 @@ extdef() {
   auto o, c;
 
   o = symbol();
-  if(o==0 | o==1) /* eof ; */
+  if (o==0 | o==1) /* eof ; */
     return;
 
-  if(o!=20) /* name */
+  if (o!=20) /* name */
     goto syntax;
 
   csym[0] = 6; /* extrn */
@@ -555,9 +556,8 @@ stmt() {
 
 next:
   o = symbol();
- 
-  if (o==0) /* eof */
-  {
+
+  if (o==0) { /* eof */
     error('fe'); /* Unexpected eof */
     return;
   }
@@ -579,7 +579,7 @@ next:
     }
 
     if (cval==11) { /* return */
-      if((peeksym=symbol())==6) /* ( */
+      if ((peeksym=symbol())==6) /* ( */
         pexpr();
       gen('n',7); /* retrn */
       goto semi;
@@ -716,8 +716,7 @@ name(s) {
   }
 }
 
-error(code)
-{
+error(code) {
   extrn line, eof, csym, nerror, fout;
   auto f;
 
