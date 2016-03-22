@@ -33,6 +33,7 @@
 	init     frwr- -1 bin/altinit
         ln       frwr- -1 bin/ln
         ls       frwr- -1 bin/altls
+        mkdir    frwr- -1 bin/altmkdir
         mv       frwr- -1 bin/mv
 	password frw-- -1 fs/password
         sh       frwr- -1 bin/sh

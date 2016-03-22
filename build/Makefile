@@ -85,7 +85,7 @@ cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/altchrm $(BINDIR)/cp $(BINDIR)/ds \
-	$(BINDIR)/ed $(BINDIR)/altinit
+	$(BINDIR)/ed $(BINDIR)/altinit $(BINDIR)/altmkdir
 
 $(BINDIR)/as: $(CMDSRC)/as.s
 	$(AS) $(ASARGS) -o $(BINDIR)/as $(CMDSRC)/as.s
@@ -129,6 +129,10 @@ $(BINDIR)/init: $(CMDSRC)/init.s
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init.s
 	$(AS) $(ASARGS) -o $(BINDIR)/altinit $(ALTSRC)/init.s
+
+$(BINDIR)/altmkdir: $(ALTSRC)/wktmkdir.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altmkdir $(ALTSRC)/wktmkdir.s
+
 
 # The commands that did not come from the scans
 others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \

@@ -257,12 +257,14 @@
 1:
    jms access			" here if not found
    lac u.ac			" get access bits from user AC (zero for lock!)
-   and o17			" mask to permissions
+   and o37			" mask the permissions, but allow the dir bit
    jms icreat
 open1:				" common exit for open/creat
    jms fassign			" assign fd slot
       jms error			"  none free, return -1
    jmp sysexit
+
+o37: 037			" drwrw bitmask
 
 "** 01-s1.pdf page 11
 .close:
