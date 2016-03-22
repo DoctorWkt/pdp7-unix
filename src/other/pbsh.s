@@ -37,9 +37,9 @@ maxargs=8
 
 newline:
    lac d1; sys write; prompt; 1	" output prompt
-   jms rline			" read line into ibuf
-   lac iipt
-   dac ipt			" reset input pointer
+   jms rline			" read (edited) line into lbuf
+   lac ilpt
+   dac lpt			" reset line pointer
 
 " parse new command from current input line
 " (after ';' or '&')
@@ -199,14 +199,14 @@ child:				" debug symbol
    sad infile			" input redirct?
     jmp 1f			"  no
    sys close			" close fd 0
-   sys open; infile; 0		" open redirected
-   spa sna
+   sys open; infile; 0		" open new stdin
+   spa
     jmp inerror
    cla
-1: sad outfile			" output redirec?
+1: sad outfile			" output redirect?
     jmp exec			"  no
    lac d1; sys close		" close fd 1
-   lac o17; sys creat; outfile	" open output redirect
+   lac o17; sys creat; outfile	" open new stdout
    spa
     jmp outerror
 
@@ -228,7 +228,7 @@ exec:
 
 " copied up to bootloc in high memory (below argc)
 boot:
-   sys read; userbase; userlen	" read executable in
+   sys read; userbase; userlen	" read executable in (check for non-zero ret?)
    lacq				" Get the fd back and close the file
    sys close			" close command file
    jmp userbase			" and jump to the beginning of the executable
@@ -248,14 +248,14 @@ error:				" error in child: filename pointer in AC
   lac d1; sys write; 1: 0; 4
   lac d1; sys write; qmnl; 1
   lac d2; sys close		" close executable, if any
-  sys exit
+  sys exit			" performs implicit rmes
 
 " chdir command: executed in shell process
 " takes a series of directory names to chdir to in turn
 changedir:
    lac argc
    sad d4
-    jmp cherr			" need at least one arg!
+    jmp qm			" need at least one arg!
    lac argv0p
    skp
 1:  lac 0f			" increment dir pointer
@@ -270,12 +270,11 @@ changedir:
    sma				" error?
     jmp 1b			"  no: look for another directory
 
-" chdir call failed
-   lac 0b			" get name
+
+   lac 0b			" chdir failed: get offending name
    dac 0f			" store for write
-   lac d1; sys write; 0:0; 4
-cherr:
-   lac d1; sys write; qmnl; 1
+   lac d1; sys write; 0:0; 4	" complain
+qm:lac d1; sys write; qmnl; 1
    jmp nextcmd			" join parent code
 
 " here in parent, child pid in AC
@@ -327,50 +326,70 @@ delim: 0
    isz delim			" ran the gauntlet: skip home
    jmp delim i
 
-" get character from ibuf
+" get character from lbuf
 getc: 0
-   lac ipt i		" fetch char
-   isz ipt		" increment pointer
+   lac lpt i			" fetch char from line buffer
+   isz lpt			" increment pointer
    jmp getc i
 
-" from init.s rline: read line from tty into ibuf
+" from init.s rline: read line into lbuf with editing
 " (store one character per word)
 rline: 0
-   law ibuf-1		" Store ibuf pointer in location 8
+   law lbuf-1			" pointer in location 8
    dac 8
-1:
-" XXX ttyin returns one char per read,
-"     but redirected stdin would return two!!!
-"     push read down into a "getc" routine??
-"     used to do this, but removed it for some reason!!!
-   cla; sys read; char; 1 " Read in one character from stdin
-   sna			" read ok?
-    jmp quit		" no
-   lac char
-   lrss 9		" Get it and shift down 9 bits
-   sad o100		" '@' (kill) character?
-     jmp rline+1	"  yes: start from scratch
-   sad o43		" '#' (erase) character?
-     jmp 2f		"  yes: handle below
-
-   dac 8 i		" Store the character in the buffer
-   sad o12		" Newline?
-     jmp rline i	"  yes: return
-   jmp 1b		" no: keep going
+1: jms readc
+    jmp quit			" EOF
+   sad o100			" '@' (kill) character?
+    jmp rline+1			"  yes: start from scratch
+   sad o43			" '#' (erase) character?
+    jmp 2f			"  yes: handle below
+   dac 8 i			" Store the character in the buffer
+   sad o12			" Newline?
+     jmp rline i		"  yes: return
+   jmp 1b			" no: keep going
 2:
-   law ibuf-1		" # handling. Do nothing if at start of the buffer
-   sad 8
-     jmp 1b		" and loop back
-   -1
-   tad 8		" Otherwise, move the pointer in location 8 back one
+   law lbuf-1			" # (erase) handling
+   sad 8			" at start?
+    jmp 1b			"  yes: noop, loop back
+   -1				" no: decrement poiner
+   tad 8
    dac 8
-   jmp 1b		" and loop back
+   jmp 1b
 
 quit:
    lac d1; sys smes	" wake up init
    sys exit
 
-" copied from cat.s:
+" copied from cat.s
+
+" was "getc"
+readc: 0
+   lac ipt			" Load the pointer to the next word in the buffer
+   sad eipt
+     jmp 1f			" We've reached the end of the buffer, so read more
+   dac 2f			" Save the pointer
+   add o400000			" Flip the msb and save into ipt
+   dac ipt
+   ral				" Move the msb into the link register
+   lac 2f i			" Load the word from the buffer
+   szl				" Skip if this is the second character in the word
+     lrss 9			" It's the first char, shift down the top character
+   and o177			" Keep the lowest 7 bits
+   sna
+     jmp readc+1		" Skip a NUL characters and read another one
+   isz readc			" give skip return
+   jmp readc i			" Return the character from the subroutine
+1:
+   cla				" Buffer is empty, read 64 chars from stdin
+   sys read; iipt+1; 64
+   sna
+     jmp readc i		" No characters read: return without skip
+   tad iipt			" Add the word count to the base of the buffer
+   dac eipt			" and store in the end buffer pointer
+   lac iipt			" Reset the ipt to the base of the buffer
+   dac ipt
+   jmp readc+1			" and loop back to get one character
+
 putc: 0
    and o177			" Keep the lowest 7 bits and save into 2f+1
    dac 2f+1
@@ -391,6 +410,10 @@ putc: 0
    jmp putc i			" No, so return (more room still in the buffer)
 
 2: 0;0				" pointer, char
+ipt: 0				" Current input buffer base
+eipt: 0				" Pointer to end of data read in input buffer
+iipt: .+1; .=.+64		" 64 word input buffer and pointer to it
+" end from cat.s
 
 " literals
 d1: 1
@@ -430,7 +453,7 @@ argcptr: argc
 infilep: infile
 outfilep: outfile
 
-iipt: ibuf
+ilpt: lbuf			" initial line buffer pointer
 iopt:argv0p: argv0		" initial value for nextarg, opt
 
 " ################ variables
@@ -440,9 +463,9 @@ prompt: <@ 040			" v1 prompt!
 redirect: .=.+1			" last file was a redirect (lt or gt)
 nextarg: .=.+1			" next slot in argv to fill
 bcount: .=.+1			" byte counter for current filename
-opt: .=.+1			" "output pointer" (may point to in/outfile or into argv)
+opt: .=.+1			" "output pointer" (in/outfile or into argv)
 delimchar: .=.+1		" character that terminated line
-char: .=.+1			" char that terminated word (merge into delimchar?)
+char: .=.+1			" char that terminated word (merge w/ delimchar?)
 
 outfile: .=.+4			" buffer for output redirect file name
 infile: .=.+4			" buffer for input redirect file name
@@ -450,9 +473,8 @@ pid: .=.+1			" "other" pid
 cmdfd: .=.+1			" fd for executable
 bootcount: .=.+1		" loop count for "boot" copy
 
-ipt: .=.+1			" input buf pointer
-ibuf:				" input line stored here, one character per word
-
+lpt: .=.+1			" line buf pointer
+lbuf:				" edited line, one char per word
 
 " enter addresses into namelist:
 .=017777			" last word points to argc + argv data
