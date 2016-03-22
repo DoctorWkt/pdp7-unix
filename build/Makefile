@@ -68,6 +68,7 @@ copybinaries:
 	mkdir -p $(BINARIES)
 	cp image.fs $(BINARIES)
 	cp a.rim $(BINARIES)
+	cp unixv0.simh $(BINARIES)
 
 clean:
 	rm -f a.rim image.fs a.lst n.out alt/image.fs alt/a.rim alt/a.lst
