@@ -39,7 +39,10 @@ newline:
    lac d1; sys write; prompt; 1	" output prompt
    jms rline			" read line into ibuf
    lac iipt
-   dac ipt
+   dac ipt			" reset input pointer
+
+" parse new command from current input line
+" (after ';' or '&')
 newcom:
    dzm char			" clear saved char
    dzm infile			" clear input redirect file name
@@ -68,12 +71,12 @@ newarg:
 
    jms blank			" skip whitespace
    jms delim			" command sep?
-    jmp eol			"  yes
+    jmp eoc			"  yes
    sad lt			" input redirect?
-    jmp redirin
+    jmp redirin			"  yes
    sad gt			" output redirect?
-    jmp redirout
-   jmp 3f
+    jmp redirout		"  yes
+   jmp savechar			" no: save as filename
 
 redirin:			" saw <
    dac redirect			" flag redirect
@@ -87,40 +90,43 @@ redirout:			" saw >
    dac opt
    " fall
 
-newchar:
+newchar:			" loop reading a file name
    jms getc
    sad o40			" space?
     jmp eoname			"  yes
-   jms delim
-    jmp eoname
-3: jms putc			" save
+   jms delim			" no: end of line?
+    jmp eoname			"  yes
+savechar:
+   jms putc			" no: save
    isz bcount			" loop unless full
     jmp newchar
 
 " here after 8 chars: discard until terminator seen
-discard:
-   jms getc
+1: jms getc
    jms delim			" end of line?
-    jmp eoname
+    jmp 2f
    sad o40
-    jmp eoname
-   jmp discard
+    jmp 2f
+   jmp 1b
+
+2:
+   dac char			" save terminator
+   jmp full
 
 " name ended (short) with whitespace or delim
 " pad out last name to 8 with spaces
-" XXX check if ANYTHING read
 eoname:
    dac char			" save terminator
 1: lac o40
-   jms putc			" no: copy into argv
+   jms putc			" copy into argv
    isz bcount			" loop until full
     jmp 1b
-
-" saw end of name
-2: lac redirect
+full:
+   lac redirect
    sza
     jmp 2f			" last name was a redirect file, skip increment
 
+" file was not a redirection:
    lac argc			" increment argc
    tad d4
    dac argc
@@ -131,31 +137,31 @@ eoname:
 2:
    dzm redirect			" clear redirect flag
    lac nextarg
-   dac opt
+   dac opt			" set output pointer
 
-   lac char
-   jms delim
-    jmp eol
+   lac char			" get terminator
+   jms delim			" end of command?
+    jmp eoc			"  yes
 
-   lac argc
-   sad maxargwords
-    skp
-     jmp newarg
+   lac argc			" another arg
+   sad maxargwords		" full up?
+    skp				"  yes
+     jmp newarg			"   no: get another
 
-" too many args, (complain?).  for now eat rest of line 
+" too many args
 4: jms getc
    jms delim
     skp
      jmp 4b
    lac d1; sys write; toomany; ltoomany
-   jmp newline
+   jmp newline			" ignore rest of line
 
-" here at end of line
-eol:
-   sad delimchar		" save eol character
+" here at end of command
+eoc:
+   dac delimchar		" save command delimiter
    lac argc			" check for empty command line
    sna				" get anything?
-    jmp 2f			" no, go back for another
+    jmp nextcmd			" no, go back for another
 
 " check for built-in "chdir" command
    lac argv0
@@ -170,27 +176,24 @@ eol:
    sad chdirstr+2
     jmp changedir
 
-1:
-" comment these out to test "exec" w/o fork
-   sys fork
+" here to execute command (not a builtin)
+1: sys fork
     jmp parent
 
+child:				" debug symbol
    sys open; argv0; 0		" try cwd (no link required)
-   sma
-    jmp 1f
-   " jmp cmderr
+   sma				" error?
+    jmp 1f			"  no
 
-   sys unlink; exectemp		" remove old temp file, if any
-   sys link; system; argv0; exectemp
+   sys link; system; argv0; argv0
    spa
-     jmp cmderr
-   sys open; exectemp; 0
+    jmp cmderr
+   sys open; argv0; 0
    spa
-     jmp cmderr
+    jmp cmderr
    dac cmdfd
-   sys unlink; exectemp
+   sys unlink; argv0
    skp
-
 1:  dac cmdfd			" save command file descriptor
    cla				" check for input redirection
    sad infile			" input redirct?
@@ -248,28 +251,32 @@ error:				" error in child: filename pointer in AC
   sys exit
 
 " chdir command: executed in shell process
+" takes a series of directory names to chdir to in turn
 changedir:
-" XXX check if argc == 4 (no directories) and complain??
+   lac argc
+   sad d4
+    jmp cherr			" need at least one arg!
    lac argv0p
    skp
-1:  lac 0f			" increment argvp
+1:  lac 0f			" increment dir pointer
    tad d4
    dac 0f
    -4				" decrement argc
    tad argc
    dac argc
    sna				" done?
-    jmp 2f			"  yes: join parent code
+    jmp nextcmd			"  yes: join parent code
    sys chdir; 0:0
    sma				" error?
     jmp 1b			"  no: look for another directory
 
 " chdir call failed
-   lac 0b
-   dac 0f
+   lac 0b			" get name
+   dac 0f			" store for write
    lac d1; sys write; 0:0; 4
+cherr:
    lac d1; sys write; qmnl; 1
-   jmp 2f			" join parent code
+   jmp nextcmd			" join parent code
 
 " here in parent, child pid in AC
 parent:
@@ -290,9 +297,11 @@ parent:
     jmp newcom			"  yes: go back without wait
    lac pid			" no: get pid
    sys smes			" hang until child exits
-2: lac delimchar
+   nop
+nextcmd:
+   lac delimchar
    sad o73			" semi?
-    jmp newcom			"  yes: look for another command w/o prompt
+    jmp newcom			"  yes: look for another command on line
    jmp newline			" no: output prompt
 
 " ================
@@ -330,6 +339,9 @@ rline: 0
    law ibuf-1		" Store ibuf pointer in location 8
    dac 8
 1:
+" XXX ttyin returns one char per read,
+"     but redirected stdin would return two!!!
+"     push read down into an "rchar" routine??
    cla; sys read; char; 1 " Read in one character from stdin
    sna			" read ok?
     jmp quit		" no
@@ -383,12 +395,13 @@ putc: 0
 d1: 1
 d2: 2
 o4:d4: 4
+dm8: -8
 o12: 012			" newline
 o17: 017
 o40: 040			" space
 o43: 043			" #
 o46: 046			" ampersand
-o73: 046			" semi
+o73: 073			" semi
 o74:lt: 074			" <
 o76:gt: 076			" >
 o100: 0100			" @
@@ -400,9 +413,6 @@ qmnl: <? 012			" question mark, newline
 
 system:
    <sy>;<st>;<em>; 040040
-
-exectemp:
-   <ex>;<ec>;<te>;<mp>		" temporary link for file being exec'ed
 
 chdirstr:
    <ch>;<di>;<r 040
@@ -442,14 +452,18 @@ bootcount: .=.+1		" loop count for "boot" copy
 ipt: .=.+1			" input buf pointer
 ibuf:				" input line stored here, one character per word
 
+
+" enter addresses into namelist:
+.=017777			" last word points to argc + argv data
+argptr:
+
+.=argptr-maxargs-maxargs-maxargs-maxargs-1 " argc followed by argv
+argc: .=.+1
+argv0:				" 4 word blocks following argc
+
+" "bootstrap" (reads executable into userbase) copied JUST below argc
+.=argc-bootlen
+bootloc:
+
 userbase=010000			" user starts at 4K
-argptr=017777			" last word points to argc + argv data
-argc=argptr-maxargs-maxargs-maxargs-maxargs-1 " argc followed by argv
-
-" arguments in 4 word blocks follow argc
-argv0=argc+1
-
-" "bootstrap" (reads executable into userbase) JUST below argc
-bootloc=argc-bootlen		" location of bootstrap
-
 userlen=bootloc-userbase	" max executable
