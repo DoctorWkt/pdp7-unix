@@ -21,7 +21,7 @@ TESTDIR=tests
 BINARIES=../binaries/
 
 
-all: cmd others a.rim image.fs copybinaries
+all: cmd others a.rim image.fs
 
 # Make alternative everything: no dd but . and ..
 alt: altcmd altothers alt/a.rim alt/image.fs
@@ -33,7 +33,18 @@ run:
 
 # Alternative run, use the alt/image.fs
 altrun:
-	$(PDP7) alt/unixv0.simh
+	cd alt; $(PDP7) unixv0.simh
+
+dist: all alt
+	mkdir -p $(BINARIES)
+	mkdir -p $(BINARIES)/orig
+	mkdir -p $(BINARIES)/alt
+	cp image.fs $(BINARIES)/orig
+	cp a.rim $(BINARIES)/orig
+	cp unixv0.simh $(BINARIES)/orig
+	cp alt/image.fs $(BINARIES)/alt
+	cp alt/a.rim $(BINARIES)/alt
+	cp alt/unixv0.simh $(BINARIES)/alt
 
 # Warm boot Unix kernel: boots into init and a login prompt
 a.rim:
@@ -62,13 +73,6 @@ image.fs: cmd others
 alt/image.fs: altcmd altothers
 	$(MKFS) -1 -2 -3 -o alt/image.fs alt/proto
 	$(FSCK) -3 alt/image.fs
-
-
-copybinaries:
-	mkdir -p $(BINARIES)
-	cp image.fs $(BINARIES)
-	cp a.rim $(BINARIES)
-	cp unixv0.simh $(BINARIES)
 
 clean:
 	rm -f a.rim image.fs a.lst n.out alt/image.fs alt/a.rim alt/a.lst

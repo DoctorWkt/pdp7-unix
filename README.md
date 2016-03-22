@@ -37,19 +37,29 @@ To compile it:
 ## Running pdp7-unix
 
 You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
-On 64-bit systems, you may need to set the C compiler's optimisation
-level to -O1.
+On 64-bit systems, you may need to set the C compiler's optimisation level to -O1.
+
+### Running from source
 
 To run pdp-unix from the pdp7-unix source tree, do:
 
 `make run`
 
-<pre>
-cd binaries
-pdp7 ../build/unixv0.simh
-</pre>
-
 Press `ctl-e` to break out the simulator into simh
+
+### Precompiled Binaries
+
+You can also run pdp7-unix from precompiled binaries in the [/binaries](/binaries) directory. There are **orig** binaries and **alt** binaries.
+
+The orig binaries use the unixv0 directory semantics as restored from the printouts.  To run pdp7-unix orig:
+
+`cd binaries/orig; pdp7 unixv0.simh`
+
+The alt binaries use the more familiar "." and ".." diretory semanatics as found in later unix.  To run pdp7-unix alt:
+
+`cd binaries/alt; pdp7 unixv0.simh`
+
+### Typical Output
 
 A typical pdp7-unix session on simh looks like:
 
