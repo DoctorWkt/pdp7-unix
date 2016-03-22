@@ -196,8 +196,8 @@ usage() if ( @ARGV < 1 );
 );
 
 # Parse all the files
+print STDERR "I\n";		# like the real as
 foreach my $file (@ARGV) {
-    print STDERR "I $file\n";	# like the real as
     parse_file($file);
 }
 
@@ -206,8 +206,9 @@ $Var{'.'} = $BASE;
 $stage = 2;
 open(my $OUT, ">$output") || die "$output";
 
+print STDERR "II\n";		# like the real as
 foreach my $file (@ARGV) {
-    print STDERR "II $file\n";	# like the real as
+    print STDERR "$file\n";	# like the real as
     parse_file($file);
 }
 
