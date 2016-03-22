@@ -341,7 +341,8 @@ rline: 0
 1:
 " XXX ttyin returns one char per read,
 "     but redirected stdin would return two!!!
-"     push read down into an "rchar" routine??
+"     push read down into a "getc" routine??
+"     used to do this, but removed it for some reason!!!
    cla; sys read; char; 1 " Read in one character from stdin
    sna			" read ok?
     jmp quit		" no
@@ -441,7 +442,7 @@ nextarg: .=.+1			" next slot in argv to fill
 bcount: .=.+1			" byte counter for current filename
 opt: .=.+1			" "output pointer" (may point to in/outfile or into argv)
 delimchar: .=.+1		" character that terminated line
-char: .=.+1			" char that terminated word
+char: .=.+1			" char that terminated word (merge into delimchar?)
 
 outfile: .=.+4			" buffer for output redirect file name
 infile: .=.+4			" buffer for input redirect file name
