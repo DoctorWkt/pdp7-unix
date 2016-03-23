@@ -130,7 +130,8 @@ sub allocate_blocks {
     }
     dprintf(
         "Allocated blocks for size %d: %d .. %d (%06o .. %06o)\n",
-	$numwords, $blklist[0], $blklist[-1], $blklist[0], $blklist[-1]);
+	$numwords, $blklist[0], $blklist[-1], $blklist[0], $blklist[-1])
+		if ($blklist[0]);
     return (@blklist);
 }
 
