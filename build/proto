@@ -1,7 +1,7 @@
 # Prototype file for PDP-7 Unix filesystem layout
 #
 # Entries are one of:
-#    filename f[r-][w-][r-][w-] uid local_file_to_insert
+#    filename f[r-][w-][r-][w-] uid local_file_to_insert [inumber]
 #    dirname  d[r-][w-][r-][w-] uid [inumber]
 #    device   i[r-][w-][r-][w-] uid inumber
 #    link     l---- inumber
@@ -12,6 +12,7 @@
 # Format was inspired by 6th Edition mkfs
 #
 dd 	         drwr- -1 4
+    core         frwrw -1 /dev/null 1
     system       drwr- -1 3
         ttyin    irwr- -1 6
         keyboard irwr- -1 7

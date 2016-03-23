@@ -378,7 +378,7 @@ sub read_word {
 # filesystem. Add an entry to this file in the current directory on
 # the dirstack.
 sub add_file {
-    my ( $name, $perms, $uid, $extfile ) = @_;
+    my ( $name, $perms, $uid, $extfile, $inum ) = @_;
     dprintf( "Adding file %s perms %06o uid %d extfile %s\n",
         $name, $perms, $uid, $extfile );
 
@@ -389,11 +389,11 @@ sub add_file {
     my $isbinary = 0;
     my $c        = getc($IN);
     seek( $IN, 0, 0 );
-    $isbinary = 1 if ( ( ord($c) & 0300 ) == 0200 );
+    $isbinary = 1 if ($c && (( ord($c) & 0300 ) == 0200 ));
 
    # Read the whole file into a buffer, converting from ASCII or sixbit encoding
     my @buf;
-    my $size;
+    my $size=0;
 
     while (1) {
         if ($isbinary) {
@@ -418,13 +418,15 @@ sub add_file {
 
     # Put the contents of the file into the blocks
     my ($blocknum, $offset)= ($blklist[0], 0);
+    if ($blocknum) {
     dprint("Filling block $blocknum with content from $extfile\n");
-    foreach my $i (0 .. $size-1) {
-        $Block[$blocknum][$offset++]= $buf[$i];
-        if ( $offset == WORDSPERBLK ) {
-            $offset = 0;
-            $blocknum++;
-    	    dprint("Filling block $blocknum with content from $extfile\n");
+        foreach my $i (0 .. $size-1) {
+            $Block[$blocknum][$offset++]= $buf[$i];
+            if ( $offset == WORDSPERBLK ) {
+                $offset = 0;
+                $blocknum++;
+    	        dprint("Filling block $blocknum with content from $extfile\n");
+            }
         }
     }
 
@@ -437,7 +439,7 @@ sub add_file {
     }
 
     # Allocate and fill in the i-node
-    my $inum = allocate_inode();
+    $inum = allocate_inode($inum);
     if ($large) {
         fill_inode( $inum, $perms, I_FILE, $uid, $size, @indblocks );
     } else {
@@ -517,8 +519,8 @@ sub parse_proto_file {
             next;
         }
         if ( $type eq I_FILE ) {
-            my ( $name, $permstr, $uid, $extfile ) = @words;
-            add_file( $name, $perms, $uid, $extfile );
+            my ( $name, $permstr, $uid, $extfile, $inum ) = @words;
+            add_file( $name, $perms, $uid, $extfile, $inum );
             next;
         }
         if ( $type eq I_SPECIAL ) {
