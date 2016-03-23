@@ -1,4 +1,4 @@
-" Warren's version of ls. ls [-l] [dirname]
+" Warren's alternative version of ls. ls [-l] [name ...]
 "
 " When -l is used, you see
 "
@@ -16,14 +16,14 @@ main:
 argloop:
    lac 017777 i		" Do we have any arguments?
    sad d4
-     jmp 1f		" Leave the loop if no further arguments
+     jmp 1f		" No, so leave the argloop
 
    lac argptr i		" Is this one -l?
    sad minusell
      jmp setlong
 
-   lac argptr		" It wasn't -l, so save it as the dir to open
-   dac 9f
+   lac argptr		" It wasn't -l, so try to list it
+   jms listit
    skp
 
 setlong:
@@ -38,9 +38,36 @@ setlong:
    dac 017777 i		" Decrement the arg count and loop back
    jmp argloop
 
+1: lac didprint		" Have we actually printed anything?
+   sna
+     jms listdir	" No, so list the current directory
+    sys exit		" then exit
 
-1:
-   sys open; 9:curdir; 0 " Open up the directory, curdir if no arguments
+
+			" Given a pointer to a name in AC, list it.
+			" If it's a dir, list the contents.
+			" If it's a file, list just the file.
+listit: 0
+   dac 7f		" Stash the name's pointer in several places
+   dac 8f
+   lac statbufptr	" Get the name's details into the statbuf
+   sys status; 7:0
+   spa
+     jmp error		" exit if the status call fails
+   lac s.perm		" See if this is a directory
+   and isdirmask
+   sna
+     jmp 1f
+   jms listdir		" Yes, print the whole directory
+   jmp listit i
+
+1: lac 7b
+   jms printentry	" Only a file, print it
+   jmp listit i
+
+
+listdir: 0		" List a whole directory
+   sys open; 8:curdir; 0 " Open up the directory, curdir if no arguments
    spa
      jmp error
    dac fd		" Save the fd
@@ -49,40 +76,63 @@ fileloop:
    lac fd		" Read 64 words into the buffer from the input file
    sys read; buf; 64
    spa                  " Skip if result was >= 0
-     jmp fileend        " Result was -ve, so error result
+     jmp error          " Result was -ve, so error result
    sna                  " Skip if result was >0
-     jmp fileend        " Result was zero, so nothing left to read
+     jmp fileend       	" Result was zero, so nothing left to read
 
    dac count		" Save the count of words read in
-   lac ibufptr		" Point bufptr at the base of the buffer
-   dac bufptr
+   lac inameptr		" Point nameptr at the base of the buffer
+   dac nameptr
 
-" Each directory entry is eight words. We need to print out
-" the filename which is in words 2 to 5. Word 1 is the inum.
+			" Each dir entry is 8 words. We need to print out the
+			" filename which is in words 2 to 5. Word 1 is the inum.
 entryloop:
-   lac bufptr i		" Is the inode number zero?
+   lac nameptr i	" Is the inode number zero?
    sna
-     jmp skipentry	" Yes, skip this entry
-   lac longopt		" Are we printing out in long format?
-   sna
-     jmp 1f		" No, don't print out the inode number
+     jmp nextentry	" Yes, move to the next directory entry
 
-   lac bufptr i		" Print out the inode number as 5 digits
-   jms octal; -5
-
-1: isz bufptr		" Move up to the filename
-   lac longopt		" Are we printing out in long format?
-   sna
-     jmp printname	" No, jump to printname
-
-   lac bufptr
+   lac nameptr		" Move up to the filename
+   tad d1
    dac statfile		" Copy the pointer to the status call
    lac statbufptr	" Get the file's details into the statbuf
    sys status; statfile:0
    spa
-     jms fileend
+     jmp error		" exit if the status call fails
+   lac statfile
+   jms printentry	" Now print it out
 
+nextentry:
+   lac nameptr		" Add 8 to the nameptr to move up to the next one
+   tad d8
+   dac nameptr
+   -8
+   tad count		" Decrement the count of words in the buffer by 8
+   dac count
+   sza			" Anything left in the buffer to print?
+     jmp entryloop	" Yes, stuff left to print
+   jmp fileloop		" Nothing in the buffer, try reading some more
+
+fileend:
+   lac fd		" Close the open file descriptor and return
+   sys close
+   jmp listdir i
+
+
+printentry: 0		" Print out an entry from the statbuf and nameptr in AC
+   dac statfile
+   lac longopt		" Are we printing out in long format?
+   sza
+     jms printlong	" Yes, print out the i-node details
+   lac statfile		" Now print out the file's name
+   jms printname
+   isz didprint
+   jmp printentry i
+
+			" Print out the i-node in long format
+printlong: 0		
 			" Ugly code. Improvements welcome!
+   lac s.inum		" Print out the i-node number
+   jms octal; -5
    lac s.perm		" See if this is a directory
    and isdirmask
    sna
@@ -152,33 +202,19 @@ entryloop:
    jms octal; -3
    lac s.size		" Print the size out
    jms octal; -5
+   jmp printlong i
 
-printname:
+
+			" Given a filename pointer in AC,
+			" print it out with a newline
+printname: 0
+   dac 1f
    lac fd1
-   sys write; bufptr:0; 4	" Write the filename out to stdout
+   sys write; 1:0; 4		" Write the filename out to stdout
    lac fd1
    sys write; newline; 1	" followed by a newline
+   jmp printname i
 
-   lac bufptr		" Add 7 to the bufptr
-   tad d7
-   jmp nextentry
-
-skipentry:
-   lac bufptr		" Add 8 to the bufptr if we skipped this entry entirely
-   tad d8		" Or add 8 if we skipped this entry entirely
-nextentry:
-   dac bufptr
-   -8
-   tad count		" Decrement the count of words by 8
-   dac count
-   sza			" Anything left in the buffer to print?
-     jmp entryloop	" Yes, stuff left to print
-   jmp fileloop		" Nothing in the buffer, try reading some more
-
-fileend:
-   lac fd		" Close the open file descriptor and exit
-   sys close
-   sys exit
 
 			" Octal print code: This code borrowed from ds.s
 octal: 0
@@ -211,10 +247,6 @@ octal: 0
    jmp octal i		" and return from subroutine
 
 error:
-   lac 9b
-   dac 1f
-   lac d1
-   sys write; 1:0; 4	" Write out the bad dirname
    lac d1
    sys write; mes; 1	" followed by "?\n"
    sys exit
@@ -224,6 +256,7 @@ mes:
 
 longopt: 0		" User set the -l option when this is 1
 argptr:  0		" Pointer to the next argument
+nameptr:	 0		" Pointer to files name
 fd: 0			" File descriptor for the directory
 d1: fd1: 1		" File descriptor 1
 d4: 4
@@ -232,12 +265,13 @@ d7: 7
 d8: 8
 o40: 040
 o60: 060
+didprint: 0		" Did we print anything out?
 count: 0		" Count of # of directory words read in
 cbuf: 0			" Used to print out in the octal routing
 c: .=.+1		" Loop counter for printing octal digits
 
 " Input buffer for read
-ibufptr: buf			" Constant pointer to the buffer
+inameptr: buf			" Constant pointer to the buffer
 buf: .=.+64			" Directory buffer
 statbufptr: statbuf		" Pointer to the statbuf
 statbuf:			" Status buffer fields below
