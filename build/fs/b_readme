@@ -1,0 +1,14 @@
+Here is how to compile and run hello.b:
+
+  @ bc hello.b hello.s
+  @ as ops.s bl.s hello.s bi.s
+  I
+  II
+  ops.s   
+  bl.s    
+  hello.s 
+  bi.s    
+  @ a.out
+  Hello, World!
+
+

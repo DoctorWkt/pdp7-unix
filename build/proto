@@ -21,6 +21,7 @@ dd 	         drwr- -1 4
         display  irwr- -1 12
         pptout   irwr- -1 13
         as       frwr- -1 bin/as
+        bc       frwr- -1 bin/bc
         cat      frwr- -1 bin/cat
         check    frwr- -1 bin/check
         chmod    frwr- -1 bin/chmod
@@ -43,8 +44,13 @@ dd 	         drwr- -1 4
 	$
     ken      drwr- 10
       system l----  3
-        hello     frwr- 10 fs/hello
+      hello  frwr- 10 fs/hello
       $
-    dmr      drwr- 12
-      system l----  3
+    dmr        drwr- 12
+      system   l----  3
+      b_readme frwr- 12 fs/b_readme
+      bi.s     frwr- 12 ../src/cmd/bi.s
+      bl.s     frwr- 12 ../src/cmd/bl.s
+      hello.b  frwr- 12 ../src/other/hello.b
+      ops.s    frwr- 12 ../src/other/ops.s
       $

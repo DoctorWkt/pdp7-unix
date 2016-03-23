@@ -6,6 +6,7 @@ ASARGS=--format=ptr
 MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
+CC=gcc -Wno-multichar
 PDP7=pdp7
 
 # source dirs
@@ -141,7 +142,8 @@ $(BINDIR)/altmkdir: $(ALTSRC)/wktmkdir.s
 
 # The commands that did not come from the scans
 others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
-	$(BINDIR)/ln $(BINDIR)/ls $(BINDIR)/mv $(BINDIR)/stat $(BINDIR)/od
+	$(BINDIR)/ln $(BINDIR)/ls $(BINDIR)/mv $(BINDIR)/stat $(BINDIR)/od \
+	$(BINDIR)/bc
 
 # Alternative other commands: no dd, but . and ..
 altothers: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
@@ -177,6 +179,13 @@ $(BINDIR)/stat: $(OTHERSRC)/wktstat.s
 
 $(BINDIR)/od: $(OTHERSRC)/wktod.s
 	$(AS) $(ASARGS) -o $(BINDIR)/od $(OTHERSRC)/wktod.s
+
+# B compiler
+$(BINDIR)/bc: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
+	$(CC) -o b ../tools/b.c 2> /dev/null
+	./b $(OTHERSRC)/b.b b.s
+	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
+	rm b b.s
 
 tests:
 	mkdir -p $(TESTDIR)
