@@ -26,7 +26,7 @@
    dzm fbuf
    lac d1
    dac dskadr
-   dac wrlfg
+   dac wrflg
    dzm diskin
  "o------------> [scan markup]
    jmp advanc
@@ -272,7 +272,7 @@ cw:
    jms putsc; tal1
 1:
    -1
-   tad tufp
+   tad tbufp
    cma
    tad tal1
    dac 1f

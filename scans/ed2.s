@@ -3,7 +3,7 @@
 " ed2
 
 cs:
-   jsm getsc; tal
+   jms getsc; tal
    sad o40
    jmp cs
    sad o12
@@ -275,7 +275,7 @@ execute: 0
    dac i trvect+1
    jmp 1f
 
-exchg: "???
+xchg:
    lacq
    sad o12
    jmp i execute
@@ -407,7 +407,7 @@ matclo: 0 "???
 
 "??? the remainder of this scan had an unreadable first character
 "??? I did the best I could to recreate the characters appropriately
-o1: 1
+d1: 1
 o133: 0133
 dm3: -3
 o136: 0136
@@ -480,7 +480,7 @@ c1: .=.+1
 ital: .=.+1
 otal: .=.+1
 diskin: .=.+1
-glint: .=.+1
+glint1: .=.+1
 c2: .=.+1
 num: .=.+1
 zermp: .=.+1
@@ -513,7 +513,7 @@ fbuf: .=.+4  "not sure if this is fbuf, but
 tbuf: .=.+64 "there is a write; tbuf; 64 call
 line: .=.+64
 nlist: .=.+50
-"??? ?list: .=.+50, unable to determine label
+clist: .=.+50
 compbuf: .=.+100
 dskbuf: .=.+1 "[line crossed out - scan markup]
 lnodes: .=.+1000
