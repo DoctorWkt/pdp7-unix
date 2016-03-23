@@ -60,12 +60,12 @@ main(int argc, char **argv) {
     if (argc > 2) {
       if ((fout = creat(argv[2], 0777))<0) {
         error('fo');
-        return;
+        return 1;
       }
     }
     if ((fin = open(argv[1],0))<0) {
       error('fi');
-      return;
+      return 1;
     }
   }
 
@@ -74,6 +74,7 @@ main(int argc, char **argv) {
     extdef();
     blkend();
   }
+  return 0;
 }
 
 int *lookup() {
