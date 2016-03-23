@@ -16,6 +16,8 @@ my $singlestep = 0;    # Are we running in single-step mode?
 my $coverage   = 0;    # Print out code coverage
 my %Breakpoint;        # Hash of defined breakpoints
 my @Mem;               # 8K 18-bit words of main memory
+my %Addr2Name;	       # Map addresses to names
+my %Name2Addr;	       # Map names to addresses
 my @CC;		       # Code coverage: what addrs executed instructions
 my @FD;                # Array of open filehandles
 my @ISBINARY;          # Array of filehandle flags: ASCII or binary files?
@@ -35,6 +37,8 @@ use constant EAESTEP   => 077;         # EAE step count mask
 use constant EAEIMASK  => 0777700;     # EAE instruction mask
 use constant SIGN      => 0400000;     # Sign bit
 
+use constant EPSILON   => 99;	       # max delta for symbol display
+
 ### Main program ###
 
 # Get any optional arguments
@@ -49,7 +53,7 @@ while ( defined( $ARGV[0] ) && ( $ARGV[0] =~ m{^-} ) ) {
     # -b: set a breakpoint
     if ( $ARGV[0] eq "-b" ) {
         shift(@ARGV);
-        $Breakpoint{ oct( shift(@ARGV) ) } = 1;
+        $Breakpoint{ lookup( shift(@ARGV) ) } = 1;
     }
 
     # -c: print out code coverage
@@ -57,10 +61,16 @@ while ( defined( $ARGV[0] ) && ( $ARGV[0] =~ m{^-} ) ) {
         shift(@ARGV);
         $coverage= 1;
     }
+
+    # -n: read a namelist file
+    if ( $ARGV[0] eq "-n" ) {
+        shift(@ARGV);
+	load_names( shift(@ARGV) );
+    }
 }
 
 # Check the arguments
-die("Usage: $0 [-c] [-d] [-b breakpoint] a.outfile [arg1 arg2 ...]\n")
+die("Usage: $0 [-c] [-d] [-b breakpoint] [-n namelist] a.outfile [arg1 arg2 ...]\n")
   if ( @ARGV < 1 );
 
 # Load the a.out file into memory
@@ -189,10 +199,53 @@ sub set_arguments {
             my $c1 = substr( $str, $i,     1 ) || "";
             my $c2 = substr( $str, $i + 1, 1 ) || "";
 
-           #printf("Saving %06o to %06o\n", (ord($c1) << 9 ) | ord($c2), $addr);
+           #printf("Saving %06o to %s\n", (ord($c1) << 9 ) | ord($c2), addr($addr));
             $Mem[ $addr++ ] = ( ord($c1) << 9 ) | ord($c2);
         }
     }
+}
+
+### Load a namelist file
+sub load_names {
+    my $filename = shift;
+    open( my $IN, "<", $filename ) || die("Unable to open $filename: $!\n");
+    while (<$IN>) {
+	chomp;
+        if ($_ =~ m{([a-z0-9.]+)\s+([0-7]+)}) {
+	    my $i = oct($2);
+	    $Name2Addr{$1} = $i;
+	    $Addr2Name{$i} = $1;
+	}
+    }
+    close ($IN);
+}
+
+### Format an address
+sub addr {
+    my $addr = shift;
+    my $oct = sprintf("%06o", $addr);
+    if (%Addr2Name) {
+	return "$oct ($Addr2Name{$addr})" if ($Addr2Name{$addr});
+	# XXX keep Addr2Name as a sorted array?
+	# prefer after to before
+	for (my $epsilon = 1; $epsilon <= EPSILON; $epsilon++) {
+	    my $n = $Addr2Name{$addr-$epsilon};
+	    return "$oct ($n+$epsilon)" if (defined($n));
+	}
+	for (my $epsilon = 1; $epsilon <= EPSILON; $epsilon++) {
+	    my $n = $Addr2Name{$addr+$epsilon};
+	    return "$oct ($n-$epsilon)" if (defined($n));
+	}
+    }
+    return $oct;
+}
+
+### convert string (symbol or octal) to address
+sub lookup {
+    my $x = shift;
+    return oct($x) if ($x =~ m/^[0-7]+$/);
+    return $Name2Addr{$x} if (defined($Name2Addr{$x}));
+    return 0;
 }
 
 ### Simulate the machine code loaded into memory
@@ -251,10 +304,11 @@ sub simulate {
         # If this is a breakpoint, stop now and get a user command
         if ( defined( $Breakpoint{$PC} ) ) {
             $singlestep = 1;
-            dprintf( "break at PC %06o\n", $PC );
+            dprintf( "break at PC %s\n", addr($PC) );
         }
         get_user_command() if ($singlestep);
-        dprintf( "PC %06o: ", $PC );
+        dprintf( "PC %-20.20s L.AC %d.%06o MQ %06o: ", addr($PC),
+		 ($LINK ? 1 : 0), $AC & 0777777, $MQ );
 
        #dprintf("PC %06o: instr %06o, op %03o, in %o, addr %06o indaddr %06o\n",
        #   $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
@@ -264,8 +318,8 @@ sub simulate {
             $Oplist{$opcode}->( $instruction, $addr, $indaddr );
         }
         else {
-            printf( STDERR "Unknown instruction 0%06o at location 0%06o\n",
-                $instruction, $PC );
+            printf( STDERR "Unknown instruction 0%06o at location %s\n",
+                $instruction, addr($PC) );
             exit(1);
         }
     }
@@ -291,7 +345,7 @@ sub dump_memory {
 # Load AC
 sub lac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "lac %06o (value %06o) into AC\n", $indaddr, $Mem[$indaddr] );
+    dprintf( "lac %s (value %06o) into AC\n", addr($indaddr), $Mem[$indaddr] );
     $AC = $Mem[$indaddr];
     $PC++;
 }
@@ -299,7 +353,8 @@ sub lac {
 # Deposit AC
 sub dac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "dac AC (value %06o) into %06o\n", $AC, $indaddr );
+    dprintf( "dac AC (value %06o) into %s\n", $AC, addr($indaddr) );
+    dprintf("(****WRITE TO LOW MEMORY****)\n") if ($indaddr < 010000 && !($indaddr >= 010 && $indaddr <= 020) ) ;
     $Mem[$indaddr] = $AC;
     $PC++;
 }
@@ -307,8 +362,8 @@ sub dac {
 # Add to AC, twos complement
 sub tad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "tad AC (value %06o) with addr %06o (%06o)\n",
-        $AC, $indaddr, $Mem[$indaddr] );
+    dprintf( "tad AC (value %06o) with addr %s (%06o)\n",
+        $AC, addr($indaddr), $Mem[$indaddr] );
     $AC   = $AC + $Mem[$indaddr];
     $LINK = ( $LINK ^ $AC ) & LINKMASK;
     $AC   = $AC & MAXINT;
@@ -318,8 +373,8 @@ sub tad {
 # Add to AC, ones complement
 sub add {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "add AC (value %06o) with addr %06o (%06o)\n",
-        $AC, $indaddr, $Mem[$indaddr] );
+    dprintf( "add AC (value %06o) with addr %s (%06o)\n",
+        $AC, addr($indaddr), $Mem[$indaddr] );
 
     # This logic shamelessly borrowed from SimH
     # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
@@ -337,8 +392,8 @@ sub add {
 # And AC and Y
 sub and {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "and AC (value %06o) with addr %06o (%06o)\n",
-        $AC, $indaddr, $Mem[$indaddr] );
+    dprintf( "and AC (value %06o) with addr %s (%06o)\n",
+        $AC, addr($indaddr), $Mem[$indaddr] );
     $AC &= $Mem[$indaddr];
     $PC++;
 }
@@ -346,8 +401,8 @@ sub and {
 # Xor AC and Y
 sub xor {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "xor AC (value %06o) with addr %06o (%06o)\n",
-        $AC, $indaddr, $Mem[$indaddr] );
+    dprintf( "xor %s (%06o)\n",
+	     addr($indaddr), $Mem[$indaddr] );
     $AC ^= $Mem[$indaddr];
     $PC++;
 }
@@ -355,14 +410,14 @@ sub xor {
 # Skip if AC different to Y
 sub sad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "sad AC %06o cf. %06o\n", $AC, $Mem[$indaddr] );
+    dprintf( "sad %s (%06o)\n", addr($indaddr), $Mem[$indaddr] );
     $PC += ( $AC != $Mem[$indaddr] ) ? 2 : 1;
 }
 
 # Deposit zero in memory
 sub dzm {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "dzm into %06o\n", $indaddr );
+    dprintf( "dzm %s\n", addr($indaddr) );
     $Mem[$indaddr] = 0;
     $PC++;
 }
@@ -370,7 +425,7 @@ sub dzm {
 # Index and skip if zero
 sub isz {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "isz %06o (value %06o)\n", $indaddr, $Mem[$indaddr] );
+    dprintf( "isz %s (value %06o)\n", addr($indaddr), $Mem[$indaddr] );
     $Mem[$indaddr]++;
     $Mem[$indaddr] &= MAXINT;
     $PC += ( $Mem[$indaddr] == 0 ) ? 2 : 1;
@@ -379,14 +434,14 @@ sub isz {
 # Jump
 sub jmp {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "jmp %06o\n", $indaddr );
+    dprintf( "jmp %s\n", addr($indaddr) );
     $PC = $indaddr;
 }
 
 # Jump to subroutine
 sub jms {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "jms %06o\n", $indaddr );
+    dprintf( "jms %s\n", addr($indaddr) );
 
     # Save the LINK and current PC into the $indaddr location
     $Mem[ $indaddr++ ] = $PC + 1 | ( ($LINK) ? 0400000 : 0 );
@@ -399,7 +454,7 @@ sub opr {
 
     # hlt: halt simulation
     if ( $instruction == 0740040 ) {
-        printf( STDERR "PC %06o: program halted\n", $PC );
+        printf( STDERR "PC %s: program halted\n", addr($PC) );
         dump_memory( 0, MAXADDR, 0 ) if ($debug);
         exit(1);
     }
@@ -425,7 +480,7 @@ sub opr {
     # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
     my $skip = 0;
     my $i    = ( $instruction >> 6 ) & 017;    # decode IR<8:11>
-    dprintf( "L.AC %d.%06o %s", ($LINK) ? 1 : 0, $AC, $skipop[$i] );
+    dprintf( "%s", $skipop[$i] );
 
     $skip = 1 if ( ( $i == 1 ) && ( $AC & SIGN ) != 0 );      # sma
     $skip = 1 if ( ( $i == 2 ) && ( $AC & MAXINT ) == 0 );    # sza
@@ -530,8 +585,8 @@ sub eae {
 
     if ( $instruction == 0653323 ) {    # idiv: integer division
 	my $divisor= $Mem[ $PC+1 ];
-        dprintf( "idiv AC %06o by %06o (decimal %d by %d)\n",
-					$AC, $divisor, $AC, $divisor );
+        dprintf( "idiv %06o by %06o (decimal %d by %d)\n",
+				$AC, $divisor, $AC, $divisor );
 	# Prevent division by zero :-)
 	my $quotient = ($divisor) ? $AC / $divisor : 0;
 	my $remainder = ($divisor) ? $AC % $divisor : 0;
@@ -542,7 +597,7 @@ sub eae {
     }
     if ( $instruction == 0640323 ) {	# div: 36-bit unsigned integer division
 	my $divisor= $Mem[ $PC+1 ];
-        dprintf( "div MQ.AC %06o.%06o AC by %06o (decimal %d)\n",
+        dprintf( "div MQ.AC %06o.%06o by %06o (decimal %d)\n",
 					$MQ, $AC, $divisor, $divisor );
 	# http://www.perlmonks.org/?node_id=718414 says that we won't
 	# lose accuracy before 2^53
@@ -569,7 +624,7 @@ sub eae {
         return;
     }
     if ( $maskedinstr == 0660700 ) {    # alss: AC left shift, signed
-        dprintf( "alss AC %06o step %d\n", $AC, $step );
+        dprintf( "alss step %d\n", $step );
         $AC   = ( $AC << $step ) & MAXINT;
         $LINK = ( $AC << 1 ) & LINKMASK;
         $PC++;
@@ -578,7 +633,7 @@ sub eae {
     if ( $maskedinstr == 0660600 ) {    # llss: long left shift, signed
 	# Set the link to be the AC sign bit
 	$LINK= ($AC & SIGN) ? LINKMASK : 0;
-        dprintf( "llss AC %06o step %d\n", $AC, $step );
+        dprintf( "llss step %d\n", $step );
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
             $AC = ( ( $AC << 1 ) | $MQmsb ) & MAXINT;
@@ -588,7 +643,7 @@ sub eae {
         return;
     }
     if ( $maskedinstr == 0640600 ) {    # lls: long left shift
-        dprintf( "lls AC %06o step %d\n", $AC, $step );
+        dprintf( "lls step %d\n", $step );
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
             $AC = ( ( $AC << 1 ) | $MQmsb ) & MAXINT;
@@ -598,7 +653,7 @@ sub eae {
         return;
     }
     if ( $maskedinstr == 0640700 ) {    # als: AC left shift
-        dprintf( "als AC %06o step %d\n", $AC, $step );
+        dprintf( "als AC step %d\n", $step );
         $AC = ( $AC << $step ) & MAXINT;
         $PC++;
         return;
@@ -655,8 +710,8 @@ sub eae {
         $PC+=2;
         return;
     }
-    printf( STDERR "PC %06o: Unknown eae instruction %06o\n",
-        $PC, $instruction );
+    printf( STDERR "PC %s: Unknown eae instruction %06o\n",
+	    addr($PC), $instruction );
     exit(1);
 }
 
@@ -703,7 +758,7 @@ sub cal {
         $Syscallist{$addr}->();
     }
     else {
-        printf( STDERR "PC %06o: Unknown syscall %d\n", $PC, $addr );
+        printf( STDERR "PC %s: Unknown syscall %d\n", addr($PC), $addr );
         exit(1);
     }
 }
@@ -960,7 +1015,7 @@ sub sys_read {
     my $count = $Mem[ $PC + 2 ];
     my $end   = ( $start + $count - 1 ) & MAXADDR;
     die("sys_read: bad start/end addresses $start $end\n") if ( $end < $start );
-    dprintf( "read: %d words into %06o from fd %d\n", $count, $start, $fd );
+    dprintf( "read: %d words into %s from fd %d\n", $count, addr($start), $fd );
 
     # Bump up the PC
     $PC += 3;
@@ -1025,7 +1080,7 @@ sub sys_write {
     my $end   = ( $start + $count - 1 ) & MAXADDR;
     die("sys_write: bad start/end addresses $start $end\n")
       if ( $end < $start );
-    dprintf( "write: %d words from %06o to fd %d\n", $count, $start, $fd );
+    dprintf( "write: %d words from %s to fd %d\n", $count, addr($start), $fd );
 
     # Bump up the PC
     $PC += 3;
@@ -1386,8 +1441,9 @@ sub get_user_command {
         print("a7out> ");
         chomp( my $line = <STDIN> );
         my ( $cmd, $addr, $endaddr ) = split( /\s+/, $line );
-        $addr    = oct($addr)    if ( defined($addr) );
-        $endaddr = oct($endaddr) if ( defined($endaddr) );
+
+        $addr    = lookup($addr)    if ( defined($addr) );
+        $endaddr = lookup($endaddr) if ( defined($endaddr) );
 
         # Run the command
         my $leave;
@@ -1451,7 +1507,7 @@ sub cmd_help {
 
 sub cmd_showregs {
     my $link = ($LINK) ? 1 : 0;
-    printf( "PC: %06o, L.AC %d.%06o, MQ: %06o\n", $PC, $link, $AC, $MQ );
+    printf( "PC: %s, L.AC %d.%06o, MQ: %06o\n", addr($PC), $link, $AC, $MQ );
     return (0);
 }
 
