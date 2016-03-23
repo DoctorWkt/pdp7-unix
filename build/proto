@@ -22,6 +22,7 @@ dd 	         drwr- -1 4
         pptout   irwr- -1 13
         as       frwr- -1 bin/as
         cat      frwr- -1 bin/cat
+        check    frwr- -1 bin/check
         chmod    frwr- -1 bin/chmod
         chown    frwr- -1 bin/chown
         chrm     frwr- -1 bin/chrm
