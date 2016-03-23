@@ -19,10 +19,10 @@ main:
    lac nextarg i		" fetch it
    dac longopt			" save (for long check)
 
-   -4				" check for second arg
-   tad argc
-   spa
-    jmp nodir			" no second arg
+   lac argc
+   sad d8
+    skp
+     jmp usage			" no second arg
 
    lac nextarg
    tad d3			" skip rest of argv[0]
@@ -199,8 +199,8 @@ octal: 0
    isz octal		" skip the oits argument
    jmp octal i		" and return
 
-nodir:
-   lac d1; sys write; nodirs; 5
+usage:
+   lac d1; sys write; usages; lusage
    sys exit
 
 error:
@@ -212,8 +212,9 @@ error:
 
 " constants
 
-nodirs: <di>; <r 040; <na>; <me>
+usages: <di>; <r 040; <na>; <me> " also writes next word!!
 qnl: <? 012
+lusage=.-usages
 
 " file type bits, each followed by character to tag with
 types:
