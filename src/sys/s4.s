@@ -229,28 +229,36 @@ putq: 0
    dac q1+1 ..
    jmp putq i
 
+	" NOTE!! srcdbs, collaps, dskrd, dskwr share the same "temp" vars!!
+	
+	" check if disk block number in AC in memory
+	" give skip return if block not found
 srcdbs: 0
-   dac 9f+t+2   "* lmq
-   -ndskbs
-   dac 9f+t
-   law dskbs	"* -1 dac 8 written
-   dac 9f+t+1	"* lacq
+   dac 9f+t+2   "* lmq			" save block number in t2
+   -ndskbs				" loop for number of buffers
+   dac 9f+t				" in t0
+   law dskbs	"* -1 dac 8 written	" get address of first buffer
+   dac 9f+t+1	"* lacq			" in t1
 1:
-   lac 9f+t+2	"** crossed out
-   sad 9f+t+1	"** isz 8 written
-   jmp srcdbs i
-   law 65	"** ??? crossed out
+   lac 9f+t+2	"** crossed out		" get desired block number
+	" Phil: it looks to me like the next line
+	" is missing an indirect (t1 contains an address),
+	" but setting "i" breaks the kernel, so there must
+	" be something else missing/wrong as well!
+   sad 9f+t+1	"** isz 8 written	" match buffer block?
+   jmp srcdbs i				"  yes: return without skip
+   law 65	"** ??? crossed out	" no: advance to next buffer
    tad 9f+t+1	"** crossed out isz 8 written
    isz 9f+t+1
    isz 9f+t
    jmp 1b
-   isz srcdbs
+   isz srcdbs				" block not found: give skip return
    jmp srcdbs i
 
 collapse: 0
-   cla
-   jms srcdbs
-      jmp 1f
+   cla					" look for block zero
+   jms srcdbs				" in memory?
+      jmp 1f				"  yes
    law dskbs
    dac 9f+t+1	"** 9f+t+1 crossed out: 8 written in
 1:
@@ -276,17 +284,18 @@ collapse: 0
    jms copy; dskbuf; 0:..; 64
    jmp collapse i
 
+	" read logical disk block number (2..7999) in AC
 dskrd: 0
    jms betwen; d2; d7999
 
 "** 01-s1.pdf page 25
-      jms halt
-   sad dskaddr
-   jmp dskrd i
-   dac dskaddr
-   jms srcdbs
-      jmp 1f
-   lac dskaddr
+      jms halt			" bad block number
+   sad dskaddr			" block currently in dskbuf
+   jmp dskrd i			"  yes: return
+   dac dskaddr			" save block address
+   jms srcdbs			" in memory?
+      jmp 1f			"  yes
+   lac dskaddr			" no: read from disk
    jms dskio; 06000
    jmp 2f
 1:
@@ -312,6 +321,7 @@ dskwr: 0
    jmp dskwr i
 t = t+3
 
+	" called to read/write logical block into "dskbuf"
 	" AC/ block
 	"   jms dskio; dsld_bits
 dskio: 0
@@ -338,8 +348,10 @@ dskio: 0
    jmp dskio i
 t = t+1
 
-	" called with:
-	"   jms dsktrans; -WC; MAC; addr_ptr?; dsld_ptr
+	" perform disk I/O (both filesystem buffer and swapping)
+	" passed physical (BCD) disk address
+	" called:
+	"   jms dsktrans; -WC; MAC; addr_ptr; dsld_ptr
 dsktrans: 0
    -10
    dac 9f+t

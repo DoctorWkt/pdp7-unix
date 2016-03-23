@@ -3,9 +3,9 @@
 " s8
 
 " manifests
-mnproc = 10
-dspbsz = 270
-ndskbs = 4
+mnproc = 10			" number of processes
+dspbsz = 270			" display buffer size
+ndskbs = 4			" number of buffers at dskbs
 
 " flags
 .insys: 0			" "in system"
@@ -140,7 +140,7 @@ coldentry:
    jmp 4096			" start process 1
    . = dspbuf+dspbsz+3
 dskbuf = 07700
-dskbs: .=.+65+65+65+65
+dskbs: .=.+65+65+65+65		" ndskbs buffers (block number + block)
 edskbsp: .
 uquant: .=.+1			" number of ticks user has been running
 dspbufp: .=.+1			" pointer to display buffer
