@@ -1,21 +1,23 @@
 " db
+	"** pages 2-21  of 07-13-19.pdf
+	" Usage: db [ corefile [ namelist ] ]
 
    narg = ..+07777
    lac i narg
    sad d4
-   jmp start
+   jmp start			" no args
    lac narg
-   tad d5
+   tad d5			" pointer to first arg
    dac rcorep
    dac wcorep
    lac i narg
-   sad d8
-   jmp start
-   sad d12
-   skp
-   jmp error
+   sad d8			" one arg?
+   jmp start			"  yes: start
+   sad d12			" two args?
+   skp				"  yes
+   jmp error			"   no: error
    lac narg
-   tad d9
+   tad d9			" pointer to second arg
    dac nlnamep
    "
 start:
@@ -41,7 +43,7 @@ start:
    dac nlsize
    jmp 3f
 1:
-   sys read; nlbuff; namesize;0
+   sys read; nlbuff; namesize:0
    spa
    jmp 2b
    dac nlcnt
@@ -58,7 +60,7 @@ wcorep: corename; 1
    spa
    jmp error
    "
-   lac o52012
+   lac o52012			" prompt: "*\n"
    jms wchar
    law dotdot
    dac nsearch
@@ -96,7 +98,7 @@ error:
    jmp mloop
 cmd:
    lacq
-   sad o41
+   sad o41			" '!'?
    jmp patch
    lac opfound
    sna
@@ -111,27 +113,27 @@ cmd:
    dac dotrel
 1:
    lacq
-   sad o42
+   sad o42			" '"'?
    jmp ascii
-   sad o12
+   sad o12			" NL?
    jmp newln
-   sad o77
+   sad o77			" '?'?
    jmp symbol
-   sad o47
+   sad o47			" "'"?
    jmp saddress
-   sad o75
+   sad o75			" '='?
    jmp address
-   sad o57
+   sad o57			" '/'?
    jmp octal
-   sad o72
+   sad o72			" ':'
    jmp decimal
-   sad o136
+   sad o136			" '^'
    skp
    jmp 1f
    dac sysflag
    jmp mloop
 1:
-   sad o45
+   sad o45			" '%'?
    skp
    jmp 1f
    dzm sysflag
@@ -139,7 +141,7 @@ cmd:
 1:
    sad d1
    sys exit
-   sad o54
+   sad o54			" ','?
    skp
    jmp error
    " comma
@@ -215,7 +217,7 @@ address:
    jms wchar
    jmp mloop
 1:
-   lac o162012
+   lac o162012			" r\n
    jms wchar
    jmp mloop
    "
@@ -500,7 +502,7 @@ getsym:0
    dac skipt
    skp
 storech:
-   imq
+   lmq
    lac i symbufp
    and o177000
    sna
@@ -595,7 +597,7 @@ getnum:0
    dzm value
 num1:
    tad om60
-   imq
+   lmq
    lac value
    alss 3
    omq
@@ -674,7 +676,7 @@ prsym:0
    and o760000
    sad o760000
    jmp plaw
-   sad o20000
+   sad o20000			" cal i == "sys"
    jmp pcal
    and o740000
    sad o640000
@@ -715,7 +717,7 @@ symadr:
 pradr:
    dac addr
    jms nlsearch
-   jmp octals
+   jmp octala
 pr1:
    dzm relflg
    jms wrname
@@ -758,7 +760,7 @@ plaw:
    law
    dac relflg
    lac addr
-   lms nlsearch
+   jms nlsearch
    jmp poct
    dac symindex
    law laws
@@ -823,7 +825,7 @@ octala:
    jmp 1f
    lacq
    tad mrelocv
-   imq
+   lmq
 1:
    lacq
    jms octw
@@ -873,7 +875,7 @@ wrname:0
 1:
    lac i 10
    dac 2f
-   imq
+   lmq
    cla
    llss 9
    sad o40
@@ -924,7 +926,7 @@ nloop:
    skp
    jmp nloop
    isz np
-   iac i np
+   lac i np
    dac tvalue
    sad match
    jmp nlok
@@ -1025,7 +1027,7 @@ nlok:
    dac value
    lac treloc
    dac reloc
-   lac cnip
+   lac cnlp
    isz nlsearch
    jmp i nlsearch
    "
@@ -1063,11 +1065,11 @@ wchar:0
    "
 octw: 0
    isz octw
-   imq
+   lmq
    cla cll
    llss 3
    alss 6
-   llss3
+   llss 3
    tad o60060
    dac obuf
    cla
@@ -1090,7 +1092,7 @@ m10: -10
    "
 o54:054
 d6:6
-o52012:052012
+o52012:052012			" "*\n"
 d5:5
 d9:9
 d12:12
@@ -1126,7 +1128,7 @@ type:proct
 o162:0162
 nl:012
 om100:-0100
-d2:2
+"d2:2
 symbuf: .=.+5
 inbuf:.=.+64
 o100:0100
@@ -1137,10 +1139,10 @@ rcore:0
 o56:056
 om60:-060
 om10:-010
-o56:056
+"o56:056
 om141:-0141
 o141: 0141
-oO44: 044
+o044: 044
 o151: 0151
 o161: 0161
 om101: -0101
@@ -1157,7 +1159,7 @@ trafill: jmp fill
 nchar1:0
 nchar:0
 o177000:0177000
-o56040:056040
+o56040:056040				" ". "
 nsearch:0
 word:0
 relflg:0
@@ -1168,15 +1170,15 @@ o700000:0700000
 o17777:017777
 o20000:020000
 o10000: 010000
-o151040:0151040
-eaes:0145141;0145040
-laws: 0154141;0167040
-oprs:0157160;0162040
-iots:0151157;0164040
-syss:0163171;0163040
-corename:0143157;0162145;040040;040040
-nlname:0156056;0157165;0164040;040040
-dotdot: <..>; 040040; 040040; 040040
+o151040:0151040				" "i "
+eaes:0145141;0145040			" "eae "
+laws: 0154141;0167040			" "law "
+oprs:0157160;0162040			" "opr "
+iots:0151157;0164040			" "iot "
+syss:0163171;0163040			" "sys "
+corename:0143157;0162145;040040;040040	" "core"
+nlname:0156056;0157165;0164040;040040	" "n.out"
+dotdot: <..>; 040040; 040040; 040040	" (relocation base symbol)
 addr:0
 o37777:037777
 dm1:-1
