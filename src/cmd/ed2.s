@@ -53,7 +53,7 @@ cs:
    szl
    xor o400000
    tad linep
-   dac tal1 "???
+   dac tal1
    lac tbufp
    dac tal
 3:
@@ -61,7 +61,7 @@ cs:
    sad o12
    jmp 3f
    jms putsc; tal1
-   isz linsiz "???
+   isz linsiz
 "** 08-rest.pdf page 22
 "[handwritten page number top right of scan - 15]
    jmp 3b
@@ -186,7 +186,7 @@ cadvanc:
    jms getsc; tal
    sad delim
    jmp cdone
-   dac compflg "???
+   dac compflg
 "** 08-rest.pdf page 24
 "[handwritten page number top right of scan - 17]
    dzm lastre
@@ -194,7 +194,7 @@ cadvanc:
    jmp error
    "sad o133
    "jmp chrcls
-   sad o136 "???
+   sad o136
    jmp beglin
    sad o44
    jmp endlin
@@ -249,7 +249,7 @@ comp: 0 "???
    -1
    tad comp
    dac 9
-   lac 8 "???
+   lac 8
 "** 08-rest.pdf page 25
 "[handwritten page number top right of scan - 18]
    dac prev
@@ -275,7 +275,7 @@ execute: 0
    dac i trvect+1
    jmp 1f
 
-xchg: "???
+xchg:
    lacq
    sad o12
    jmp i execute
@@ -312,7 +312,7 @@ matchar: 0 "???
    lac matchar
    and o17777
    tad jms1
-   dac i 8 "??? [unreadable page cutoff]
+   dac i 8
 "** 08-rest.pdf page 26
 "[handwritten page number top right of scan - 19]
    lac i exret
@@ -375,7 +375,7 @@ mateol: 0 "???
    dac exret
    lac i exret
    dac 9
-   "??? [line is cut off in scan, maybe lac i 8 or jmp i 9]
+   jmp i 9
 "** 08-rest.pdf page 27
 "[handwritten page number top right of scan - 20]
 1: "???
@@ -456,7 +456,7 @@ o54: 054
 o17: 017
 
 tname:
-   0145056;0164155;0160040;040040	" e.tmp
+   0145056;0164155;0160040;040040
 tbufp: tbuf
 linep: line
 nlistp: nlist
@@ -502,7 +502,7 @@ bett1: .=.+1
 bett2: .=.+1
 wrflg: .=.+1
 apt1: .=.+1
-sfi: .=.+1			"[page cuts off one label] PLB: added
+sfi: .=.+1
 "** 08-rest.pdf page 29
 "[handwritten page number top right of scan - 22]
 sfo: .=.+1
@@ -513,7 +513,7 @@ fbuf: .=.+4  "not sure if this is fbuf, but
 tbuf: .=.+64 "there is a write; tbuf; 64 call
 line: .=.+64
 nlist: .=.+50
-clist: .=.+50		" unable to determine label [PLB missing clist]
+clist: .=.+50
 compbuf: .=.+100
 dskbuf: .=.+1 "[line crossed out - scan markup]
 lnodes: .=.+1000

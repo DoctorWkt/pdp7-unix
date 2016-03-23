@@ -70,28 +70,28 @@ chkwrp:
    jmp error
 
 comand:
-   lac char		" Get the character entered
+   lac char
    sad o141
-   jmp ca		" a command, append lines of text
+   jmp ca
    sad o143
-   jmp cc		" c command, change lines of text
+   jmp cc
    sad o144
-   jmp cd		" d command, delete lines of text
+   jmp cd
    sad o160
-   jmp cp		" p command, print lines of text
+   jmp cp
    sad o161
-   jmp cq		" q command, quit the editor
+   jmp cq
    sad o162
-   jmp cr		" r command, read in a file
+   jmp cr
    sad o163
-   jmp cs		" s command, substitute text
+   jmp cs
    sad o167
-   jmp cw		" w command, write out the file
+   jmp cw
    sad o12
-   jmp cnl		" newline
+   jmp cnl
    sad o75
-   jmp ceq		" = command
-   jmp error		" unrecognised, give an error
+   jmp ceq
+   jmp error
 ca:
    jms newline
    jms setfl
@@ -100,7 +100,7 @@ ca:
 ca1:
    jms rline
    lac line
-   sad o56012		" . NL?
+   sad o56012
    jmp advanc
    jms append
    jmp ca1
@@ -121,7 +121,7 @@ cc: cd:
    dac i 9
    sza
    jmp 2b
-"??? illegible line cut off - dac 0, lac 0, something else???
+   lac 9
 "** 08-rest.pdf page 10
 "[handwritten page number top right of scan - 3]
    dac eofp
@@ -185,7 +185,7 @@ cr:
    jms number
    jmp advanc
 2:
-"??? illegible line cut off - cma, sma, something else?
+   cma
 "** 08-rest.pdf page 11
 "[handwritten page number top right of scan - 4]
    tad d1
@@ -247,7 +247,7 @@ cw:
    jmp 3f
    isz num
    jmp putsc; tal1
-   isz c2 "???
+   isz c2
 "** 08-rest.pdf page 12
 "[handwritten page number top right of scan - 5]
    jmp 3f
@@ -334,10 +334,10 @@ setfl: 0
    jmp i setfl
 
 newline: 0
-   jms getsc; tal	" Get a character into tal
+   jms getsc; tal
    sad o12
-   jmp i newline	" Return if a newline
-   jmp error		" else an error
+   jmp i newline
+   jmp error
 
 addres: 0
    dzm minflg "..) [stray scan mark?]
@@ -523,7 +523,7 @@ gline: 0
    dac glint1
    jms getdsk
    lac glint1 " [these 6 lines were surrounded by a box
-   and o17777 " that was Xed out with an arrow pointing to it]:
+   and o1777  " that was Xed out with an arrow pointing to it]:
    tad dskbfp " --
    dac ital   "|\/|
    lac linep  "|/\|<---
@@ -616,7 +616,7 @@ getsc: 0
    lac i sctalp
    dac sctal
    add o400000
-   dac i sctal
+   dac i sctalp
    ral
    lac i sctal
    szl
