@@ -53,7 +53,7 @@ cs:
    szl
    xor o400000
    tad linep
-   dac tal1 "???
+   dac tal1
    lac tbufp
    dac tal
 3:
@@ -61,13 +61,13 @@ cs:
    sad o12
    jmp 3f
    jms putsc; tal1
-   isz linsiz "???
+   isz linsiz
 "** 08-rest.pdf page 22
 "[handwritten page number top right of scan - 15]
    jmp 3b
 3:
    -1
-   tad lcrhno
+   tad lchrno
    rcr
    szl
    xor o400000
@@ -118,7 +118,7 @@ bsrch:
    jms compile
    jms srcsav
    lac dot
-   dad zerop
+   sad zerop
    lac eofp
 bloop:
    tad dm1
@@ -186,7 +186,7 @@ cadvanc:
    jms getsc; tal
    sad delim
    jmp cdone
-   dac compflg "???
+   dac compflg
 "** 08-rest.pdf page 24
 "[handwritten page number top right of scan - 17]
    dzm lastre
@@ -194,7 +194,7 @@ cadvanc:
    jmp error
    "sad o133
    "jmp chrcls
-   sad o136 "???
+   sad o136
    jmp beglin
    sad o44
    jmp endlin
@@ -249,7 +249,7 @@ comp: 0 "???
    -1
    tad comp
    dac 9
-   lac 8 "???
+   lac 8
 "** 08-rest.pdf page 25
 "[handwritten page number top right of scan - 18]
    dac prev
@@ -310,9 +310,9 @@ matchar: 0 "???
    skp
    jmp 1f
    lac matchar
-   adn o17777
+   and o17777
    tad jms1
-   dac i 8 "??? [unreadable page cutoff]
+   dac i 8
 "** 08-rest.pdf page 26
 "[handwritten page number top right of scan - 19]
    lac i exret
@@ -375,7 +375,7 @@ mateol: 0 "???
    dac exret
    lac i exret
    dac 9
-   "??? [line is cut off in scan, maybe lac i 8 or jmp i 9]
+   jmp i 9
 "** 08-rest.pdf page 27
 "[handwritten page number top right of scan - 20]
 1: "???
@@ -502,7 +502,7 @@ bett1: .=.+1
 bett2: .=.+1
 wrflg: .=.+1
 apt1: .=.+1
-"[page cuts off one label]
+sfi: .=.+1
 "** 08-rest.pdf page 29
 "[handwritten page number top right of scan - 22]
 sfo: .=.+1
