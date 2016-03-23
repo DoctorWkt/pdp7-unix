@@ -354,7 +354,13 @@ sub lac {
 sub dac {
     my ( $instruction, $addr, $indaddr ) = @_;
     dprintf( "dac AC (value %06o) into %s\n", $AC, addr($indaddr) );
-    dprintf("(****WRITE TO LOW MEMORY****)\n") if ($indaddr < 010000 && !($indaddr >= 010 && $indaddr <= 020) ) ;
+
+    # Catch writes below the process' memory range
+    if ($indaddr < 010000 && !($indaddr >= 010 && $indaddr <= 020) ) {
+      $singlestep = 1;
+      dprintf("(****WRITE TO LOW MEMORY****)\n");
+      dprintf( "break at PC %s\n", addr($PC) );
+    }
     $Mem[$indaddr] = $AC;
     $PC++;
 }
