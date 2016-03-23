@@ -143,7 +143,7 @@ $(BINDIR)/altmkdir: $(ALTSRC)/wktmkdir.s
 # The commands that did not come from the scans
 others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
 	$(BINDIR)/ln $(BINDIR)/ls $(BINDIR)/mv $(BINDIR)/stat $(BINDIR)/od \
-	$(BINDIR)/bc
+	$(BINDIR)/bc  $(BINDIR)/lsd
 
 # Alternative other commands: no dd, but . and ..
 altothers: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
@@ -168,8 +168,14 @@ $(BINDIR)/ln: $(OTHERSRC)/wktln.s
 $(BINDIR)/ls: $(OTHERSRC)/wktls.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ls $(OTHERSRC)/wktls.s
 
+$(BINDIR)/lsd: $(OTHERSRC)/pblsd.s
+	$(AS) $(ASARGS) -o $(BINDIR)/lsd $(OTHERSRC)/pblsd.s
+
 $(BINDIR)/altls: $(ALTSRC)/wktls.s
 	$(AS) $(ASARGS) -o $(BINDIR)/altls $(ALTSRC)/wktls.s
+
+$(BINDIR)/lsd: $(OTHERSRC)/pblsd.s
+	$(AS) $(ASARGS) -o $(BINDIR)/lsd $(OTHERSRC)/pblsd.s
 
 $(BINDIR)/mv: $(OTHERSRC)/wktmv.s
 	$(AS) $(ASARGS) -o $(BINDIR)/mv $(OTHERSRC)/wktmv.s
