@@ -14,7 +14,6 @@ use Data::Dumper;
 my $debug      = 0;    # Debug flag
 my $singlestep = 0;    # Are we running in single-step mode?
 my $coverage   = 0;    # Print out code coverage
-my $namelist   = undef;	# Namelist filename
 my %Breakpoint;        # Hash of defined breakpoints
 my @Mem;               # 8K 18-bit words of main memory
 my %Addr2Name;	       # Map addresses to names
