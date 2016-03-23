@@ -112,3 +112,19 @@ like chrm, mv, ln.
 The shell now has code to link binaries in from the system directory, and mkfs7 has
 been modified to optionally create . and .., so things are mostly working now including
 chdir.
+
+## wkt Wed Mar 23 14:16:15 AEST 2016
+To keep things sensible, we have set the main build rules to build from
+the untouched historical sources. Phil has managed to get SimH to
+simulate enough of the Graphics-2 device to use it as a second console.
+We have removed all the #ifdefs from the code.
+
+Warren has been working on an alternative version which sees the
+system advance by about a year to when it has . and .. directory
+entries, no dd entry, plus things like mkdir. To build this, do make alt,
+make altrun. The src/alt area is used to hold the "alternative" code.
+
+Essentially, it all works now except a few minor glitches. We now need
+to get as up and running fully, get ed rescanned and working. Eventually
+it would be good to have a working roff; but someone is going to have
+to write it from scratch.
