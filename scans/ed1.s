@@ -121,7 +121,7 @@ cc: cd:
    dac i 9
    sza
    jmp 2b
-"??? illegible line cut off - dac 0, lac 0, something else???
+   lac 9
 "** 08-rest.pdf page 10
 "[handwritten page number top right of scan - 3]
    dac eofp
@@ -185,7 +185,7 @@ cr:
    jms number
    jmp advanc
 2:
-"??? illegible line cut off - cma, sma, something else?
+   cma
 "** 08-rest.pdf page 11
 "[handwritten page number top right of scan - 4]
    tad d1
@@ -247,7 +247,7 @@ cw:
    jmp 3f
    isz num
    jmp putsc; tal1
-   isz c2 "???
+   isz c2
 "** 08-rest.pdf page 12
 "[handwritten page number top right of scan - 5]
    jmp 3f
@@ -283,7 +283,7 @@ cw:
    jms number
    jmp advanc
 
-cn1:
+cnl:
    lac adrflg
    sna
    jmp 1f
@@ -346,7 +346,7 @@ addres: 0
 ad1:
    jms getsc; tal
 ad2:
-   jms betwen; d47; d56
+   jms betwen; d47; d58
    skp
    jmp numb
    sad o40 "[o40 circled in scan]
@@ -523,7 +523,7 @@ gline: 0
    dac glint1
    jms getdsk
    lac glint1 " [these 6 lines were surrounded by a box
-   adn o17777 " that was Xed out with an arrow pointing to it]:
+   and o1777  " that was Xed out with an arrow pointing to it]:
    tad dskbfp " --
    dac ital   "|\/|
    lac linep  "|/\|<---
@@ -616,7 +616,7 @@ getsc: 0
    lac i sctalp
    dac sctal
    add o400000
-   dac i sctal
+   dac i sctalp
    ral
    lac i sctal
    szl
