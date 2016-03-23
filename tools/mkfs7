@@ -158,14 +158,16 @@ sub build_indirect_blocks {
     # Divide the number of data blocks by WORDSPERBLK and round up, so
     # we know how many indirect blocks to allocate.
     my $indcount = int( ( $blkcount + WORDSPERBLK - 1 ) / WORDSPERBLK );
+    dprint("Allocating $indcount indirect blks for $blkcount direct blks\n");
 
     # Get enough indirect blocks
-    my @indlist = allocate_blocks($indcount);
+    my @indlist = allocate_blocks(WORDSPERBLK * $indcount);
 
     # Now fill in the pointers
     my $indblock = $indlist[0];
     my $offset   = 0;
     foreach my $datablock (@blklist) {
+        # dprint("$indblock $offset -> $datablock\n");
         $Block[$indblock][ $offset++ ] = $datablock;
         if ( $offset == WORDSPERBLK ) {
             $offset = 0;
