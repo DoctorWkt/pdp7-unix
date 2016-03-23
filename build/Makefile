@@ -141,11 +141,11 @@ $(BINDIR)/altmkdir: $(ALTSRC)/wktmkdir.s
 
 # The commands that did not come from the scans
 others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
-	$(BINDIR)/ln $(BINDIR)/ls $(BINDIR)/mv $(BINDIR)/stat
+	$(BINDIR)/ln $(BINDIR)/ls $(BINDIR)/mv $(BINDIR)/stat $(BINDIR)/od
 
 # Alternative other commands: no dd, but . and ..
 altothers: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
-	$(BINDIR)/ln $(BINDIR)/altls $(BINDIR)/mv $(BINDIR)/stat
+	$(BINDIR)/ln $(BINDIR)/altls $(BINDIR)/mv $(BINDIR)/stat $(BINDIR)/od
 
 
 $(BINDIR)/sh: $(OTHERSRC)/pbsh.s
@@ -174,6 +174,9 @@ $(BINDIR)/mv: $(OTHERSRC)/wktmv.s
 
 $(BINDIR)/stat: $(OTHERSRC)/wktstat.s
 	$(AS) $(ASARGS) -o $(BINDIR)/stat $(OTHERSRC)/wktstat.s
+
+$(BINDIR)/od: $(OTHERSRC)/wktod.s
+	$(AS) $(ASARGS) -o $(BINDIR)/od $(OTHERSRC)/wktod.s
 
 tests:
 	mkdir -p $(TESTDIR)
