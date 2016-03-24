@@ -25,7 +25,7 @@ BINARIES=../binaries/
 all: cmd others a.ptr a.rim image.fs
 
 # Make alternative everything: no dd but . and ..
-alt: altcmd altothers alt/a.rim alt/image.fs
+alt: altcmd altothers a.rim alt/a.ptr alt/image.fs
 
 # The run rule has no dependencies so that the system can be booted easily
 # and frequently with make run. However, you have to manually make all first!
@@ -34,7 +34,7 @@ run:
 
 # Alternative run, use the alt/image.fs
 altrun:
-	cd alt; $(PDP7) unixv0.simh
+	$(PDP7) alt/unixv0.simh
 
 dist: all alt
 	mkdir -p $(BINARIES)
