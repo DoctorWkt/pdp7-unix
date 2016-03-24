@@ -26,6 +26,6 @@ set dt disa
 show dev
 
 # load and run the bootstrap code
-load -S a.rim
+load -S boot.rim
 dep pc 010000
 go

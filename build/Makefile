@@ -22,10 +22,10 @@ TESTDIR=tests
 BINARIES=../binaries/
 
 
-all: cmd others a.ptr a.rim image.fs
+all: cmd others a.out boot.rim image.fs
 
 # Make alternative everything: no dd but . and ..
-alt: altcmd altothers a.rim alt/a.ptr alt/image.fs
+alt: altcmd altothers boot.rim alt/a.out alt/image.fs
 
 # The run rule has no dependencies so that the system can be booted easily
 # and frequently with make run. However, you have to manually make all first!
@@ -41,48 +41,48 @@ dist: all alt
 	mkdir -p $(BINARIES)/orig
 	mkdir -p $(BINARIES)/alt
 	cp image.fs $(BINARIES)/orig
-	cp a.rim $(BINARIES)/orig
-	cp a.ptr $(BINARIES)/orig
+	cp boot.rim $(BINARIES)/orig
+	cp a.out $(BINARIES)/orig
 	cp unixv0.simh $(BINARIES)/orig
 	cp alt/image.fs $(BINARIES)/alt
-	cp alt/a.ptr $(BINARIES)/alt
+	cp alt/a.out $(BINARIES)/alt
 	cp alt/unixv0.simh $(BINARIES)/alt
 
 # Warm boot Unix kernel: boots into init and a login prompt
-a.ptr:
-	$(AS) -f ptr  -o a.ptr $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
+a.out:
+	$(AS) -f ptr  -o a.out $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-8].s
 
 # Alternative kernel: no dd, but . and ..
-alt/a.ptr:
-	$(AS) -f ptr -o alt/a.ptr $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
+alt/a.out:
+	$(AS) -f ptr -o alt/a.out $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
 		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
 	$(AS) -n -f list -o alt/a.lst $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
 		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
 
 # Phil's bootstrap code
-a.rim: $(SYSSRC)/sop.s $(OTHERSRC)/pbboot.s
-	$(AS) -f rim -o a.rim $(SYSSRC)/sop.s $(OTHERSRC)/pbboot.s
+boot.rim: $(SYSSRC)/sop.s $(OTHERSRC)/pbboot.s
+	$(AS) -f rim -o boot.rim $(SYSSRC)/sop.s $(OTHERSRC)/pbboot.s
 
 # Cold boot Unix kernel: attempts to build a minimal filesystem.
 # Don't use this one!
 coldboot:
-	$(AS) -f rim  -o a.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
+	$(AS) -f rim  -o boot.rim $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 	$(AS) -n -f list -o a.lst $(SYSSRC)/sop.s $(SYSSRC)/s[1-9].s
 
 # Filesystem image
 image.fs: cmd others
-	$(MKFS) -k a.ptr proto
+	$(MKFS) -k a.out proto
 	$(FSCK) image.fs
 
 # Alternate filesystem image: . and .. but no dd
 alt/image.fs: altcmd altothers
-	$(MKFS) -1 -2 -3 -o alt/image.fs -k alt/a.ptr alt/proto
+	$(MKFS) -1 -2 -3 -o alt/image.fs -k alt/a.out alt/proto
 	$(FSCK) -3 alt/image.fs
 
 clean:
-	rm -f a.rim image.fs a.lst n.out a.ptr
-	rm -f alt/image.fs alt/a.ptr alt/a.lst
+	rm -f boot.rim image.fs a.lst n.out a.out
+	rm -f alt/image.fs alt/a.out alt/a.lst
 	rm -rf $(BINDIR) $(TESTDIR)
 	rm -rf $(BINARIES)
 
