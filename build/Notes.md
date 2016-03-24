@@ -128,3 +128,18 @@ Essentially, it all works now except a few minor glitches. We now need
 to get as up and running fully, get ed rescanned and working. Eventually
 it would be good to have a working roff; but someone is going to have
 to write it from scratch.
+
+## wkt Thu Mar 24 17:53:55 AEST 2016
+The B compiler works and can compile itself, thanks to the hard work
+done by Robert Swierczek, so it's now on the filesystem image; there's
+an example B program in dmr's home directory.
+
+Phil has written a proper RIM bootstrap for the system with the kernel
+loaded onto physical track 180 (logical 80). The mkfs7 tools has been
+altered to place the kernel there, so now we can boot from a paper tape that
+is only 237 bytes (23.7 inches) long instead of 14133 bytes (1413 inches)
+long :-) That will help when we get to the LCM machine.
+
+We have a new scan from Norman Wilson, and some transcription errors in
+ed have been fixed. ed now assembles and runs, but it isn't working
+perfectly yet.
