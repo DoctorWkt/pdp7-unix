@@ -268,8 +268,8 @@ case21:
         *csym = 6; /* extrn */
       } else {
         *csym = 2; /* internal */
-        isn = isn+1;
         csym[1] = isn;
+        isn = isn+1;
       }
     }
     if (*csym==5) /* auto */
@@ -280,7 +280,8 @@ case21:
         write('.');
         name(csym+2);
       } else { /* internal */
-        write('l');
+        write('1f');
+        write('+');
         number(csym[1]);
       }
       write('*n');
@@ -587,14 +588,14 @@ next:
 
     if (cval==12) { /* if */
       pexpr();
-      isn = isn+1;
       o1 = isn;
+      isn = isn+1;
       jumpc(o1);
       stmt();
       o = symbol();
       if (o==19 & cval==14) { /* else */
-        isn = isn+1;
         o2 = isn;
+        isn = isn+1;
         jump(o2);
         label(o1);
         stmt();
@@ -607,12 +608,12 @@ next:
     }
 
     if (cval==13) { /* while */
-      isn = isn+1;
       o1 = isn;
+      isn = isn+1;
       label(o1);
       pexpr();
-      isn = isn+1;
       o2 = isn;
+      isn = isn+1;
       jumpc(o2);
       stmt();
       jump(o1);
@@ -628,8 +629,8 @@ next:
     peekc = 0;
     if (!*csym) {
       *csym = 2; /* param */
-      isn = isn+1;
       csym[1] = isn;
+      isn = isn+1;
     } else if (*csym != 2) {
       error('rd');
       goto next;
@@ -653,17 +654,20 @@ syntax:
 }
 
 blkend() {
-  extrn isn, nisn;
+  extrn isn;
+  auto i;
 
-  while (nisn < isn) {
-    nisn = nisn+1;
+  if (!isn)
+    return;
+  write('1:');
+  i = 0;
+  while (i < isn) {
     write('l');
-    number(nisn);
-    write(':');
-    write('ll');
-    number(nisn);
+    number(i);
     write('*n');
+    i = i+1;
   }
+  isn = 0;
 }
 
 gen(o,n) {
@@ -675,22 +679,25 @@ gen(o,n) {
 
 jumpc(n) {
   write('f '); /* ifop */
-  write('l');
+  write('1f');
+  write('+');
   number(n);
   write('*n');
 }
 
 jump(n) {
-  write('t '); /* traop */
-  write('ll');
+  write('x ');
+  write('1f');
+  write('+');
   number(n);
-  write('*n');
+  gen('*nn',6); /* goto */
 }
 
 label(n) {
-  write('ll');
+  write('l');
   number(n);
-  write(':');
+  write('=.');
+  write('*n');
 }
 
 printn(n) {
@@ -778,6 +785,5 @@ csym;
 ns;
 cval;
 isn;
-nisn;
 nerror;
 nauto;
