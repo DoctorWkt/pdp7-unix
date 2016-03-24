@@ -377,13 +377,11 @@ sub read_word {
     return ( ( ( $b1 & 077 ) << 12 ) | ( ( $b2 & 077 ) << 6 ) | ( $b3 & 077 ) );
 }
 
-# Given a filename, perms, user-id and an external file, add a file to the
-# filesystem. Add an entry to this file in the current directory on
-# the dirstack.
-sub add_file {
-    my ( $name, $perms, $uid, $extfile, $inum ) = @_;
-    dprintf( "Adding file %s perms %06o uid %d extfile %s\n",
-        $name, $perms, $uid, $extfile );
+# Given a filename, read that file in and return an array of
+# words containing that file, or die otherwise
+sub read_file {
+    my $extfile= shift;
+    my @buf;
 
     # Open the external file
     open( my $IN, "<", $extfile ) || die("Can't open $extfile: $!\n");
@@ -394,17 +392,14 @@ sub add_file {
     seek( $IN, 0, 0 );
     $isbinary = 1 if ($c && (( ord($c) & 0300 ) == 0200 ));
 
-   # Read the whole file into a buffer, converting from ASCII or sixbit encoding
-    my @buf;
-    my $size=0;
-
+    # Read the file into a buffer, converting from ASCII or sixbit encoding
     while (1) {
         if ($isbinary) {
 
             # Convert three bytes into one 18-bit word
             my $result = read_word($IN);
             last if ( $result == -1 );
-            $buf[ $size++ ] = $result;
+            push(@buf, $result);
         } else {
             # Convert two ASCII characters into one 18-bit word
             my $c1 = getc($IN);
@@ -412,25 +407,48 @@ sub add_file {
             my $word = ord($c1) << 9;
             my $c2   = getc($IN);
             $word |= ord($c2) if ( defined($c2) );
-            $buf[ $size++ ] = $word;
+            push(@buf, $word);
         }
     }
+    return(@buf);
+}
+
+# Write a file which is stored in a buffer into the in-memory
+# disk image. Takes the base block number and the buffer of words
+sub write_file {
+    my ($blocknum, @buf)= @_;
+    my $size= @buf;
+    my $offset=0;
+
+    foreach my $i (0 .. $size-1) {
+        $Block[$blocknum][$offset++]= $buf[$i];
+        if ( $offset == WORDSPERBLK ) {
+            $offset = 0;
+            $blocknum++;
+    	    dprint("Filling block $blocknum\n");
+        }
+    }
+}
+
+# Given a filename, perms, user-id and an external file, add a file to the
+# filesystem. Add an entry to this file in the current directory on
+# the dirstack.
+sub add_file {
+    my ( $name, $perms, $uid, $extfile, $inum ) = @_;
+    dprintf( "Adding file %s perms %06o uid %d extfile %s\n",
+        $name, $perms, $uid, $extfile );
+
+    # Read the file into a buffer
+    my @buf= read_file($extfile);
+    my $size= @buf;
 
     # Allocate enough blocks for the file
     my @blklist = allocate_blocks($size);
 
     # Put the contents of the file into the blocks
-    my ($blocknum, $offset)= ($blklist[0], 0);
-    if ($blocknum) {
-    dprint("Filling block $blocknum with content from $extfile\n");
-        foreach my $i (0 .. $size-1) {
-            $Block[$blocknum][$offset++]= $buf[$i];
-            if ( $offset == WORDSPERBLK ) {
-                $offset = 0;
-                $blocknum++;
-    	        dprint("Filling block $blocknum with content from $extfile\n");
-            }
-        }
+    if ($blklist[0]) {
+        dprint("Filling block $blklist[0] with content from $extfile\n");
+        write_file($blklist[0], @buf);
     }
 
     # If it's too big, allocate indirect blocks
@@ -644,7 +662,7 @@ sub usage {
 
 ### MAIN PROGRAM
 
-my ( $format, $output ) = ( "simh", "image.fs" );
+my ( $format, $output, $kernelfile ) = ( "simh", "image.fs" );
 
 GetOptions(
     'debug|d'    => \$debug,
@@ -653,6 +671,7 @@ GetOptions(
     'no_dd|3'    => \$no_dd,
     'format|f=s' => \$format,
     'output|o=s' => \$output,
+    'kernel|k=s' => \$kernelfile,
 ) or usage();
 
 usage() if ( @ARGV < 1 );
@@ -661,5 +680,13 @@ parse_proto_file( $ARGV[0] );
 dprint("Storing free list in blocks ");
 fill_sysdata();
 dprint("\n");
+
+# If we were given a kernel image, write that to track 80
+# which is block number 6400.
+if ($kernelfile) {
+    dprint("Adding kernel $kernelfile to track 80\n");
+    my @buf= read_file($kernelfile);
+    write_file(6400, @buf);
+}
 dump_image( $format, $output );
 exit(0);
