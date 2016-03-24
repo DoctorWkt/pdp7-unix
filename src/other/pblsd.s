@@ -121,7 +121,6 @@ ploop:
    isz c			" more bits?
     jmp ploop			"  yes, loop
 
-putsp:
    lac o40			" put space
    dac 8 i
 
@@ -149,7 +148,6 @@ prname:
    lac o12			" add newline
    dac 8 i
 
-wr:				" breakpoint
    lac lbufp			" negate starting pointer
    cma
    tad d1
