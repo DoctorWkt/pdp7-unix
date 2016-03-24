@@ -25,7 +25,7 @@ set dt disa
 # show device settings:
 show dev
 
-# load and start the system:
+# load and run the bootstrap code
 load -S a.rim
-dep pc 0100
+dep pc 010000
 go
