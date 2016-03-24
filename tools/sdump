@@ -12,40 +12,53 @@ use Fcntl qw(:flock SEEK_SET);
 ### return -1 on EOF
 sub read_word {
     my $F = shift;
+
     # Convert four bytes into one 18-bit word
-    return -1 if ( read( $F, my $four, 4 ) != 4 ); # Not enough bytes read
+    return -1 if ( read( $F, my $four, 4 ) != 4 );    # Not enough bytes read
     my ( $b1, $b2, $b3, $b4 ) = unpack( "CCCC", $four );
-    return (($b1 & 0xff)  |
-            (($b2 & 0xff) << 8 ) |
-            (($b3 & 0xff) << 16) |
-            (($b4 & 0xff) << 24));
+    return (
+        ( $b1 & 0xff ) | ( ( $b2 & 0xff ) << 8 ) | ( ( $b3 & 0xff ) << 16 ) |
+          ( ( $b4 & 0xff ) << 24 ) );
 }
 
 ### Main program
-die("Usage: $0 imagefile\n") if (@ARGV!=1);
+die("Usage: $0 imagefile\n") if ( @ARGV != 1 );
 
-open(my $IN, "<", $ARGV[0]) || die("Couldn't open $ARGV[0]: $!\n");
+open( my $IN, "<", $ARGV[0] ) || die("Couldn't open $ARGV[0]: $!\n");
 
-use constant NUMBLOCKS     => 8000;    # Number of blocks on a surface
-use constant WORDSPERBLK   => 64;      # 64 words per block
-use constant BYTESPERWORD  => 4;       # We encode each word into 4 bytes
+use constant NUMBLOCKS    => 8000;    # Number of blocks on a surface
+use constant WORDSPERBLK  => 64;      # 64 words per block
+use constant BYTESPERWORD => 4;       # We encode each word into 4 bytes
 
 # Skip the first surface
-seek($IN, NUMBLOCKS*WORDSPERBLK*BYTESPERWORD, SEEK_SET) ||
-				die("Cannot seek: $!\n");
+seek( $IN, NUMBLOCKS * WORDSPERBLK * BYTESPERWORD, SEEK_SET )
+  || die("Cannot seek: $!\n");
 
-foreach my $blocknum ( 0 .. NUMBLOCKS*2 - 1 ) {
-    printf("Block %d (%06o)\n", $blocknum, $blocknum );
+foreach my $blocknum ( 0 .. NUMBLOCKS * 2 - 1 ) {
+    printf( "Block %d (%06o)\n", $blocknum, $blocknum );
     foreach my $line ( 0 .. 7 ) {
 
-	# Print out the words in octal
+        # Print out the words in octal
+        my @buf;
         foreach my $offset ( 0 .. 7 ) {
-	    # Get a word
-	    my $word= read_word($IN);
-	    exit(0) if ($word==-1);
-	    printf("%06o ", $word);
-	}
-	print("\n");
+
+            # Get a word
+            my $word = read_word($IN);
+            exit(0) if ( $word == -1 );
+            $buf[$offset] = $word;
+        }
+        foreach my $offset ( 0 .. 7 ) {
+            printf( "%06o ", $buf[$offset] );
+        }
+        print("  ");
+        foreach my $offset ( 0 .. 7 ) {
+            my $c1 = ( $buf[$offset] >> 9 ) & 0777;
+            $c1 = ( ( $c1 >= 32 ) && ( $c1 <= 126 ) ) ? chr($c1) : ' ';
+            my $c2 = $buf[$offset] & 0777;
+            $c2 = ( ( $c2 >= 32 ) && ( $c2 <= 126 ) ) ? chr($c2) : ' ';
+            print("$c1$c2");
+        }
+        print("\n");
     }
     print("\n");
 }
