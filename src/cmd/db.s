@@ -125,9 +125,9 @@ cmd:
    jmp address
    sad o57			" '/'?
    jmp octal
-   sad o72			" ':'
+   sad o72			" ':'?
    jmp decimal
-   sad o136			" '^'
+   sad o136			" '^'?
    skp
    jmp 1f
    dac sysflag
@@ -450,19 +450,19 @@ xloop:
    "
 getspec: 0
       jms rch
-      sad o141
-      jmp spcac
-      sad o161 "q
-      jmp spcmq
-      sad o151 "i
-      jmp spcic
+      sad o141			" 'a'?
+      jmp spcac			"  get AC
+      sad o161 "q		" 'q'?
+      jmp spcmq			"  get MQ
+      sad o151 "i		" 'i'
+      jmp spcic			"  get index
       lmq
-      tad om60
-      spa
-      jmp 2f
-      tad om10
-      sma
-      jmp 2f
+      tad om60			" subtract '0'
+      spa			" positive?
+      jmp 2f			"  no: not a digit
+      tad om10			" yes: subtract 10
+      sma			" negative?
+      jmp 2f			"  no: not a digit
       lacq
       jms getnum
       jmp spcai
@@ -471,20 +471,20 @@ getspec: 0
       dac errf
       jmp getspec i
 spcac:
-      cla
+      cla			" offset of AC in userdata
       jmp 1f
 spcmq:
-      lac d1
+      lac d1			" offset of MQ in userdata
       jmp 1f
 spcic:
-      lac d10
+      lac d10			" offset of PC in userdata
       jmp 1f
 spcai:
-      lac value
-      tad dm6
+      lac value			" get index number
+      tad dm6			" get offset in userdata
 
 1:
-      tad o10000
+      tad o10000		" add offset in core file of userdata
       dac value
       lac d1
       dac reloc
@@ -533,31 +533,31 @@ skipt:
    dzm reloc
    jmp i getsym
 1:
-   sad o56
-   jmp storech
+   sad o56			" '.'
+   jmp storech 
    dac nchar1
    tad om60
    spa
-   jmp fill
+   jmp fill			" not a digit
    tad m10
    spa
-   jmp 2f
+   jmp 2f			" is a digit
    lac nchar1
    tad om141
    spa
-   jmp 1f
+   jmp 1f			" not a lc letter
    tad om32
    spa
-   jmp 2f
+   jmp 2f			" lc letter
 1:
    lac nchar1
    tad om101
    spa
-   jmp fill
+   jmp fill			" not a uc letter
    tad om32
    sma
-   jmp fill
-2:
+   jmp fill			" not a uc letter
+2:				" here with letter or digit
    lac nchar1
    dzm nchar1
    jmp storech
@@ -570,8 +570,8 @@ fill:
    "
 endsym:
    lac symbuf
-   sad o56040
-   jmp dotsym
+   sad o56040			" '. '?
+   jmp dotsym			"  yes
    law symbuf
    dac nsearch
    jms nlsearch
@@ -668,7 +668,7 @@ prasc:0
    jms wchar
    jmp i prasc
    "
-prsym:0
+prsym:0				" print symbolic instruction
    dac word
    dzm relflg
    dzm relocflg
@@ -693,13 +693,13 @@ prsym:0
    lac o40
    jms wchar
    lac word
-   and o20000
+   and o20000			" check indirect bit
    sna
-   jmp 1f
-   lac o151040
+   jmp 1f			" no indirect
+   lac o151040			" 'i '
    jms wchar
    lac word
-   xor o20000
+   xor o20000			" clear indirect bit
    dac word
 1:
 symadr:
@@ -745,7 +745,7 @@ pr1:
    1
    jmp i prsym
    "
-plaw:
+plaw:				" print LAW instruction
    lac d1
    dac relocflg
    lac word
@@ -773,7 +773,7 @@ plaw:
 2:0
 9:0
    "
-peae:
+peae:				" print EAE instruction
    lac word
    jms nlsearch
    jmp 1f
@@ -797,10 +797,10 @@ peae:
    dac addr
    jmp nfnd
    "
-popr:
+popr:				" print OPR instruction
    law oprs
    jmp 1f
-piot:
+piot:				" print IOT instruction
    law iots
 1:
    dac addr
@@ -1104,14 +1104,14 @@ o45: 045
 sysflag: 0
 char:0
 d2:2
-o162012:0162012
+o162012:0162012			" r\n
 mrelocv:-010000
 relocval:010000
 nwords:0
 errf:0
 rator:0
 d1:1
-errmes:077012
+errmes:077012			" ?\n
 o12:012
 curval:0
 curreloc:0
@@ -1128,7 +1128,7 @@ type:proct
 o162:0162
 nl:012
 om100:-0100
-"d2:2
+"d2:2				" duplicate!
 symbuf: .=.+5
 inbuf:.=.+64
 o100:0100
@@ -1139,7 +1139,7 @@ rcore:0
 o56:056
 om60:-060
 om10:-010
-"o56:056
+"o56:056			" duplicate!
 om141:-0141
 o141: 0141
 o044: 044
