@@ -2,15 +2,15 @@
 "[handwritten page number top right of scan - 1]
 " ed1
    lac d1
-   sys write; 1f; 3
+   sys write; 1f; 3		" say hello
    lac o17
-   sys creat; tname
+   sys creat; tname		" create e.tmp for write
    spa
-   sys save
+   sys save			" dump core on error!
    dac sfo
-   sys open; tname; 0
+   sys open; tname; 0		" open e.tmp for read
    spa
-   sys save
+   sys save			" dump core on error!
    dac sfi
    -1
    tad lnodp
@@ -46,9 +46,9 @@ advanc:
    dac addr2
 1:
    lac char
-   sad o54
+   sad o54			" comma?
    jmp 2f
-   sad o73
+   sad o73			" semi?
    skp
    jmp chkwrp
    lac addr
@@ -71,28 +71,28 @@ chkwrp:
 
 comand:
    lac char
-   sad o141
+   sad o141			" a?
    jmp ca
-   sad o143
+   sad o143			" c?
    jmp cc
-   sad o144
+   sad o144			" d?
    jmp cd
-   sad o160
+   sad o160			" p?
    jmp cp
-   sad o161
+   sad o161			" q?
    jmp cq
-   sad o162
+   sad o162			" r?
    jmp cr
-   sad o163
+   sad o163			" s?
    jmp cs
-   sad o167
+   sad o167			" w?
    jmp cw
-   sad o12
+   sad o12			" newline?
    jmp cnl
-   sad o75
+   sad o75			" =?
    jmp ceq
    jmp error
-ca:
+ca:				" a(ppend)
    jms newline
    jms setfl
    lac addr2
@@ -100,12 +100,12 @@ ca:
 ca1:
    jms rline
    lac line
-   sad o56012
+   sad o56012			" .NL?
    jmp advanc
    jms append
    jmp ca1
 
-cc: cd:
+cc: cd:				" c(change) and d(elete)?
    jms newline
    jms setdd
    lac addr1
@@ -126,14 +126,14 @@ cc: cd:
 "[handwritten page number top right of scan - 3]
    dac eofp
    lac char
-   sad o144
-   jmp advanc
+   sad o144			" was delete?
+   jmp advanc			"  yes
    -1
    tad dot
    dac dot
    jmp ca1
 
-cp:
+cp:				" p(rint)
    jms newline
 cp1:
    jms setdd
@@ -155,14 +155,14 @@ cp1:
    dac addr1
    jmp 1b
 
-cq:
+cq:				" q(uit)
    jms newline
    lac adrflg
    sza
    jmp error
    sys exit
 
-cr:
+cr:				" r(ead)
    jms setfl
    lac addr2
    dac dot
@@ -216,7 +216,7 @@ cr:
    isz c1
    jmp 2b
    jmp 1b
-cw:
+cw:				" w(rite)
    jms setfl
    lac i addr1
    sna
@@ -283,7 +283,7 @@ cw:
    jms number
    jmp advanc
 
-cnl:
+cnl:				" newline
    lac adrflg
    sna
    jmp 1f
@@ -298,7 +298,7 @@ cnl:
    dac dot
    jmp cp1
 
-ceq:
+ceq:				" = command
    jms newline
    jms setfl
    lac addr2
@@ -334,10 +334,10 @@ setfl: 0
    jmp i setfl
 
 newline: 0
-   jms getsc; tal
-   sad o12
+   jms getsc; tal		" get input char
+   sad o12			" newline?
    jmp i newline
-   jmp error
+   jmp error			" no, complain
 
 addres: 0
    dzm minflg "..) [stray scan mark?]
@@ -346,7 +346,7 @@ addres: 0
 ad1:
    jms getsc; tal
 ad2:
-   jms betwen; d47; d58
+   jms betwen; d47; d58		" digit?
    skp
    jmp numb
    sad o40 "[o40 circled in scan]
@@ -354,17 +354,17 @@ ad2:
    sad o11
    jmp ad1 "[hand drawn check mark follows operand in scan]
            "[check mark underlined in scan]
-   sad o55
+   sad o55			" -?
    jmp amin "[hand drawn check mark follows operand in scan]
-   sad o56
+   sad o56			" .?
    jmp adot "[hand drawn check mark follows operand in scan]
-   sad o53
+   sad o53			" +?
    jmp ad1 "[hand drawn check mark follows operand in scan]
-   sad o44
+   sad o44			" $?
    jmp adol "[hand drawn check mark follows operand in scan]
-   sad o57
+   sad o57			" /?
    jmp fsrch "[hand drawn check mark follows operand in scan]
-   sad o77
+   sad o77			" ??
    jmp bsrch "[hand drawn check mark follows operand in scan]
    dac char
    lac minflg

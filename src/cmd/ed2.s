@@ -502,10 +502,10 @@ bett1: .=.+1
 bett2: .=.+1
 wrflg: .=.+1
 apt1: .=.+1
-sfi: .=.+1
+sfi: .=.+1			" e.tmp input fd
 "** 08-rest.pdf page 29
 "[handwritten page number top right of scan - 22]
-sfo: .=.+1
+sfo: .=.+1			" e.tmp output fd
 sctal: .=.+1
 sctalp: .=.+1
 char: .=.+1
