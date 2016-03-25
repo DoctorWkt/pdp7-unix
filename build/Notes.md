@@ -144,7 +144,7 @@ We have a new scan from Norman Wilson, and some transcription errors in
 ed have been fixed. ed now assembles and runs, but it isn't working
 perfectly yet.
 
-## plb Fri Mar 25 00:45:57 EDT 2016
+## pb Fri Mar 25 00:45:57 EDT 2016
 
 boot.rim is now "Hardware Read In", and only 120 bytes (12 inches),
 and in the format an actual PDP-7 wants at cold start!
@@ -161,5 +161,16 @@ and resulting a.out (once renamed to nas) assembles as.s
 
 verified ESCAPE leaves 010100 word core file (file with i-num #1)
 
+## pb Fri Mar 25 18:30:29 EDT 2016
 
+Found three typos in ed: dskbuf needs to be 1024 words, and two jms'
+that had been typed as jmp.
 
+Now working/tested:
+    a (in an empty buffer)
+    r (in an empty buffer)
+    numeric address changes .
+    p
+    w
+    /word/
+    ?word?
