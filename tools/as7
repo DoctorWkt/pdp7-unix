@@ -231,13 +231,12 @@ elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
     }
 }
 elsif ($format eq 'rim') {	# PDP-7 (secondary) Read In Mode
-    for my $loc ( 0 .. $#Mem ) {
-	if (defined($Mem[$loc])) {
-	    punch(0040000 | $loc ); # DAC addr
-	    punch($Mem[$loc] || 0);
-	}
+    my $base = $Var{'..'};
+    for my $loc ( $base .. $#Mem ) {
+	punch($Mem[$loc] || 0);
     }
-    punch(0740040 );	# HLT
+    # final word: command; has 0100 lit on last frame
+    punch(0600000 | $base, 0100 );
 }
 else {
     die("unknown format $format");
@@ -551,11 +550,12 @@ sub find_relative_label {
 
 sub punch {			# output a word in paper tape binary format
     my $word = shift;
+    my $final = shift || 0;
 
     printf $OUT "%c%c%c",
 	(($word >> 12) & 077) | 0200,
 	(($word >>  6) & 077) | 0200,
-	 ($word        & 077) | 0200;
+         ($word        & 077) | 0200 | $final;
 }
 
 sub dump_labels {		# for 'list' and --namelist
