@@ -33,7 +33,7 @@ q2p: q2
 
 " strings
 initf:
-   <i>n;<i>t;< > ;< > "
+   <in>; <it>; 040040; 040040 " was <i>n;<i>t;< > ;< >  but as.s unhappy!
 
 " constants
 d0: 0
