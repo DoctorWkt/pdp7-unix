@@ -201,7 +201,7 @@ cadvanc:
    "sad o52
    "jmp clsure
    dac 1f
-   jmp comp
+   jms comp
    1; jms matchar; 1: 0; 0
    jmp cadvanc
 

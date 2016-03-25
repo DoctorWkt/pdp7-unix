@@ -246,7 +246,7 @@ cw:				" w(rite)
    sna
    jmp 3f
    isz num
-   jmp putsc; tal1
+   jms putsc; tal1
    isz c2
 "** 08-rest.pdf page 12
 "[handwritten page number top right of scan - 5]
