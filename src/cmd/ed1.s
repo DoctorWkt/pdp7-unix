@@ -555,13 +555,13 @@ gline: 0
    tad otal
    jmp i gline
 
-rline: 0
+rline: 0			" read line from stdin
    lac linep
    dac tal
 
 1:
    cla
-   sys read; char; 1		" read a char or two
+   sys read; char; 1		" read a char (or two)
    lac char
 "** 08-rest.pdf page 17
 "[handwritten page number top right of scan - 10]
@@ -609,47 +609,47 @@ esc: 0				" edit/save char
    dac linsiz
    jmp i rline			" return from rline
 
-getsc: 0
-   lac i getsc
+getsc: 0			" call: jms getsc; pbufp
+   lac i getsc			" fetch buffer pointer addr from after call
    dac sctalp
-   isz getsc
-   lac i sctalp
+   isz getsc			" skip buffer pointer pointer
+   lac i sctalp			" fetch buffer pointer
    dac sctal
-   add o400000
-   dac i sctalp
-   ral
-   lac i sctal
-   szl
-   lrss 9
-   and o777
+   add o400000			" flip high bit (carry wraps around)
+   dac i sctalp			" save pointer back
+   ral				" shift high bit into link
+   lac i sctal			" fetch word from buffer
+   szl				" link set?
+   lrss 9			"  yes: shift high char down
+   and o777			" mask to character
    jmp i getsc
 
-putsc: 0
-   and o777
+putsc: 0			" call: jms putsc; pbufp
+   and o777			" mask to single 9-bit character
 "** 08-rest.pdf page 18
 "[handwritten page number top right of scan - 11]
-   lmq
-   lac i putsc
+   lmq				" put in MQ
+   lac i putsc			" fetch buffer pointer pointer
    dac sctalp
-   isz putsc
-   lac i sctalp
-   dac sctal
-   add o400000
-   dac i sctalp
-   sma cla
-   jmp 1f
-   llss 27
-   dac i sctal
-   lrss 9
-   jmp i putsc
+   isz putsc			" skip over pointer pointer
+   lac i sctalp			" get pointer
+   dac sctal			" save it for later
+   add o400000			" flip high bit, wrap carry
+   dac i sctalp			" save back as buffer pointer pointer
+   sma cla			" high bit set?
+   jmp 1f			"  no
+   llss 27			" yes: get MQ in high half of AC
+   dac i sctal			" save to buffer
+   lrss 9			" shift char back down
+   jmp i putsc			" return
 
 1:
-   lac i sctal
-   and o777000
-   omq
-   dac i sctal
-   lacq
-   jmp i putsc
+   lac i sctal			" get word from buffer
+   and o777000			" mask to high character
+   omq				" OR in new char
+   dac i sctal			" save word
+   lacq				" restore char
+   jmp i putsc			" return
 
 append: 0
    -1
