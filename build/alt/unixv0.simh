@@ -25,7 +25,7 @@ set dt disa
 # show device settings:
 show dev
 
-# load and run the bootstrap code
-load -S boot.rim
-dep pc 010000
+# load and run the paper tape bootstrap
+# (loads system from disk)
+load boot.rim 010000
 go

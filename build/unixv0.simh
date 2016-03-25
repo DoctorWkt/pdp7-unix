@@ -27,6 +27,5 @@ show dev
 
 # load and run the paper tape bootstrap
 # (loads system from disk)
-load -S boot.rim
-dep pc 010000
+load boot.rim 010000
 go
