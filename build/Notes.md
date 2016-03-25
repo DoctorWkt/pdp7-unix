@@ -143,3 +143,8 @@ long :-) That will help when we get to the LCM machine.
 We have a new scan from Norman Wilson, and some transcription errors in
 ed have been fixed. ed now assembles and runs, but it isn't working
 perfectly yet.
+
+## plb Fri Mar 25 00:45:57 EDT 2016
+
+boot.rim is now "Hardware Read In", and only 120 bytes (12 inches),
+and in the format an actual PDP-7 wants at cold start!
