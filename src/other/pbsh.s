@@ -7,25 +7,32 @@
 " are copied from the v1 shell:
 " redirection must occur at the start of a name (after whitespace)
 
-" includes ';' and '&' (unknown if available in v0 shell)
-" does NOT (yet) include quoting (backslash or single quote)
-" no "globbing" (performed by /etc/glob in v1 shell)
+" includes ';' and '&' (which are mentioned as added close after "fork")
+" does NOT include quoting (backslash or single quote)
 
-" v0 cat.s seems to write error output on fd 8, *BUT* shell doesn't
-" know what device is on stdout (passed by init, and init doesn't pass
-" fd 8), and there isn't a "dup" call, nor does init appear to be an
-" "indirect" device like /dev/tty, nor does init make an equivalent link!!
+" No "globbing" (performed by /etc/glob in v1 shell);
+" McIlroy's "Reader" paper reports that cp/mv syntax
+" changed in response to the introduction of globbing,
+" the the surviving "cp" command takes src dest pairs.
+
+" cat.s seems to write error output on fd 8, *BUT* shell doesn't know
+" what device is on stdout (passed by init, and init doesn't pass fd 8)
+" and there isn't a "dup" call, an "indirect" device like /dev/tty,
+" nor does init make an equivalent link!!
 
 " Arguments for new processes are located at the end of memory.
 " Location 17777 points to a word with the argument count (argc),
 " followed by blocks of four words with (filename) arguments.
 " Currently leave room for ONLY maxargs items.
-maxargs=8
+" 10 is enough to build "cold start" system (sop + s1-9):
+maxargs=10
 
 " v1 shell expects "-" as argument from init or login, will read
-" filename passed as argument.  *BUT* v0 init.s doesn't set up the
-" argv at the top of memory, so the v0 shell may not have taken
-" command line arguments!!!
+" filename passed as argument.  *BUT* init.s doesn't set up the argv
+" at the top of memory, so the v0 shell may not have taken command
+" line arguments!!!  You can still invoke "sh <rc" but the shell has
+" no way to know input is not a tty (no sgtty/fstat calls) to suppress
+" the prompt (or make the sub-shell interruptable)
 
    lac d1
    sys intrp			" make shell uninterruptable
