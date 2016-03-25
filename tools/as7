@@ -230,7 +230,8 @@ elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
 	punch($Mem[$loc] || 0);
     }
 }
-elsif ($format eq 'rim') {	# PDP-7 (secondary) Read In Mode
+elsif ($format eq 'rim') {	# "Hardware Read In" tape
+    # only handles continguous memory, but no overhead
     my $base = $Var{'..'};
     for my $loc ( $base .. $#Mem ) {
 	punch($Mem[$loc] || 0);
