@@ -515,5 +515,5 @@ line: .=.+64
 nlist: .=.+50
 clist: .=.+50
 compbuf: .=.+100
-dskbuf: .=.+1 "[line crossed out - scan markup]
+dskbuf: .=.+1024 "[line crossed out - scan markup]
 lnodes: .=.+1000
