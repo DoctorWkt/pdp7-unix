@@ -6,8 +6,40 @@ ASARGS=--format=ptr
 MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
-CC=gcc -Wno-multichar
+CCARGS=-Wno-multichar
 PDP7=pdp7
+
+# detect OS
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+UNAME := LINUX
+else 
+ifeq ($(UNAME), Darwin)
+UNAME := DARWIN
+else 
+ifeq ($(UNAME), FreeBSD)
+UNAME := FREEBSD
+endif
+endif
+endif
+
+# choose C compiler
+ifeq ($(UNAME), LINUX)
+# Linux
+CC=gcc
+else
+ifeq ($(UNAME), FREEBSD)
+# FreeBSD
+CC=cc
+else
+ifeq ($(UNAME), DARWIN)
+# Mac OS X
+CC=cc 
+else
+$(error "Unknown OS: " $(UNAME))
+endif
+endif
+endif
 
 # source dirs
 SYSSRC=../src/sys
@@ -194,7 +226,7 @@ $(BINDIR)/od: $(OTHERSRC)/wktod.s
 
 # B compiler
 $(BINDIR)/bc: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
-	$(CC) -o b ../tools/b.c
+	$(CC) $(CCARGS) -o b ../tools/b.c
 	./b $(OTHERSRC)/b.b b.s
 	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
 	rm b b.s
