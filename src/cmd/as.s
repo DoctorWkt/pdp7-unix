@@ -676,7 +676,7 @@ num2: 0				" (radix stored here)
    jmp i gsymb			"  no, return
    dac name
    tad fbxp			" make index into "fbx" array
-   dac name+1			" ???save??? (crushed below)
+   dac name+1			" save for indirect fetch
    lac i name+1			" fetch fbx array entry
    dac name+1			" save fbx count in name
    lac savchr			" get break character
