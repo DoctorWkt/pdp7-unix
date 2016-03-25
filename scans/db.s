@@ -278,7 +278,7 @@ sprint:
    isz addr
    law prasc
    sad type
-   jmp 2f
+   jmp 1f
    lac nl
    jms wchar
 1:
@@ -379,7 +379,7 @@ xloop:
    sma
    jmp 1f
    lacq
-   jms getnum
+   jms getnum  " ??? getnur
    jms oprand
    jmp xloop
 1:
@@ -1025,7 +1025,7 @@ nlok:
    dac value
    lac treloc
    dac reloc
-   lac cnip
+   lac cnlp
    isz nlsearch
    jmp i nlsearch
    "
@@ -1067,7 +1067,7 @@ octw: 0
    cla cll
    llss 3
    alss 6
-   llss3
+   llss 3
    tad o60060
    dac obuf
    cla
