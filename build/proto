@@ -46,7 +46,18 @@ dd 	         drwr- -1 4
 	$
     ken      drwr- 10
       system l----  3
-      hello  frwr- 10 fs/hello
+      sop.s      frwr- 10 ../src/sys/sop.s
+      s1.s       frwr- 10 ../src/sys/s1.s
+      s2.s       frwr- 10 ../src/sys/s2.s
+      s3.s       frwr- 10 ../src/sys/s3.s
+      s4.s       frwr- 10 ../src/sys/s4.s
+      s5.s       frwr- 10 ../src/sys/s5.s
+      s6.s       frwr- 10 ../src/sys/s6.s
+      s7.s       frwr- 10 ../src/sys/s7.s
+      s8.s       frwr- 10 ../src/sys/s8.s
+      maksys.s   frwr- 10 ../src/sys/maksys.s
+      trysys.s   frwr- 10 ../src/sys/trysys.s
+      sys.rc     frwr- 10 fs/sys.rc
       $
     dmr        drwr- 12
       system   l----  3

@@ -148,3 +148,10 @@ perfectly yet.
 
 boot.rim is now "Hardware Read In", and only 120 bytes (12 inches),
 and in the format an actual PDP-7 wants at cold start!
+
+adjusted shell to take 10 arguments
+(needed to build "cold start" system a.out)
+
+load sys sources into ken directory
+along with "sys.rc" file (run with "sh <sys.rc") to build system files
+(errors building maksys and trysys)
