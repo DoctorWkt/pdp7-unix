@@ -10,15 +10,15 @@ CCARGS=-Wno-multichar
 PDP7=pdp7
 
 # detect OS
-UNAME := $(shell uname)
+UNAME= $(shell uname)
 ifeq ($(UNAME), Linux)
-UNAME := LINUX
+	UNAME= LINUX
 else 
 ifeq ($(UNAME), Darwin)
-UNAME := DARWIN
+	UNAME= DARWIN
 else 
 ifeq ($(UNAME), FreeBSD)
-UNAME := FREEBSD
+	UNAME= FREEBSD
 endif
 endif
 endif
@@ -26,16 +26,16 @@ endif
 # choose C compiler
 ifeq ($(UNAME), LINUX)
 # Linux
-CC=gcc
+	CC=gcc
 else
 ifeq ($(UNAME), FREEBSD)
 # FreeBSD
-CC=cc
+	CC=cc
 else
 ifeq ($(UNAME), DARWIN)
 # Mac OS X
-CC=cc 
-else
+	CC=cc 
+else:
 $(error "Unknown OS: " $(UNAME))
 endif
 endif
