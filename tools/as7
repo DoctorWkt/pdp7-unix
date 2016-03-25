@@ -230,7 +230,7 @@ elsif ($format eq 'ptr') {	# dump absolute memory in PTR binary
 	punch($Mem[$loc] || 0);
     }
 }
-elsif ($format eq 'rim') {	# PDP-7 Read In Mode
+elsif ($format eq 'rim') {	# PDP-7 (secondary) Read In Mode
     for my $loc ( 0 .. $#Mem ) {
 	if (defined($Mem[$loc])) {
 	    punch(0040000 | $loc ); # DAC addr
