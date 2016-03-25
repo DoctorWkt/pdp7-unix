@@ -41,7 +41,7 @@ start:
    dac nlsize
    jmp 3f
 1:
-   sys read; nlbuff; namesize;0
+   sys read; nlbuff; namesize:0
    spa
    jmp 2b
    dac nlcnt
@@ -365,7 +365,7 @@ getexp:0
 xloop:
    jms rch
    lmq
-   sad o044
+   sad o44
    skp
    jmp 1f
    jms getspec
@@ -500,7 +500,7 @@ getsym:0
    dac skipt
    skp
 storech:
-   imq
+   lmq
    lac i symbufp
    and o177000
    sna
@@ -595,7 +595,7 @@ getnum:0
    dzm value
 num1:
    tad om60
-   imq
+   lmq
    lac value
    alss 3
    omq
@@ -715,7 +715,7 @@ symadr:
 pradr:
    dac addr
    jms nlsearch
-   jmp octals
+   jmp octala
 pr1:
    dzm relflg
    jms wrname
@@ -758,7 +758,7 @@ plaw:
    law
    dac relflg
    lac addr
-   lms nlsearch
+   jms nlsearch
    jmp poct
    dac symindex
    law laws
@@ -823,7 +823,7 @@ octala:
    jmp 1f
    lacq
    tad mrelocv
-   imq
+   lmq
 1:
    lacq
    jms octw
@@ -873,7 +873,7 @@ wrname:0
 1:
    lac i 10
    dac 2f
-   imq
+   lmq
    cla
    llss 9
    sad o40
@@ -924,7 +924,7 @@ nloop:
    skp
    jmp nloop
    isz np
-   iac i np
+   lac i np
    dac tvalue
    sad match
    jmp nlok
@@ -1063,7 +1063,7 @@ wchar:0
    "
 octw: 0
    isz octw
-   imq
+   lmq
    cla cll
    llss 3
    alss 6
@@ -1126,7 +1126,7 @@ type:proct
 o162:0162
 nl:012
 om100:-0100
-d2:2
+" d2:2		" Duplicate
 symbuf: .=.+5
 inbuf:.=.+64
 o100:0100
@@ -1137,10 +1137,10 @@ rcore:0
 o56:056
 om60:-060
 om10:-010
-o56:056
+" o56:056	" Duplicate
 om141:-0141
 o141: 0141
-oO44: 044
+o44: 044
 o151: 0151
 o161: 0161
 om101: -0101
@@ -1184,7 +1184,7 @@ match:0
 rwdflg:0
 nlbufp:nlbuff
 nlsize:0
-dm6:-6
+" dm6:-6	" Duplicate
 cnlp:0
 o377777:0377777
 minp:0
@@ -1197,7 +1197,7 @@ o75:075
 best: 0
 o60000:060000
 comflg:0
-nlbufp:nlbuff
+" nlbufp:nlbuff	" Duplicate
 brack: 30
 mbrack: -30
 o777700:0777700
@@ -1207,11 +1207,11 @@ o760000:0760000
 o40000:040000
 tvalue: 0
 treloc: 0
-o151:0151
+" o151:0151	" Duplicate
 o47: 047
 o52:052
 indflg: 0
 o74:074
 o76:076
-nlbufp: nlbuff
+" nlbufp: nlbuff " Duplicate
    nlbuff = .
