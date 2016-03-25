@@ -154,3 +154,12 @@ adjusted shell to take 10 arguments
 
 load sys sources into ken directory
 along with "sys.rc" file (run with "sh <sys.rc") to build system files
+
+load as.s into dmr directory
+verified as7 built as can assemble as.s
+and resulting a.out (once renamed to nas) assembles as.s
+
+verified ESCAPE leaves 010100 word core file (file with i-num #1)
+
+
+
