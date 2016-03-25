@@ -154,5 +154,3 @@ adjusted shell to take 10 arguments
 
 load sys sources into ken directory
 along with "sys.rc" file (run with "sh <sys.rc") to build system files
-maksys and trysys need system call defns (not in sop.s)!!
-
