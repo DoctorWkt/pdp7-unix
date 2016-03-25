@@ -1,5 +1,8 @@
-as sop.s maksys.s
+chrm ken ops.s
+ln dmr ops.s ops.s
+as sop.s ops.s maksys.s
 mv a.out maksys
-as sop.s trysys.s
+as sop.s ops.s trysys.s
 mv a.out trysys
+chrm ken ops.s
 as sop.s s1.s s2.s s3.s s4.s s5.s s6.s s7.s s8.s
