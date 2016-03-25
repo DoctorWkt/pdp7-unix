@@ -26,6 +26,14 @@
 int fin;
 int fout = 1;
 
+void pexpr();
+void error(int code);
+void stmt();
+void blkend();
+void stmtlist();
+void getcc();
+void extdef();
+
 xread() {
   char buf[1];
   if (read(fin, buf, 1) <= 0)
@@ -237,7 +245,7 @@ subseq(c,a,b) {
   return(b);
 }
 
-getcc() {
+void getcc() {
   extern cval;
   auto c;
 
@@ -292,7 +300,7 @@ mapch(c) {
   return(a);
 }
 
-expr(lev) {
+void expr(lev) {
   extern peeksym, *csym, cval, isn;
   auto o;
 
@@ -447,7 +455,7 @@ loop:
   peeksym = o;
 }
 
-pexpr() {
+void pexpr() {
   if (symbol()==6) { /* ( */
     expr(15);
     if (symbol()==7) /* ) */
@@ -456,7 +464,7 @@ pexpr() {
   error('()');
 }
 
-declare(kw) {
+void declare(kw) {
   extern *csym, cval, nauto;
   auto o;
 
@@ -485,7 +493,7 @@ syntax:
   error('[]'); /* declaration syntax */
 }
 
-extdef() {
+void extdef() {
   extern peeksym, *csym, cval, nauto;
   auto o, c;
 
@@ -586,7 +594,7 @@ syntax:
   stmt();
 }
 
-stmtlist() {
+void stmtlist() {
   extern peeksym, eof;
   auto o;
 
@@ -599,7 +607,7 @@ stmtlist() {
   error('$)'); /* missing $) */
 }
 
-stmt() {
+void stmt() {
   extern peeksym, peekc, *csym, cval, isn, nauto;
   auto o, o1, o2;
 
@@ -701,7 +709,7 @@ syntax:
   goto next;
 }
 
-blkend() {
+void blkend() {
   extern isn;
   auto i;
 
@@ -771,7 +779,7 @@ name(int *s) {
   }
 }
 
-error(code) {
+void error(code) {
   extern line, eof, *csym, nerror, fout;
   auto f;
 

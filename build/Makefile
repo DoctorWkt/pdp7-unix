@@ -194,7 +194,7 @@ $(BINDIR)/od: $(OTHERSRC)/wktod.s
 
 # B compiler
 $(BINDIR)/bc: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
-	$(CC) -o b ../tools/b.c 2> /dev/null
+	$(CC) -o b ../tools/b.c
 	./b $(OTHERSRC)/b.b b.s
 	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
 	rm b b.s
