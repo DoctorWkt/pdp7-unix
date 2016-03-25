@@ -406,35 +406,35 @@ amin:
 
 numb:
    dac char
-   sad o60
-   jmp 1f
-   lac d10
+   sad o60			" leading zero?
+   jmp 1f			"  yes: octal
+   lac d10			" no: decimal
    jmp 2f
 1:
-   lac d8
+   lac d8			" here for octal
 2:
-   dac 2f
+   dac 2f			" save radix for mul
    dzm num
 1:
    lac num
-   cll; mul; 2: 0
+   cll; mul; 2: 0		" multiply by radix
    lacq
-   tad char
-   tad dm48
-   dac num
-   jms getsc; tal
-   dac char
-   jms betwen; d47; d58
-   skp
-   jmp 1b
-   lac minflg
-   sna
-   jmp 1f
-   -1
+   tad char			" add digit
+   tad dm48			" subtract ASCII zero
+   dac num			" save
+   jms getsc; tal		" get another char
+   dac char			" save
+   jms betwen; d47; d58		" a digit?
+   skp				"  no: done
+   jmp 1b			" yes: process
+   lac minflg			" minus flag
+   sna				" set?
+   jmp 1f			"  no
+   -1				" yes: negate
    tad num
    cma
    dac num
-   dzm minflg
+   dzm minflg			" clear minus flag
 1:
    lac addr
 "** 08-rest.pdf page 15
@@ -448,7 +448,7 @@ numb:
    lac char
    jmp ad2
 
-number: 0
+number: 0		" format "num" in decimal to "tbuf"
    lac d100000
    dac n1
    law tbuf-1
@@ -561,42 +561,42 @@ rline: 0
 
 1:
    cla
-   sys read; char; 1
+   sys read; char; 1		" read a char or two
    lac char
 "** 08-rest.pdf page 17
 "[handwritten page number top right of scan - 10]
    lrss 9
-   jms esc
+   jms esc			" process high char
    lac char
    and o777
-   jms esc
+   jms esc			" process low char
    jmp 1b
 
-esc: 0
+esc: 0				" edit/save char
    sna
-   jmp i esc
+   jmp i esc			" skip NUL
    jms putsc; tal
-   sad o12
+   sad o12			" newline?
    jmp 2f
-   sad o100
+   sad o100			" @ (kill)?
    jmp 1f
-   sad o43
+   sad o43			" # (erase)?
    skp
    jmp i esc
-   -1
-   tad tal
+   -1				" erase
+   tad tal			" decrement pointer
    dac tal
-   and o17777
-   sad linpm1
-   jmp 1f
+   and o17777			" mask to addr
+   sad linpm1			" before start?
+   jmp 1f			"  yes: reset
    jmp i esc
 
-1:
+1:				" saw @ (kill) reset pointer
    lac linep
    dac tal
    jmp i esc
 
-2:
+2:				" here with newline
    lac tal
    sma cla
    jmp 1f
@@ -607,7 +607,7 @@ esc: 0
    cma
    tad tal
    dac linsiz
-   jmp i rline
+   jmp i rline			" return from rline
 
 getsc: 0
    lac i getsc
