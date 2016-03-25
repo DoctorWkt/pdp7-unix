@@ -1,5 +1,7 @@
 # Build the kernel, the utilities, the filesystem and run SimH
 
+include os.mk
+
 # tools
 AS=../tools/as7
 ASARGS=--format=ptr
@@ -8,38 +10,6 @@ A7OUT=../tools/a7out
 FSCK=../tools/fsck7
 CCARGS=-Wno-multichar
 PDP7=pdp7
-
-# detect OS
-UNAME= $(shell uname)
-ifeq ($(UNAME), Linux)
-	UNAME= LINUX
-else 
-ifeq ($(UNAME), Darwin)
-	UNAME= DARWIN
-else 
-ifeq ($(UNAME), FreeBSD)
-	UNAME= FREEBSD
-endif
-endif
-endif
-
-# choose C compiler
-ifeq ($(UNAME), LINUX)
-# Linux
-	CC=gcc
-else
-ifeq ($(UNAME), FREEBSD)
-# FreeBSD
-	CC=cc
-else
-ifeq ($(UNAME), DARWIN)
-# Mac OS X
-	CC=cc 
-else:
-$(error "Unknown OS: " $(UNAME))
-endif
-endif
-endif
 
 # source dirs
 SYSSRC=../src/sys
@@ -52,7 +22,6 @@ TESTSRC=../src/tests
 BINDIR=bin
 TESTDIR=tests
 BINARIES=../binaries/
-
 
 all: cmd others a.out boot.rim image.fs
 

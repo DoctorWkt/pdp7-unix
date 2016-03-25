@@ -1,14 +1,16 @@
 
+include build/os.mk
+
 all: buildit
 
 buildit:
-	cd build && make all
+	cd build && $(MAKE) all
 
 run: buildit
-	cd build && make run
+	cd build && $(MAKE) run
 
 altrun: buildit
-	cd build && make alt && make altrun
+	cd build && $(MAKE) alt && $(MAKE) altrun
 
 clean:
-	cd build && make clean
+	cd build && $(MAKE) clean
