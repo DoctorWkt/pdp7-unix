@@ -280,7 +280,7 @@ sprint:
    isz addr
    law prasc
    sad type
-   jmp 2f
+   jmp 1f
    lac nl
    jms wchar
 1:
@@ -534,7 +534,7 @@ skipt:
    jmp i getsym
 1:
    sad o56			" '.'
-   jmp storech 
+   jmp storech
    dac nchar1
    tad om60
    spa
