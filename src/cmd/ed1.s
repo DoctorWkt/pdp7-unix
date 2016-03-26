@@ -36,13 +36,13 @@ advanc:
    jms rline
    lac linep
    dac tal
-   dzm adrflg
-   jms addres
-   jmp comand
+   dzm adrflg			" clear address flag
+   jms addres			" get address?
+   jmp comand			"  no: check if command
    -1
-   dac adrflg
+   dac adrflg			" set address flag
    lac addr
-   dac addr1
+   dac addr1			" set both addr1 & 2
    dac addr2
 1:
    lac char
@@ -53,7 +53,7 @@ advanc:
    jmp chkwrp
    lac addr
    dac dot
-2:
+2:				" here for address range
    jms addres
    jmp error
    lac addr2
@@ -105,7 +105,7 @@ ca1:
    jms append
    jmp ca1
 
-cc: cd:				" c(change) and d(elete)?
+cc: cd:				" c(change) and d(elete)
    jms newline
    jms setdd
    lac addr1
@@ -349,9 +349,9 @@ ad2:
    jms betwen; d47; d58		" digit?
    skp
    jmp numb
-   sad o40 "[o40 circled in scan]
+   sad o40 "[o40 circled in scan]	" space?
    jmp ad1 "[hand drawn check mark follows operand in scan]
-   sad o11
+   sad o11			" tab?
    jmp ad1 "[hand drawn check mark follows operand in scan]
            "[check mark underlined in scan]
    sad o55			" -?
@@ -364,7 +364,7 @@ ad2:
    jmp adol "[hand drawn check mark follows operand in scan]
    sad o57			" /?
    jmp fsrch "[hand drawn check mark follows operand in scan]
-   sad o77			" ??
+   sad o77			" '?'?
    jmp bsrch "[hand drawn check mark follows operand in scan]
    dac char
    lac minflg

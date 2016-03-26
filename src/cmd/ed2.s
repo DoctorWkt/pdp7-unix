@@ -190,15 +190,15 @@ cadvanc:
 "** 08-rest.pdf page 24
 "[handwritten page number top right of scan - 17]
    dzm lastre
-   sad o12
+   sad o12			" newline
    jmp error
-   "sad o133
+   "sad o133			" [
    "jmp chrcls
-   sad o136
+   sad o136			" ^?
    jmp beglin
-   sad o44
+   sad o44			" $
    jmp endlin
-   "sad o52
+   "sad o52			" * (disabled)
    "jmp clsure
    dac 1f
    jms comp
