@@ -9,3 +9,6 @@ build/boot.rim
 build/image.fs
 build/bin
 build/n.out
+build/alt/a.lst
+build/alt/a.out
+build/alt/image.fs
