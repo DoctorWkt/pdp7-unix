@@ -117,7 +117,6 @@ badcal:				" bad (unimplemented) system call
 
 	" rmes system call
 	"   sys smes
-	" returns with message delivered, or error if process does not exit
 	" AC/ sending pid
 	" MQ/ message
 .rmes:
