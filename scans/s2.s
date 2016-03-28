@@ -68,7 +68,7 @@
    lac f.flags
    and d1
    sna
-   jms 1f
+   jmp 1f
    lacq
    jms betwen; d0; i.size
       jms dacisize
