@@ -65,36 +65,36 @@
    jmp sysexit
 
 .seek:
-   jms seektell
-   tad u.base
+   jms seektell			" fetch offset & whence (return seek base)
+   tad u.base			" add offset
 "** 01-s1.pdf page 8
-   spa
-   jms error
-   lmq
-   lac f.flags
-   and d1
-   sna
-   jms 1f
-   lacq
-   jms betwen; d0; i.size
-      jms dacisize
+   spa				" positive?
+   jms error			"  no: error
+   lmq				" save position in MQ
+   lac f.flags			" get file flags
+   and d1			" get write bit
+   sna				" open for write?
+   jmp 1f			"  no
+   lacq				" yes: get position
+   jms betwen; d0; i.size	" between zero and size?
+      jms dacisize		"  no: store new size
    jmp 2f
 1:
-   lacq
-   jms betwen; d0; i.size
-      lac i.size
+   lacq				" reading: get position
+   jms betwen; d0; i.size	" between zero and size?
+      lac i.size		"  no: get current size
 2:
-   dac f.badd
-   dac u.ac
-   jms fput
-   jmp sysexit
+   dac f.badd			" save as offset
+   dac u.ac			" return in AC
+   jms fput			" copy fnode back to user area
+   jmp sysexit			" return to user
 
 .tell:
-   jms seektell
+   jms seektell			" fetch offset & whence (return seek base)
    cma
-   tad d1
-   tad u.base
-   dac u.ac
+   tad d1			" negate base
+   tad u.base			" add to user offset
+   dac u.ac			" return in user AC
    jmp sysexit
 
 .link:
