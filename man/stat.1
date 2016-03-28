@@ -1,13 +1,16 @@
 .oh '11/3/70''STAT(I)'
-.ta 18 21
-NAME	stat - get file status
+.ta 18 21 24
+NAME	stat -- get file status
 .sp
 SYNOPSIS	
 .ul
 stat
 name
 .sp
-DESCRIPTION	stat gives several kinds of information about
+DESCRIPTION	
+.ul
+stat
+gives several kinds of information about
 	one file:
 .sp
 		access mode
@@ -20,25 +23,25 @@ DESCRIPTION	stat gives several kinds of information about
 	mode. The mode is a five-character string whose
 	characters mean the following:
 .sp
-	1	s: file is small (smaller than 4096 words)
-		l: file is large
-		d: file is a directory
+		1	s: file is small (smaller than 448 words)
+			l: file is large
+			d: file is a directory
 .sp
-	2	r: owner can read
-		-: owner cannot read
+		2	r: owner can read
+			-: owner cannot read
 .sp
-	3	w: owner can write
-		-: owner cannot write
+		3	w: owner can write
+			-: owner cannot write
 .sp
-	4	r: non-owner can read
-		-: non-owner cannot read
+		4	r: non-owner can read
+			-: non-owner cannot read
 .sp
-	5	w: non-owner can write
-		-: non-owner cannot write
+		5	w: non-owner can write
+			-: non-owner cannot write
 .sp
 	All numeric values are printed in octal.
 .sp
-FILES	
+FILES	--
 .sp
 SEE ALSO	
 .ul
@@ -50,8 +53,8 @@ stat,
 except that it also shows the i-node
 	number for each file.
 .sp
-DIAGNOSTICS	"name  ?" for any error.
-	"nofiles" if no file name is given.
+DIAGNOSTICS	"name  ?" for any error. "nofiles" if no file
+	name is given.
 .sp
 BUGS	none
 .sp

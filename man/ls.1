@@ -1,24 +1,44 @@
-        11/3/70                                                          LS (I)
+.oh '11/3/70''LS(I)'
+.ta 18 21 24
+NAME	ls -- list contents of directory
+.sp
+SYNOPSIS	ls [ -l ] directory
+.sp
+DESCRIPTION	
+.ul
+ls
+lists the contents of the named directory
+	under control of one option:
+.sp
+		l	list in long format, giving i-number,
+			mode, owner, size in words, and name of
+			each file. (see
+.ul
+stat
+for format of the
+			mode). Numeric values are in octal.
+.sp
+FILES	--
+.sp
+SEE ALSO	stat
+.sp
+DIAGNOSTICS	"name ?" if the named directory does not exist
+	or cannot be opened.
+.sp
+BUGS	In a simulated environment, a filename larger
+	than eight characters will cause
+.ul
+ls
+to exit
+	prematurely.
+.sp
+	
+.ul
+ls
+will try to open up a directory named "." if
+	no directory is named. If the user desires this
+	functionality, they need to link "." to the
+	directory in question.
 
-
-NAME              ls -- list contents of directory
-
-SYNOPSIS          ls [ -l ]
-
-DESCRIPTION       ls lists the contents of the current directory under
-                  control of one option:
-
-                     l     list in long format, giving i-number, mode, owner,
-                           size in words, and name of each file. (see stat
-			   for format of the mode). Numeric values are in octal.
-
-FILES             
-
-SEE ALSO          stat
-
-DIAGNOSTICS       No diagnostics
-
-BUGS              In a simulated environment, a filename larger than eight
-		  characters will cause ls to exit prematurely.
-
-OWNER             wkt
+.sp
+OWNER	wkt
