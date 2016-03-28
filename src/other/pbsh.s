@@ -475,7 +475,7 @@ iopt:argv0p: argv0		" initial value for nextarg, opt
 
 " ################ variables
 
-prompt: <@ 040			" v1 prompt!
+prompt: <@ 040			" v1 prompt! cleared if input is regular file
 
 redirect: .=.+1			" last file was a redirect (lt or gt)
 nextarg: .=.+1			" next slot in argv to fill
