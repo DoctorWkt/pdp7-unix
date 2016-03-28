@@ -36,7 +36,17 @@ maxargs=10
 
    lac d1
    sys intrp			" make shell uninterruptable
-   sys getuid
+
+" see if reading from a special file
+   cla; sys seek; 1; 0		" try seeking stdin forward
+   sna				" new offset non-zero?
+    jmp 1f			"  no: input is a special file (ttyin,keyboard)
+   dzm prompt			" yes: regular file, kill prompt
+   cla; sys seek; 0; 0		" seek file back to start
+   jmp newline
+
+" stdin is a special file, see if superuser
+1: sys getuid
    sma				" <0?
     jmp newline			"  no
    lac hash			" yes: superuser
