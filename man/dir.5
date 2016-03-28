@@ -1,34 +1,36 @@
-        11/3/70                                                  DIRECTORY (V)
-
-
-NAME              format of directories
-
-SYNOPSIS
-
-DESCRIPTION       A directory behaves exactly like an ordinary file, save
-                  that no user may write into a directory. The fact that a
-                  file is a directory is indicated by a bit in the flag word
-                  of its i-node entry.
-
-                  Directory entries are 8 words long. The first word is the
-                  i-node of the file represented by the entry, if non-zero;
-                  if zero, the entry is empty.
-
-                  Words 1-4 represent the (8-character) file name, space
-                  padded on the right. These words are not necessarily
-                  cleared for empty slots.
-
-                  By convention, the first entry in each directory is
-                  for "dd", which is the "directory directory" that holds
-		  all the users' home directories and the "system" directory.
-		  The "system" directory contains "init" and "sh".
-
-FILES
-
-SEE ALSO          file system format
-
-DIAGNOSTICS
-
-BUGS
-
-OWNER             ken, dmr
+.oh '11/3/70''DIRECTORY(I)'
+.ta 18 21
+NAME	format of directories
+.sp
+SYNOPSIS	--
+.sp
+DESCRIPTION	A directory behaves exactly like an ordinary
+	file, save that no user may write into a
+	directory. The fact that a file is a directory
+	is indicated by a bit in the flag word of its
+	i-node entry.
+.sp
+	Directory entries are 8 words long. The first
+	word is the i-node of the file represented by
+	the entry, if non-zero; if zero, the entry is
+	empty.
+.sp
+	Words 1-4 represent the (8-character) file name,
+	space padded on the right. These words are not
+	necessarily cleared for empty slots.
+.sp
+	By convention, the first entry in each directory
+	is for "dd", which is the "directory directory"
+	that holds all the users' home directories and
+	the "system" directory. The "system" directory
+	contains "init" and "sh".
+.sp
+FILES	--
+.sp
+SEE ALSO	file system format
+.sp
+DIAGNOSTICS	--
+.sp
+BUGS	--
+.sp
+OWNER	ken, dmr

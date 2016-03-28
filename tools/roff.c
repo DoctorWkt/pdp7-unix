@@ -43,6 +43,7 @@ int o_ll = 65, o_ad = 1, o_po = 0, o_ls = 1, o_ig = 0, o_fi = 1;
 int o_pl = 66, o_ro = 0, o_hx = 0, o_sp = 0, o_sk = 0;
 int o_ce = 0, o_ul = 0;
 int o_li = 0, o_bp = -1, o_hy = 1;
+int o_m2 = 1;
 int o_nn = 0;			/* #LINES TO SUPPRESS NUMBERING */
 int o_ti = -1;			/* TEMPORARY INDENT */
 int page_no = -1;
@@ -779,6 +780,7 @@ void beginpage()
 {
   int i;
   writetitle(page_no & 1 ? ohead : ehead);
+  for (i = 0; i < o_m2; i++) spit('\n');
   line_no = 0;
 }
 
