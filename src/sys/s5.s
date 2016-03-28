@@ -278,20 +278,21 @@ argname: 0
       jms error			"  failed: return error directly to user
    jmp argname i
 
+	" common code for seek/tell system calls
 seektell: 0
-   jms arg
-   dac u.base
+   jms arg			" fetch 1st arg after sys
+   dac u.base			" save in u.base
 
 "** 01-s1.pdf page 32
-   jms arg
-   dac u.limit
-   jms finac
-   lac u.limit
-   sna
-   jmp seektell i
-   sad d1
-   jmp .+3
-   lac i.size
+   jms arg			" fetch 2nd arg (whence??)
+   dac u.limit			" save in u.limit
+   jms finac			" fetch fnode & inode for fd in AC
+   lac u.limit			" get whence arg back
+   sna				" zero?
+   jmp seektell i		"  yes, return zero (relative to start)
+   sad d1			" one?
+   jmp .+3			"  yes: return pos (relative to current)
+   lac i.size			" no: return file size (relative to end)
    jmp seektell i
    lac f.badd
    jmp seektell i
