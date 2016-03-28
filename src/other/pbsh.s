@@ -5,34 +5,52 @@
 
 " In particular, the newline/newcom/newarg/newchar processing loop(s)
 " are copied from the v1 shell:
-" redirection must occur at the start of a name (after whitespace)
+" 1. Redirection must occur at the start of a name (after whitespace)
+" 2. In parroting the v1 shell code, I did NOT add whitespace removal
+" after > and <
 
 " includes ';' and '&' (which are mentioned as added close after "fork")
-" does NOT include quoting (backslash or single quote)
 
-" No "globbing" (performed by /etc/glob in v1 shell);
-" McIlroy's "Reader" paper reports that cp/mv syntax
-" changed in response to the introduction of globbing,
-" the the surviving "cp" command takes src dest pairs.
+" does NOT include quoting (backslash or quotes), which are mentioned
+" in the v1 shell man page: http://man.cat-v.org/unix-1st/1/sh
 
-" cat.s seems to write error output on fd 8, *BUT* shell doesn't know
-" what device is on stdout (passed by init, and init doesn't pass fd 8)
-" and there isn't a "dup" call, an "indirect" device like /dev/tty,
-" nor does init make an equivalent link!!
+" does NOT implement >> (not mentioned in the v1 sh man page)
+
+" No "globbing" (performed by /etc/glob in v1 shell); McIlroy's
+" "Reader" paper reports that cp/mv syntax changed in response to the
+" introduction of globbing, the the surviving "cp" command takes src
+" dest pairs.
+
+" v1 shell expects "-" as argument from init or login, will read a
+" filename passed as the first argument.  *BUT* the PDP-7 init.s
+" doesn't set up an arg pointer at the top of memory, so it's unlikely
+" the PDP-7 shell took command line arguments!!!
+
+" cat.s seems to write error output on fd 8, but "init" (which opened
+" stdin and stdout) doesn't set it up, and the shell doesn't know what
+" device is on stdout (passed by init, and init doesn't pass fd 8) and
+" there isn't a "dup" call, or an "indirect" device like /dev/tty
+" (nor does init make an equivalent link), so the shell doesn't have
+" a way to open the correct device).
+
+" Direct exection of "runcom" files _could_ be implemented by reading
+" the first block of the "binary" (into 010000) and seeing if any have
+" any bits in 0300300 set before jumping into the "boostrap" code.
+
+" If that's the case, then the child could open "sh" instead of the
+" command file, close stdin, and open the command file, read the first
+" block of "sh" into 010000, and jumping into the bootstrap, but there
+" isn't any evidence that this was the case.
 
 " Arguments for new processes are located at the end of memory.
 " Location 17777 points to a word with the argument count (argc),
 " followed by blocks of four words with (filename) arguments.
-" Currently leave room for ONLY maxargs items.
-" 10 is enough to build "cold start" system (sop + s1-9):
-maxargs=10
 
-" v1 shell expects "-" as argument from init or login, will read
-" filename passed as argument.  *BUT* init.s doesn't set up the argv
-" at the top of memory, so the v0 shell may not have taken command
-" line arguments!!!  You can still invoke "sh <rc" but the shell has
-" no way to know input is not a tty (no sgtty/fstat calls) to suppress
-" the prompt (or make the sub-shell interruptable)
+" Currently leave room for ONLY maxargs items.
+" 10 is enough to build "cold start" system (as sop.s s1.s ... s9.s)
+" this could be made dynamic (collect args lower in memory, calculate
+" argptr, and copy the names up).
+maxargs=10
 
    lac d1
    sys intrp			" make shell uninterruptable
@@ -475,7 +493,7 @@ iopt:argv0p: argv0		" initial value for nextarg, opt
 
 " ################ variables
 
-prompt: <@ 040			" v1 prompt!
+prompt: <@ 040			" v1 prompt! cleared if input is regular file
 
 redirect: .=.+1			" last file was a redirect (lt or gt)
 nextarg: .=.+1			" next slot in argv to fill
