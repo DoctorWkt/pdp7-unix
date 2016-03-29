@@ -311,7 +311,9 @@ sub process_label {
     else {			# symbolic label
 	# error to have different values
 	if ( defined( $Label{$label} ) && $Label{$label} != $loc ) {
-	    err('M', "Label $label multiply defined");
+	    # non-fatal: as.s doesn't even warn!!!!
+	    print STDERR "$file:$lineno: Label $label multiply defined\n"
+	        if ($stage == 2);
 	}
 	else {
 	    $Label{$label} = $loc;
