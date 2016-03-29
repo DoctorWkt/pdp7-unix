@@ -260,6 +260,27 @@ void getcc() {
     error('cc');
 }
 
+getstr() {
+  auto i, c, d;
+
+  i = 1;
+loop:
+  if ((c = mapch('"')) < 0) {
+    number(2048);
+    write('\n');
+    return(i);
+  }
+  if ((d = mapch('"')) < 0) {
+    number(c*512+4);
+    write('\n');
+    return(i);
+  }
+  number(c*512+d);
+  write('\n');
+  i = i+1;
+  goto loop;
+}
+
 mapch(c) {
   extern peekc;
   auto a;
@@ -316,6 +337,21 @@ case21:
     number(cval);
     write('\n');
     goto loop;
+  }
+
+  if (o==122) { /* string */
+    write('x ');
+    write('.+');
+    write('2\n');
+    write('t ');
+    write('2f');
+    write('\n');
+    write('.+');
+    write('1\n');
+    getstr();
+    write('2:');
+    write('\n');
+    goto loop; 
   }
 
   if (o==20) { /* name */
