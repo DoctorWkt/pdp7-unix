@@ -14,8 +14,8 @@ att rb alt/image.fs
 
 # uncomment to TELNET in GRAPHICS-2 keyboard/display(!!)
 # (requires github.com/philbudne/simh)
-#set g2in ena
-#att -U g2in 12345
+set g2in ena
+att -U g2in 12345
 
 # disable hardware UNIX-7 doesn't know about:
 set lpt disa
