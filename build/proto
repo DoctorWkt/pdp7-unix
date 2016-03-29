@@ -29,6 +29,7 @@ dd 	         drwr- -1 4
         chrm     frwr- -1 bin/chrm
         cp       frwr- -1 bin/cp
         date     frwr- -1 bin/date
+        db       frwr- -1 bin/db
         ds       frwr- -1 bin/ds
         dskres   frwr- -1 bin/dskres
         dsksav   frwr- -1 bin/dsksav
@@ -65,6 +66,7 @@ dd 	         drwr- -1 4
       b_readme frwr- 12 fs/b_readme
       bi.s     frwr- 12 ../src/cmd/bi.s
       bl.s     frwr- 12 ../src/cmd/bl.s
+      db.s     frwr- 12 ../src/cmd/db.s
       hello.b  frwr- 12 ../src/other/hello.b
       ops.s    frwr- 12 ../src/other/ops.s
       $

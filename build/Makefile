@@ -93,7 +93,8 @@ dirs:
 # The commands that came from the original scans
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
-	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init
+	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
+	$(BINDIR)/db
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -138,6 +139,9 @@ $(BINDIR)/ed: $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
 
 $(BINDIR)/init: $(CMDSRC)/init.s
 	$(AS) $(ASARGS) -o $(BINDIR)/init $(CMDSRC)/init.s
+
+$(BINDIR)/db: $(CMDSRC)/db.s
+	$(AS) $(ASARGS) -o $(BINDIR)/db $(CMDSRC)/db.s
 
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init.s
