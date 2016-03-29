@@ -2,6 +2,7 @@
 " cas
 
 	" Usage: cas [ input [ output ] ]
+	" graphics display character assembler???
 
    narg = i 017777
 

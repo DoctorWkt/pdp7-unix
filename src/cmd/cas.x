@@ -1,3 +1,6 @@
+"** 04-cas.pdf page 8
+" captital character definitions???
+" lower case definitions at 03-scope.pdf, page 2 ???
 :ca
 v
 af
