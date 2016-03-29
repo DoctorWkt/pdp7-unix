@@ -149,7 +149,7 @@ t = t+1
 	" AC/ pid
 	" MQ/ message
 	"   sys smes
-	" returns with message delivered, or error if process does not exit
+	" returns with message delivered, or error if process does not exist
 .smes:
    lac u.ac			" get pid from user AC
    sna spa			" >0?
