@@ -229,10 +229,14 @@ putq: 0
    dac q1+1 ..
    jmp putq i
 
-	" NOTE!! srcdbs, collaps, dskrd, dskwr share the same "temp" vars!!
+	" NOTE!! srcdbs, collaps, dskrd, dskwr share the same "temp" vars:
+	" "t0" temp!!
+	" "t1" contains pointer to (addr, buffer)
+	" "t2" contains block number
 	
 	" check if disk block number in AC in memory
-	" give skip return if block not found
+	" give skip return if block NOT found
+
 srcdbs: 0
    dac 9f+t+2   "* lmq			" save block number in t2
    -ndskbs				" loop for number of buffers
@@ -241,10 +245,6 @@ srcdbs: 0
    dac 9f+t+1	"* lacq			" in t1
 1:
    lac 9f+t+2	"** crossed out		" get desired block number
-	" Phil: it looks to me like the next line
-	" is missing an indirect (t1 contains an address),
-	" but setting "i" breaks the kernel, so there must
-	" be something else missing/wrong as well!
    sad 9f+t+1 i	"** "8 i" written	" match buffer block?
    jmp srcdbs i				"  yes: return without skip
    law 65	"** crossed out		" no: advance to next buffer
@@ -256,35 +256,37 @@ srcdbs: 0
    jmp srcdbs i
 
 collapse: 0
-   cla					" look for block zero
-   jms srcdbs				" in memory?
+   cla					" look for free buffer
+   jms srcdbs				" found?
       jmp 1f				"  yes
-   law dskbs
+   law dskbs				" no: reuse last buffer
    dac 9f+t+1	"** 9f+t+1 crossed out: 8 written in
 1:
+		"** written: tad dm1
+		"** written: dac 8
    lac 9f+t+1	"** 9f+t+1 crossed out: 8 written in
-   dac 0f+1
-   tad d65	"** crossed out: d2-- original obscured
-   dac 0f
+   dac 0f+1				" save as copy dest
+   tad d65	"** crossed out w/ d2	" get start of next buffer
+   dac 0f				" save as copy src
    cma
    tad d1
-   tad edskbsp
-   and o17777
-   sna
-   jmp 0f+3
-   dac 0f+2
-   jms copy; 0:..; ..; ..
+   tad edskbsp				" subtract from end of buffers
+   and o17777				" mask to 13 bits
+   sna					" non-zero count?
+   jmp 0f+3				"  no: skip copy
+   dac 0f+2				" save as copy length
+   jms copy; 0:..; ..; ..		" slide buffers up
    -65
-   tad edskbsp
-   dac 9f+t
-   tad d1
-   dac 0f
-   lac dskaddr
-   dac 9f+t i
-   jms copy; dskbuf; 0:..; 64
+   tad edskbsp				" get addr of last buffer
+   dac 9f+t				" save in t0
+   tad d1				" get block data pointer
+   dac 0f				" save as copy dest
+   lac dskaddr				" get block number
+   dac 9f+t i				" save in buffer header
+   jms copy; dskbuf; 0:..; 64		" copy dskbuf to last buffer
    jmp collapse i
 
-	" read logical disk block number (2..7999) in AC
+	" read logical disk block number (2..7999) in AC into dskbuf
 dskrd: 0
    jms betwen; d2; d7999
 
@@ -323,7 +325,7 @@ t = t+3
 
 	" called to read/write logical block into "dskbuf"
 	" AC/ block
-	"   jms dskio; dsld_bits
+	"   jms dskio; DSLD_BITS
 dskio: 0
    dac dskaddr
    cll; idiv; 80
