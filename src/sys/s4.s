@@ -245,11 +245,11 @@ srcdbs: 0
 	" is missing an indirect (t1 contains an address),
 	" but setting "i" breaks the kernel, so there must
 	" be something else missing/wrong as well!
-   sad 9f+t+1	"** isz 8 written	" match buffer block?
+   sad 9f+t+1 i	"** "8 i" written	" match buffer block?
    jmp srcdbs i				"  yes: return without skip
-   law 65	"** ??? crossed out	" no: advance to next buffer
+   law 65	"** crossed out		" no: advance to next buffer
    tad 9f+t+1	"** crossed out isz 8 written
-   isz 9f+t+1
+   dac 9f+t+1
    isz 9f+t
    jmp 1b
    isz srcdbs				" block not found: give skip return
