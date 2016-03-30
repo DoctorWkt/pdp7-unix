@@ -9,7 +9,12 @@
 
 main {
   extrn fname, fin;
-  auto ch;
+  auto ch,p;
+
+  p = 017777;
+  printf("mem[0%o] = 0%o*n",p,*p);
+  printf("mem[0%o] = %d*n",*p,**p);
+  
   
 /*  fin = open(fname, 0); */
   fin = open("abc     ", 0);

@@ -231,7 +231,7 @@ flush: 0
 
 initio: 0
    lac 017777 i
-   sad d4
+"   sad d4
    jmp 2f
    sad d8
    jmp 1f
@@ -270,7 +270,8 @@ initio: 0
    dzm oflg
    jmp initio i
 
-.argv: 0
+.argv: .+1
+.=.+10
 .fin: 0
 .fout: 1
 eibufp: 0
