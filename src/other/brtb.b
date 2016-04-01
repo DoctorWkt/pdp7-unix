@@ -2,12 +2,25 @@
 
 char(s, n) {
   if (n & 1) return(s[n/2] & 0777);
-  return ((s[n/2]/512) & 0777);
+  return((s[n/2]/512) & 0777);
 }
 
 lchar(s, n, c) {
   if (n & 1) s[n/2] = (s[n/2] & 0777000) | c;
   else s[n/2] = (s[n/2] & 0777) | (c*512);
+  return(c);
+}
+
+getstr(s) {
+  auto c, i;
+
+  i = 0;
+  while ((c = getchr()) != '*n') {
+    lchar(s,i,c);
+    i = i+1;
+  }
+  lchar(s,i,'*e');
+  return(s);
 }
 
 putstr(s) {

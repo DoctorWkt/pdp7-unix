@@ -230,29 +230,23 @@ flush: 0
    jmp flush i
 
 initio: 0
+   law .argv      " build argument list
+   dac 8          " auto-inc pointer argvp = &argv[-1]
    lac 017777 i
-"   sad d4
-   jmp 2f
-   sad d8
-   jmp 1f
+   cll rtr
+   dac 8 i        " *++argvp = arg count
+   cma
+   tad d1
+   dac t1         " count = -argv[0]
+   lac 017777
+   dac lastv      " set top of heap
+   tad d1         " ac = addr of arg0
+1: 
+   dac 8 i        " *++argvp = ac
+   tad d4         " ac += 4
+   isz t1         " while ++count != 0
+   jmp 1b
 
-   law 9
-   tad 017777
-   dac .+3
-   law 017
-   sys creat; ..
-   spa
-   jmp stop
-   dac .fout
-1:
-   law 5
-   tad 017777
-   dac .+2
-   sys open; ..; 0
-   spa
-   jmp stop
-   dac .fin
-2:
    lac lastv
    dac eibufp
    dac cibufp
@@ -280,7 +274,7 @@ iflg: 0
 eobufp: 0
 cobufp: 0
 oflg: 0
-lastv: 017770
+lastv: 0
 
 o777: 0777
 d4:o4: 4
