@@ -117,6 +117,7 @@ dspbuf:
 	" X-Y: invisible, no delay, Y=01740 (992)
 	" X-Y: invisible, settling delay, X=0
    .=.+30
+	" Kernel startup (reused for display buffer)
 coldentry:
    dzm 0100 " not re-entrant
    caf				" clear all flags
@@ -145,14 +146,14 @@ edskbsp: .
 uquant: .=.+1			" number of ticks user has been running
 dspbufp: .=.+1			" pointer to display buffer
 pbsflgs: .=.+2			" buttons on last tick, last button interrupt
-mode: .=.+1
+mode: .=.+1			" user access mode: 1 for write, 2 for read
 nttychar: .=.+1			" CR to send next, or zero
-npptchar: .=.+1
+npptchar: .=.+1			" saved PTR char
 ttydelay: .=.+1			" delay count for TTY output
-name: .=.+4
-lnkaddr: .=.+1
-char: .=.+1
-dskaddr: .=.+1
+name: .=.+4			" file name for current sys call
+lnkaddr: .=.+1			" temp for character queue routines
+char: .=.+1			" current char: temp for PI
+dskaddr: .=.+1			" number of block in dskbuf
 uniqpid: 1			" pid generator
 lu: .=.+4			" user (process) table entry copy
 sfiles: .=.+10			" wait addresses for special files

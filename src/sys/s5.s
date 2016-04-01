@@ -248,13 +248,13 @@ dspinit: 0
    jmp dspinit i
 
 	" "move display" (change display buffer pointer)
-	" called with new buffer pointer in AC??
+	" called with new buffer pointer in AC
 movdsp: 0
    iof
-   cdf
-   dac dspbufp
+   cdf				" clear display flags (stop)
+   dac dspbufp			" save display buf pointer
    -1
-   dac .dspb
+   dac .dspb			" .dspb = -1
    ion
    jmp movdsp i
 

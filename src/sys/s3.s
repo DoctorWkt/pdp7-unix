@@ -330,9 +330,9 @@ rppti:
       jmp .+3
    alss 9
    jmp passone
-   lac sfiles+3
-   sma
-   rsa
+   lac sfiles+3			" get sleep word
+   sma				" high bit set?
+   rsa				"  no: reader select alphanumeric mode
 1:
    jms sleep; sfiles+3
    jms swap

@@ -216,7 +216,7 @@
    sza				" zero (read)
    lac d1			"  no: get write mode bit
    sna				" non-zero (write)?
-   lac d2			"  no: get read mode bot
+   lac d2			"  no: get read mode bit
    dac mode			" save for access call
    lac u.cdir			" get current working directory
    jms namei; 0:0		" search for file
