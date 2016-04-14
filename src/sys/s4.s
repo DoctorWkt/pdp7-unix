@@ -18,15 +18,15 @@ alloc: 0
    lac 9f+t
    jmp alloc i		" Return from routine
 1:
-   lac s.nxfblk
-   sna
+   lac s.nxfblk		" next block with list of free blocks
+   sna			" any?
    jms halt " OUT OF DISK
-   dac s.fblks
-   jms dskrd
-   lac dskbuf
-   dac s.nxfblk
-   jms copy; dskbuf+1; s.fblks+1; 9
-   lac d10
+   dac s.fblks		" save as first free block #
+   jms dskrd		" read the block
+   lac dskbuf		" get first word (pointer to next in chain)
+   dac s.nxfblk		" save as new "next"
+   jms copy; dskbuf+1; s.fblks+1; 9	" copy remaining 9 as free
+   lac d10		" reset free count
    dac s.nfblks
    jmp alloc+1
 
