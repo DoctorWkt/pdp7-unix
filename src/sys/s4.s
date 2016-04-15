@@ -3,19 +3,19 @@
 
 	" allocate a free disk block for a file (data or indirect)
 alloc: 0
-   -1			" Decrement the # free block numbers in the cache
-   tad s.nfblks		" kept at s.fblks. Jump to 1f if no free blocks left.
-   spa
-   jmp 1f
+   -1			" decrement the count
+   tad s.nfblks		" of free blocks at s.fblks
+   spa			" any left?
+   jmp 1f		"  no
    dac s.nfblks		" Update the count of free block numbers
-   tad fblksp
-   jms laci
-   dac 9f+t
-   jms copyz; dskbuf; 64
-   lac 9f+t
-   jms dskwr
-   dzm .savblk
-   lac 9f+t
+   tad fblksp		" get pointer to last valid entry in s.fblks
+   jms laci		" fetch the word
+   dac 9f+t		" save in t0
+   jms copyz; dskbuf; 64	" zero dskbuf
+   lac 9f+t		" get block number back
+   jms dskwr		" write out the zeros
+   dzm .savblk		" cancel system block write
+   lac 9f+t		" get the block number back
    jmp alloc i		" Return from routine
 1:
    lac s.nxfblk		" next block with list of free blocks
@@ -32,31 +32,32 @@ alloc: 0
 
 	" free the disk block whose number is in AC
 free: 0
-   lmq
-   lac s.nfblks
-   sad d10
-   jmp 1f
-   tad fblksp
-   dac 9f+t
-   lacq
-   dac 9f+t i
-   dzm .savblk
-   isz s.nfblks
-   jmp free i
+   lmq			" save block in MQ
+   lac s.nfblks		" get number of free blocks
+   sad d10		" 10?
+   jmp 1f		"  yes
+   tad fblksp		" no: get addr in s.fblks to store new block in
+   dac 9f+t		" save pointer
+   lacq			" get block number
+   dac 9f+t i		" save it in s.fblks
+   dzm .savblk		" cancel system block write
+   isz s.nfblks		" increment free count
+   jmp free i		" return
 1:
-   lac s.nxfblk
-   dac dskbuf
-   jms copy; s.fblks+1; dskbuf+1; 9
-   lacq
-   dac s.nxfblk
-   jms dskwr
-   dzm .savblk
-   lac d1
-   dac s.nfblks
-   jmp free i				" Return from the routine
+   lac s.nxfblk		" get head of free chain
+   dac dskbuf		" save (as chain ptr) in first word of disk buf
+   jms copy; s.fblks+1; dskbuf+1; 9	" with 9 of the 10 free blocks
+   lacq			" get the newly freed block back
+   dac s.nxfblk		" save as new head of free chain
+   jms dskwr		" write dskbuf to the newly freed block
+   dzm .savblk		" cancel system block write
+   lac d1		" reset free count to one
+   dac s.nfblks		" (the first word in s.fblks)
+   jmp free i		" Return from the routine
 t = t+1
 
 	" load AC indirect (without using indirect!)
+	" need to avoid use of indirect in interrupt service routines
 	" AC/ address
 	"   jms laci
 	" AC/ contents of address
@@ -141,92 +142,105 @@ copyz: 0
    jmp copyz i			" return
 t = t+1
 
-	" put queued character
-	" CALLED FROM PI: AVOIDS INDIRECT!!
-	" queue number in AC
-putchar: 0
-"** 01-s1.pdf page 23
-   dac 9f+t
-   cla
-   jms takeq
-      jmp putchar i
-   tad o40001
-   dac .+4
-   lac 9f+t
-   jms putq
-   lac char
-   dac q2+1 ..
-   isz putchar
-   jmp putchar i
-t = t+1
+	" Character queue management routines
+	" (CALLED FROM PI: USE OF INDIRECT AVOIDED!)
 
-	" get queued character
-	" CALLED FROM PI: AVOIDS INDIRECT!!
-	" queue number in AC:
+	" Queue numbers:
+	"  0: free list
 	"  1: tty input
 	"  2: tty output
 	"  3: display keyboard
 	"  4: paper tape reader
 	"  5: paper tape punch
-getchar: 0
+
+	" queue headers are two words: "first" and "last"(??)
+	" queue entries are two words: "next" and "char"
+
+	" put queued character
+	" character to store in "char"
+	" queue number in AC
+
+putchar: 0
+"** 01-s1.pdf page 23
+   dac 9f+t		" save queue number in t0
+   cla			" get entry from free list
    jms takeq
-      jmp i getchar
-   tad o200001
+      jmp putchar i	" none free: return w/o skip
+   tad o40001		" turn into "dac addr+1"
+   dac .+4
+   lac 9f+t		" get queue number back
+   jms putq		" add entry
+   lac char		" get char
+   dac q2+1 ..		" save in second word of queue entry
+   isz putchar		" give skip return
+   jmp putchar i
+t = t+1
+
+	" get queued character
+	" queue number in AC
+	" returns with skip if something found
+getchar: 0
+   jms takeq		" get entry from head of queue
+      jmp i getchar	"  nothing there: return w/o skip
+   tad o200001		" turn into "lac qentry+1" (fetch stored char)
    dac .+3
    cla
-   jms putq
-   lac q2+1 ..
-   isz getchar
+   jms putq		" put qentry on free list
+   lac q2+1 ..		" fetch queued character(!!!)
+   isz getchar		" give skip return
    jmp i getchar
 
-	" CALLED FROM PI: AVOIDS INDIRECT!!
+	" fetch first entry from a queue
+	" queue number in AC
+	" returns with skip if something dequeued
 takeq: 0
-   rcl
-   tad lacq1
+   rcl			" multiply queue number by two
+   tad lacq1		" add "lac q1"
    dac .+7
-   tad o640000
+   tad o640000		" turn "lac" into "dac"
    dac .+17
-   tad d1
+   tad d1		" increment addr
    dac .+14
-   tad o500000
+   tad o500000		" turn "dac" into "sad"
    dac .+5
-   lac q1 ..
-   sna
-   jmp takeq i
+   lac q1 ..		" load queue head
+   sna			" non-zero?
+   jmp takeq i		"  no: return zero w/o skip
    dac lnkaddr
-   sad q1+1 ..
-   jmp .+5
-   tad o200000
-   dac .+1
-   lac q2 ..
+   sad q1+1 ..		" different from tail(??)
+   jmp .+5		"  no -- (last entry?)
+   tad o200000		" yes: turn into lac
+   dac .+1		" save lac
+   lac q2 ..		" get next pointer from queue entry
    jmp .+3
-   cla
-   dac q1+1 ..
-   dac q1 ..
-   isz takeq
-   lac lnkaddr
+   cla			" here with head == tail(??)
+   dac q1+1 ..		" clear tail
+   dac q1 ..		" save (clear) head
+   isz takeq		" give skip return
+   lac lnkaddr		" return queue entry pointer
    jmp i takeq
 
+	" save queue entry (at lnkaddr) to a queue (queue number in AC)
 putq: 0
-   rcl
-   tad dacq1
+   rcl			" multiply by two
+   tad dacq1		" turn into "dac qhead"
    dac .+14
-   tad d1
+   tad d1		" turn into "dac qtail"
    dac .+13
-   tad o140000
+   tad o140000		" turn into "lac qtail"
    dac .+1
-   lac q1-1 ..
+   lac q1-1 ..		" fetch tail
 "** 01-s1.pdf page 24
-   sna
-   jmp .+6
-   tad o40000
+   sna			" non-zero?
+   jmp .+6		"  no: is zero
+   tad o40000		" turn into "dac qentry" (append to queue)
    dac .+2
-   lac lnkaddr
-   dac q2 ..
+   lac lnkaddr		" get new entry
+   dac q2 ..		" append to tail entry
    jmp .+3
-   lac lnkaddr
-   dac q1 ..
-   dac q1+1 ..
+   lac lnkaddr		" here with tail == 0
+   dac q1 ..		" save new entry as head
+   dac q1+1 ..		" save new tail
    jmp putq i
 
 	" NOTE!! srcdbs, collaps, dskrd, dskwr share the same "temp" vars:
