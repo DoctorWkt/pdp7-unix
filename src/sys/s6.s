@@ -301,7 +301,13 @@ iread: 0
    xct iwrite				" skip if write
    lac i.size				"  read: get file size
    cma
-   tad 9f+t				" subtract offset
+   tad 9f+t				" add offset
+   cma
+   jms betwen; d0; 9f+t+1
+      lac 9f+t+1
+   dac 9f+t+2
+   cma
+   tad d1				" subtract offset
    sna					" offset == size?
    jmp iread i				"  yes, return
    dac 9f+t+1				" save size-offset in t1
