@@ -112,7 +112,7 @@ jmp start
    isz sp
    jmp fetch
 
-.getchr: .+1
+.getchar: .+1
    s 2
    n 8
    n 7
@@ -125,7 +125,7 @@ jmp start
    isz sp
    jmp fetch
 
-.putchr: .+1
+.putchar: .+1
    s 2
    n 8
    n 7
