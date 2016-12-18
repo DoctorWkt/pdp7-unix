@@ -14,3 +14,10 @@ altrun: buildit
 
 clean:
 	cd build && $(MAKE) clean
+
+binaries: buildit
+	mkdir -p binaries
+	cp build/image.fs binaries/
+	cp build/boot.rim binaries/
+	cp build/unixv0.simh binaries/
+

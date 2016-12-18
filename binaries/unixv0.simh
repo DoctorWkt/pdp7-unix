@@ -1,0 +1,31 @@
+set cpu 8k
+set cpu eae
+set cpu history=100
+show cpu
+
+# set up SIMH devices:
+
+# UNIX character translations (CR to NL, ESC to ALTMODE):
+set tti unix
+
+# RB09 fixed head disk:
+set rb ena
+att rb image.fs
+
+# uncomment to TELNET in GRAPHICS-2 keyboard/display(!!)
+# (requires github.com/philbudne/simh)
+set g2in ena
+att -U g2in 12345
+
+# disable hardware UNIX-7 doesn't know about:
+set lpt disa
+set drm disa
+set dt disa
+
+# show device settings:
+show dev
+
+# load and run the paper tape bootstrap
+# (loads system from disk)
+load boot.rim 010000
+go

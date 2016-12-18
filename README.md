@@ -49,15 +49,9 @@ Press `ctl-e` to break out the simulator into simh
 
 ### Precompiled Binaries
 
-You can also run pdp7-unix from precompiled binaries in the [/binaries](/binaries) directory. There are **orig** binaries and **alt** binaries.
+You can also run pdp7-unix from precompiled binaries in the [/binaries](/binaries) directory. 
 
-The orig binaries use the unixv0 directory semantics as restored from the printouts.  To run pdp7-unix orig:
-
-`cd binaries/orig; pdp7 unixv0.simh`
-
-The alt binaries use the more familiar "." and ".." diretory semanatics as found in later unix.  To run pdp7-unix alt:
-
-`cd binaries/alt; pdp7 unixv0.simh`
+`cd binaries/; pdp7 unixv0.simh`
 
 ### Typical Output
 
