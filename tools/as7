@@ -132,6 +132,7 @@ usage() if ( @ARGV < 1 );
     div    => 0640323,		# divide
     norm   => 0640444,		# normalize, unsigned
     lls    => 0640600,		# long left shift
+    clls   => 0641600,		# lls but clear AC first
     als    => 0640700,		# AC shift
     lrs    => 0640500,		# long right shift
     lacs   => 0641001,		# load AC with SC
@@ -194,6 +195,7 @@ usage() if ( @ARGV < 1 );
     law    => 0760000,		# load accumulator with (instruction)
 #   lam    => 0777777,		# (load accumulator minus)
 );
+
 
 # Parse all the files
 print STDERR "I\n";		# like the real as
@@ -342,7 +344,7 @@ sub parse_line {
 
 	print "parse_line: '$line'\n" if ($debug);
 
-	while ($line =~ s{^([A-Za-z0-9\.]+):\s*}{}) { # labels
+	while ($line =~ s{^([A-Za-z0-9_\.]+):\s*}{}) { # labels
 	    process_label($1);
 	}
 
@@ -440,9 +442,10 @@ sub parse_expression {
 	    print "\tfound >x\n" if ($debug);
 	    $syllable = ord($1)	# absolute
 	}
-	elsif ($line =~ s{^([A-Za-z\.][A-Za-z0-9\.]*)}{}) {
+	elsif ($line =~ s{^([A-Za-z\.][A-Za-z0-9_\.]*)}{}) {
 	    my $sym = $1;
 	    print "\tsym: $sym\n" if ($debug);
+	  
 	    if (defined($Var{$sym})) {
 		$syllable = $Var{$sym};
 		printf("\tvar: %s: %#o\n", $sym, $syllable) if ($debug);

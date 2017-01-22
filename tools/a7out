@@ -304,11 +304,13 @@ sub simulate {
         # If this is a breakpoint, stop now and get a user command
         if ( defined( $Breakpoint{$PC} ) ) {
             $singlestep = 1;
-            dprintf( "break at PC %s\n", addr($PC) );
+            printf( "break at PC %s\n", addr($PC) )
+					if ( ($debug) || ($singlestep) );
         }
         get_user_command() if ($singlestep);
-        dprintf( "PC %-20.20s L.AC %d.%06o MQ %06o: ", addr($PC),
-		 ($LINK ? 1 : 0), $AC & 0777777, $MQ );
+        printf( "PC %-20.20s L.AC %d.%06o MQ %06o: ", addr($PC),
+		 ($LINK ? 1 : 0), $AC & 0777777, $MQ )
+		 		if ( ($debug) || ($singlestep) );
 
        #dprintf("PC %06o: instr %06o, op %03o, in %o, addr %06o indaddr %06o\n",
        #   $PC, $instruction, $opcode, $indirect, $addr, $indaddr );
@@ -345,7 +347,8 @@ sub dump_memory {
 # Load AC
 sub lac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "lac %s (value %06o) into AC\n", addr($indaddr), $Mem[$indaddr] );
+    printf( "lac %s (value %06o) into AC\n", addr($indaddr), $Mem[$indaddr] )
+				if ( ($debug) || ($singlestep) );
     $AC = $Mem[$indaddr];
     $PC++;
 }
@@ -353,13 +356,15 @@ sub lac {
 # Deposit AC
 sub dac {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "dac AC (value %06o) into %s\n", $AC, addr($indaddr) );
+    printf( "dac AC (value %06o) into %s\n", $AC, addr($indaddr) )
+					if ( ($debug) || ($singlestep) );
 
     # Catch writes below the process' memory range
     if ($indaddr < 010000 && !($indaddr >= 010 && $indaddr <= 020) ) {
       $singlestep = 1;
-      dprintf("(****WRITE TO LOW MEMORY****)\n");
-      dprintf( "break at PC %s\n", addr($PC) );
+      dprintf("(****WRITE TO LOW MEMORY 0%o ****)\n", $indaddr);
+      printf( "break at PC %s\n", addr($PC) )
+					if ( ($debug) || ($singlestep) );
     }
     $Mem[$indaddr] = $AC;
     $PC++;
@@ -368,8 +373,9 @@ sub dac {
 # Add to AC, twos complement
 sub tad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "tad AC (value %06o) with addr %s (%06o)\n",
-        $AC, addr($indaddr), $Mem[$indaddr] );
+    printf( "tad AC (value %06o) with addr %s (%06o)\n",
+        $AC, addr($indaddr), $Mem[$indaddr] )
+					if ( ($debug) || ($singlestep) );
     $AC   = $AC + $Mem[$indaddr];
     $LINK = ( $LINK ^ $AC ) & LINKMASK;
     $AC   = $AC & MAXINT;
@@ -379,8 +385,9 @@ sub tad {
 # Add to AC, ones complement
 sub add {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "add AC (value %06o) with addr %s (%06o)\n",
-        $AC, addr($indaddr), $Mem[$indaddr] );
+    printf( "add AC (value %06o) with addr %s (%06o)\n",
+        $AC, addr($indaddr), $Mem[$indaddr] )
+					if ( ($debug) || ($singlestep) );
 
     # This logic shamelessly borrowed from SimH
     # https://github.com/simh/simh/blob/master/PDP18B/pdp18b_cpu.c
@@ -398,8 +405,9 @@ sub add {
 # And AC and Y
 sub and {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "and AC (value %06o) with addr %s (%06o)\n",
-        $AC, addr($indaddr), $Mem[$indaddr] );
+    printf( "and AC (value %06o) with addr %s (%06o)\n",
+        $AC, addr($indaddr), $Mem[$indaddr] )
+					if ( ($debug) || ($singlestep) );
     $AC &= $Mem[$indaddr];
     $PC++;
 }
@@ -416,14 +424,21 @@ sub xor {
 # Skip if AC different to Y
 sub sad {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "sad %s (%06o)\n", addr($indaddr), $Mem[$indaddr] );
+    printf( "sad %s (%06o)\n", addr($indaddr), $Mem[$indaddr] )
+					if ( ($debug) || ($singlestep) );
+    if ($AC != $Mem[$indaddr]) {
+      dprintf( "  adding 2 to PC\n");
+    } else {
+      dprintf( "  adding 1 to PC\n");
+    }
     $PC += ( $AC != $Mem[$indaddr] ) ? 2 : 1;
 }
 
 # Deposit zero in memory
 sub dzm {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "dzm %s\n", addr($indaddr) );
+    printf( "dzm %s\n", addr($indaddr) )
+					if ( ($debug) || ($singlestep) );
     $Mem[$indaddr] = 0;
     $PC++;
 }
@@ -431,7 +446,8 @@ sub dzm {
 # Index and skip if zero
 sub isz {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "isz %s (value %06o)\n", addr($indaddr), $Mem[$indaddr] );
+    printf( "isz %s (value %06o)\n", addr($indaddr), $Mem[$indaddr] )
+					if ( ($debug) || ($singlestep) );
     $Mem[$indaddr]++;
     $Mem[$indaddr] &= MAXINT;
     $PC += ( $Mem[$indaddr] == 0 ) ? 2 : 1;
@@ -440,14 +456,16 @@ sub isz {
 # Jump
 sub jmp {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "jmp %s\n", addr($indaddr) );
+    printf( "jmp %s\n", addr($indaddr) )
+					if ( ($debug) || ($singlestep) );
     $PC = $indaddr;
 }
 
 # Jump to subroutine
 sub jms {
     my ( $instruction, $addr, $indaddr ) = @_;
-    dprintf( "jms %s\n", addr($indaddr) );
+    printf( "jms %s\n", addr($indaddr) )
+					if ( ($debug) || ($singlestep) );
 
     # Save the LINK and current PC into the $indaddr location
     $Mem[ $indaddr++ ] = $PC + 1 | ( ($LINK) ? 0400000 : 0 );
@@ -594,7 +612,7 @@ sub eae {
         dprintf( "idiv %06o by %06o (decimal %d by %d)\n",
 				$AC, $divisor, $AC, $divisor );
 	# Prevent division by zero :-)
-	my $quotient = ($divisor) ? $AC / $divisor : 0;
+	my $quotient = ($divisor) ? int($AC / $divisor) : 0;
 	my $remainder = ($divisor) ? $AC % $divisor : 0;
 	$MQ= $quotient;
 	$AC= $remainder;
@@ -648,12 +666,28 @@ sub eae {
         $PC++;
         return;
     }
-    if ( $maskedinstr == 0640600 ) {    # lls: long left shift
+   					# lls: long left shift
+    if ( ($maskedinstr == 0640600) || ($maskedinstr == 0641600) ) {
         dprintf( "lls step %d\n", $step );
+	# Clear AC if the 01000 bit is set
+	$AC=0 if ($maskedinstr == 0641600);
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
             $AC = ( ( $AC << 1 ) | $MQmsb ) & MAXINT;
             $MQ = ( ( $MQ << 1 ) | ( ($LINK) ? 1 : 0 ) ) & MAXINT;
+        }
+        $PC++;
+        return;
+    }
+					# lrs: long right shift
+    if ( ($maskedinstr == 0640500) || ($maskedinstr == 0641500) ) {
+        dprintf( "lrs step %d\n", $step );
+	# Clear AC if the 01000 bit is set
+	$AC=0 if ($maskedinstr == 0641500);
+        foreach my $i ( 1 .. $step ) {
+            my $MQmsb = ( $AC & 1 ) ? 0400000 : 0;
+            $AC = ( ( $AC >> 1 ) | ( ($LINK) ? 0400000 : 0 ) ) & MAXINT;
+            $MQ = ( ( $MQ >> 1 ) | $MQmsb ) & MAXINT;
         }
         $PC++;
         return;
@@ -1021,7 +1055,8 @@ sub sys_read {
     my $count = $Mem[ $PC + 2 ];
     my $end   = ( $start + $count - 1 ) & MAXADDR;
     die("sys_read: bad start/end addresses $start $end\n") if ( $end < $start );
-    dprintf( "read: %d words into %s from fd %d\n", $count, addr($start), $fd );
+    printf( "read: %d words into %s from fd %d\n", $count, addr($start), $fd )
+					if ( ($debug) || ($singlestep) );
 
     # Bump up the PC
     $PC += 3;
@@ -1086,7 +1121,8 @@ sub sys_write {
     my $end   = ( $start + $count - 1 ) & MAXADDR;
     die("sys_write: bad start/end addresses $start $end\n")
       if ( $end < $start );
-    dprintf( "write: %d words from %s to fd %d\n", $count, addr($start), $fd );
+    printf( "write: %d words from %s to fd %d\n", $count, addr($start), $fd )
+					if ( ($debug) || ($singlestep) );
 
     # Bump up the PC
     $PC += 3;
