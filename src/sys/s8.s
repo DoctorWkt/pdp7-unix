@@ -95,28 +95,30 @@ dm1: -1
 
 9: .=.+t			" per-routine temp variables
 c1: .=.+1			" not used?
-q1: q2;q2+98	" ** 90?  96??	" queue element free list?
-   .=.+14
-	" queues (two words each, head and tail pointers?)
+	" character queues (two words each, head and tail pointers?)
+	"  0: free list
 	"  1: tty input
 	"  2: tty output
 	"  3: display keyboard
 	"  4: paper tape reader
 	"  5: paper tape punch
-q2:
+q1: q2;q2+98			" queue element free list
+   .=.+14			" room for 7 queues (5 used)
+q2:				" queue elements (and two words padding??)
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0
    .+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;.+2;0;0;0
-dsploc: .=.+1
-dsplno: .=.+1
+dsploc: .=.+1			" pointer into dspbuf
+dsplno: .=.+1			" display current line number
 dspbuf:
    0065057;0147740;0160000	" display commands: see 03-scope.pdf pg 20
 	" PARAM: clear blink, clear light pen, scale=1, intensity=3
 	" X-Y: invisible, no delay, Y=01740 (992)
 	" X-Y: invisible, settling delay, X=0
    .=.+30
+	" Kernel startup (reused for display buffer)
 coldentry:
    dzm 0100 " not re-entrant
    caf				" clear all flags
@@ -145,29 +147,30 @@ edskbsp: .
 uquant: .=.+1			" number of ticks user has been running
 dspbufp: .=.+1			" pointer to display buffer
 pbsflgs: .=.+2			" buttons on last tick, last button interrupt
-mode: .=.+1
+mode: .=.+1			" user access mode: 1 for write, 2 for read
 nttychar: .=.+1			" CR to send next, or zero
-npptchar: .=.+1
+npptchar: .=.+1			" saved PTR char
 ttydelay: .=.+1			" delay count for TTY output
-name: .=.+4
-lnkaddr: .=.+1
-char: .=.+1
-dskaddr: .=.+1
+name: .=.+4			" file name for current sys call
+lnkaddr: .=.+1			" temp for character queue routines
+char: .=.+1			" current char: temp for PI
+dskaddr: .=.+1			" number of block in dskbuf
 uniqpid: 1			" pid generator
 lu: .=.+4			" user (process) table entry copy
 sfiles: .=.+10			" wait addresses for special files
-		" (bit vector of waiting processes?)
+		" (bit vectors of waiting processes?)
+		" bit zero (MSB) is special, bit 1 first ulist entry, ....
 		" offsets:	0: ttyin, 1: ttyout, 2: keyboard,
 		"		3: ptr,   4: ptp,    6: display
-dpdata:
+dpdata:				" dataphone data
    dpstat: .=.+1
    dpread: .=.+1
    dpwrite: .=.+1
    dpchar: .=.+1
-dspdata:
+dspdata:			" display data
    .dspb: .=.+1
    .lpba: .=.+1	"** 4 written on listing
-crdata:
+crdata:				" card reader data
    crread: .=.+1
    crchar: .=.+1
 sysdata:			" system data 64 words saved to disk
@@ -176,7 +179,7 @@ sysdata:			" system data 64 words saved to disk
    s.fblks: .=.+10		" cached free block numbers
    s.uniq: .=.+1		" next unique value
    s.tim: .=.+2			" (up?)time in 60Hz ticks (low, high)
-	" process table
+	" user (process) table
 	" first word
 	"   bits 0:2 -- status
 	"	0: free slot
@@ -187,7 +190,7 @@ sysdata:			" system data 64 words saved to disk
 	"   bits 3:17 -- disk swap address/8
 	" second word: process pid
 	" third word:  smes/rmes status:
-	"	0: not waiting
+	"	 0: not waiting
 	"	-1: this process waiting (rmes)
 	"	other: complement of sender pid
 	" fourth word: smes message
@@ -242,7 +245,7 @@ dnode:				" directory entry:
    d.name: .=.+4		" name (space padded)
    d.uniq: .=.+1		" unique number from directory inode
       . = dnode+8
-fnode:				" open file entry
+fnode:				" open file entry (copied from u.ofiles)
    f.flags: .=.+1		" see below
    f.badd: .=.+1		" offset
    f.i: 0			" file i-number

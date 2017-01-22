@@ -342,7 +342,7 @@ sub parse_line {
 
 	print "parse_line: '$line'\n" if ($debug);
 
-	while ($line =~ s{^([a-z0-9\.]+):\s*}{}) { # labels
+	while ($line =~ s{^([A-Za-z0-9\.]+):\s*}{}) { # labels
 	    process_label($1);
 	}
 
@@ -440,7 +440,7 @@ sub parse_expression {
 	    print "\tfound >x\n" if ($debug);
 	    $syllable = ord($1)	# absolute
 	}
-	elsif ($line =~ s{^([a-z\.][a-z0-9\.]*)}{}) {
+	elsif ($line =~ s{^([A-Za-z\.][A-Za-z0-9\.]*)}{}) {
 	    my $sym = $1;
 	    print "\tsym: $sym\n" if ($debug);
 	    if (defined($Var{$sym})) {

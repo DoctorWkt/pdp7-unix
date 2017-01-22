@@ -2,68 +2,61 @@
 
 char(s, n) {
   if (n & 1) return(s[n/2] & 0777);
-  return ((s[n/2]/512) & 0777);
+  return((s[n/2]/512) & 0777);
 }
 
 lchar(s, n, c) {
   if (n & 1) s[n/2] = (s[n/2] & 0777000) | c;
   else s[n/2] = (s[n/2] & 0777) | (c*512);
+  return(c);
 }
 
-putstr(s) {
-  auto c, i;
+putnum(n, b) {
+  auto a, d;
 
-  i = 0;
-  while ((c = char(s,i)) != '*e') {
-    putchr(c);
-    i = i+1;
+  d = 0;
+  if (n < 0) {
+    n = -n;
+    if (n < 0) {
+      n = n-1;
+      d = 1;
+    } else
+      putchar('-');
   }
-}
-
-putnum(n) {
-  if (n > 9) {
-    putnum(n / 10);
-    n = n % 10;
-  }
-  putchr(n + '0');
-}
-
-octal(n) {
-  if (n > 7) {
-    octal(n / 8);
-    n = n & 7;
-  }
-  putchr(n + '0');
+  if (a = n/b)
+    putnum(a, b);
+  putchar(n%b + '0' + d);
 }
 
 printf(fmt,x1,x2,x3,x4,x5,x6,x7,x8,x9) {
-  auto adx, c, i;
+  auto adx, a, c, i, n;
   
   i = 0;
   adx = &x1;
 loop:
-  while ((c = char(fmt,i)) != '%') {
-    if (c=='*e')
+  while ((c = char(fmt, i)) != '%') {
+    if (c == '*e')
       return;
-    putchr(c);
+    putchar(c);
     i = i+1;
   }
   i = i+1;
-  c = char(fmt,i);
-  if (c=='d') {
-    if (*adx < 0) {
-      putchr('-');
-      *adx = -*adx;
-    }  
-    putnum(*adx);
-  } else if (c=='o') 
-    octal(*adx);
+  a = *adx;
+  c = char(fmt, i);
+  if (c=='d')
+    putnum(a, 10);
+  else if (c=='o') 
+    putnum(a, 8);
   else if (c=='c')
-    putchr(*adx);
-  else if (c=='s')
-    putstr(*adx);
-  else {
-    putchr('%');
+    putchar(a);
+  else if (c=='s') {
+    n = 0;
+    while ((c = char(a, n)) != '*e') {
+      putchar(c);
+      n = n+1;
+    }
+  } else {
+    putchar('%');
     goto loop;
   }
   i = i+1;

@@ -65,7 +65,7 @@ sysexit:			" common system call exit code
 1:
    dzm .insys			" clear "in system call" flag
    jms chkint			" pending user interrupt?
-      skp			"  no
+      skp			"  no, return to user
    jmp .save			"   yes: dump core
    jms copy; u.rq+2; 10; 6	" restore auto-index locations 10-15
    lac u.rq+1			" restore auto-index location 9
@@ -77,7 +77,7 @@ sysexit:			" common system call exit code
    lac u.ac			" restore AC register
    jmp u.rq+8 i			" return to user
 
-	" scheduler / idle loop
+	" scheduler / swapper / idle loop
 swap: 0
    ion
 1:
@@ -176,8 +176,8 @@ locn:
 	" call:
 	" .insys/ 0
 	"   jms chkint
-	"    no: no interrupt, or intflg set (discards interrupt)
-	"   yes: PI off, .insys set
+	"    <already ".insys", no interrupt, or intflg set (ignore interrupt)>
+	"   <found user interrupt: PI off, .insys set>
 chkint: 0
    lac .insys
    sza				" in system?
