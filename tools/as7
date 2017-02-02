@@ -15,7 +15,9 @@ Getopt::Long::Configure qw(gnu_getopt);
 
 ### Global variables ###
 my %Var;       # Variables such as ., .., t
-my %Label;     # Labels that are defined once
+my %Glabel;    # Global labels that are defined once
+my %Llabel;    # Local labels that are defined once
+my %Islocal;   # True if the label is a local label
 my %Rlabel;    # Relative labels, e.g. 1:, 2:
                # with an array of locations for each label
 
@@ -38,13 +40,11 @@ my $debug = 0;		# Run in debug mode
 my $format = 'a7out';	# output format
 my $namelist = 0;	# output n.out file
 my $output = 'a.out';	# output file
-my @cppdefs;		# C pre-processor defines
-my @cppundefs;		# C pre-processor undefines
 
 # keep this near the GetOptions call to make it easy to add documentation!
 sub usage {
-    die("Usage: $0 [-Dmacro] [-Umacro] [--debug] [--format=a7out|list|ptr|rim ]\n" .	
-	"\t[--out file] file1.s [file2.s ...]\n");
+    die("Usage: $0 [--debug] [--format=a7out|list|ptr|rim ]\n" .	
+	"\t[-n] [--out file] file1.s [file2.s ...]\n");
 }
 
 GetOptions(
@@ -52,8 +52,6 @@ GetOptions(
     'format|f=s' => \$format,
     'namelist|n' => \$namelist,
     'output|o=s' => \$output,
-    'D|D=s' => \@cppdefs,
-    'U|U=s' => \@cppundefs,
 ) or usage();
 
 usage() if ( @ARGV < 1 );
@@ -270,21 +268,52 @@ sub err {
     return 0;			# expression value
 }
 
+# Set a label, either global or local
+sub set_label
+{
+  my ($label,$loc)= @_;
+
+  # It is a local label if we're told it is, or if it starts with "L"
+  if ($Islocal{$file}{$label} || $label=~ m{^L}) {
+	# An error to have different values
+	if ( defined( $Llabel{$file}{$label} ) && $Llabel{$file}{$label} != $loc ) {
+	    # non-fatal: as.s doesn't even warn!!!!
+	    print STDERR "$file:$lineno: Local label $label multiply defined\n"
+	        if ($stage == 2);
+	}
+	else {
+	    $Llabel{$file}{$label} = $loc;
+	    printf( "Set local label %s to %#o\n", $label, $loc ) if ($debug);
+	}
+  } else {
+	# An error to have different values
+	if ( defined( $Glabel{$label} ) && $Glabel{$label} != $loc ) {
+	    # non-fatal: as.s doesn't even warn!!!!
+	    print STDERR "$file:$lineno: Global label $label multiply defined\n"
+	        if ($stage == 2);
+	}
+	else {
+	    $Glabel{$label} = $loc;
+	    printf( "Set global label %s to %#o\n", $label, $loc ) if ($debug);
+	}
+  }
+}
+
+# Get the value of a global or local label
+sub get_label
+{
+  my $label= shift;
+  return($Llabel{$file}{$label}) if (defined($Llabel{$file}{$label}));
+  return($Glabel{$label});
+}
+
 # Open and parse the given file
 sub parse_file {
     $file = shift;
 
-    # Get the C pre-processor command-line arguments
-    my $defines= join(' ', map { "-D$_" } @cppdefs) || "";
-    my $undefines= join(' ', map { "-U$_" } @cppundefs) || "";
-  
-    open( my $IN, "-|", "cpp -trigraphs $defines $undefines $file" )
-				|| die("Cannot pipe cpp $file: $!\n");
+    open( my $IN, "<", $file ) || die("Cannot open $file: $!\n");
     $lineno = 0;
     while ( $line = <$IN> ) {
-	# Lose any C pre-processor comment lines
-	next if ($line=~ m{^#});
-
 	$lineno++;
         chomp($line);		# Lose the end of line
         $origline = $line;
@@ -311,17 +340,22 @@ sub process_label {
 	}
     } # numeric label
     else {			# symbolic label
-	# error to have different values
-	if ( defined( $Label{$label} ) && $Label{$label} != $loc ) {
-	    # non-fatal: as.s doesn't even warn!!!!
-	    print STDERR "$file:$lineno: Label $label multiply defined\n"
-	        if ($stage == 2);
-	}
-	else {
-	    $Label{$label} = $loc;
-	    printf( "Set label %s to %#o\n", $label, $loc ) if ($debug);
-	}
+	set_label($label, $loc);
     }
+}
+
+# Parse assembler directives. These were not in the original
+# PDP-7 Unix source, but we need them so that we can write
+# compilers that target this assembler.
+sub parse_directive
+{
+  my $directive= shift;
+  print("Got directive $directive\n") if ($debug);
+
+  # Set this as a local label
+  if ($directive=~ m{^\.local\s+(\S+)}) {
+    $Islocal{$file}{$1}=1;
+  }
 }
 
 sub eol {
@@ -339,10 +373,16 @@ sub parse_line {
 
 	return if (eol());
 
+	print "parse_line: '$line'\n" if ($debug);
+
+	# Assembler directives start with a tab and a .
+	if ($line =~ m{^\t(\..*)}) {
+	   parse_directive($1);
+	   return;
+	}
+
 	# Lose any leading whitespace
 	$line =~ s{^\s*}{};
-
-	print "parse_line: '$line'\n" if ($debug);
 
 	while ($line =~ s{^([A-Za-z0-9_\.]+):\s*}{}) { # labels
 	    process_label($1);
@@ -442,7 +482,7 @@ sub parse_expression {
 	    print "\tfound >x\n" if ($debug);
 	    $syllable = ord($1)	# absolute
 	}
-	elsif ($line =~ s{^([A-Za-z\.][A-Za-z0-9_\.]*)}{}) {
+	elsif ($line =~ s{^([A-Za-z_\.][A-Za-z0-9_\.]*)}{}) {
 	    my $sym = $1;
 	    print "\tsym: $sym\n" if ($debug);
 	  
@@ -450,8 +490,8 @@ sub parse_expression {
 		$syllable = $Var{$sym};
 		printf("\tvar: %s: %#o\n", $sym, $syllable) if ($debug);
 	    }
-	    elsif (defined($Label{$sym})) {
-		$syllable = $Label{$sym};
+	    elsif (defined(get_label($sym))) {
+	        $syllable = get_label($sym);
 		printf("\tlbl: %s: %#o\n", $sym, $syllable) if ($debug);
 	    }
 	    elsif ($stage == 2) {
@@ -567,8 +607,8 @@ sub punch {			# output a word in paper tape binary format
 sub dump_labels {		# for 'list' and --namelist
     my $file = shift;
 
-    foreach my $key (sort keys %Label) {
-	my $addr =  $Label{$key};
+    foreach my $key (sort keys %Glabel) {
+	my $addr =  $Glabel{$key};
 	my $flags = ($addr & $RELATIVE) ? "r" : "";
 	if ($addr & $RELATIVE) {
 	    $addr &= 0777777;
