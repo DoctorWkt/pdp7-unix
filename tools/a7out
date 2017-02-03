@@ -680,10 +680,12 @@ sub eae {
         return;
     }
 					# lrs: long right shift
-    if ( ($maskedinstr == 0640500) || ($maskedinstr == 0641500) ) {
+    if (($maskedinstr & 0766777) == 0640500) {
         dprintf( "lrs step %d\n", $step );
 	# Clear AC if the 01000 bit is set
-	$AC=0 if ($maskedinstr == 0641500);
+	$AC=0 if ($maskedinstr & 01000);
+	# Clear MQ if the 010000 bit is set
+	$MQ=0 if ($maskedinstr & 010000);
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $AC & 1 ) ? 0400000 : 0;
             $AC = ( ( $AC >> 1 ) | ( ($LINK) ? 0400000 : 0 ) ) & MAXINT;
