@@ -7,8 +7,8 @@ pdp7-unix is a project to resurrect Unix on the PDP-7 from scans of the original
 assembly code done by
 [Norman Wilson](http://www.cs.toronto.edu/~norman/pers/index.html).
 The scans of PDP-7 Unix are in the [Unix Archive](http://www.tuhs.org/) at
-[http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/]
-(http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/)
+[http://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/]
+(http://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/)
 as the files 0*.pdf.
 
 ## Current Status
