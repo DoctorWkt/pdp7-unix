@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Read in files of PDP-7 assembly code in Ken Thompson's as format
 # and output cross-reference and other details on the files.

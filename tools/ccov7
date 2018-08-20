@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Load a code coverage report from SimH and a kernel assembly listing
 # from as7, and show which lines in the kernel were not executed.

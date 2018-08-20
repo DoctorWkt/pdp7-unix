@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Dump a binary PDP-7 file where a word is encoded as three bytes,
 # with sixbits are stored big-endian in each of the three byte.
