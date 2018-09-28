@@ -25,8 +25,8 @@ label:	is a label.
 	single digit decimal numbers can be used as "local" labels,
 	which are referenced with Nf and Nb:
 
-	jmp 1f		Jump back to the closest 1: label
-	jmp 1b		Jump forward to the closest 1: label
+	jmp 1b		Jump back to the closest 1: label
+	jmp 1f		Jump forward to the closest 1: label
 
 multiple words can be entered on one line, separated by semi-colon.
 
