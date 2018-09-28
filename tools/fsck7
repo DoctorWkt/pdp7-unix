@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # fsck7: Check a PDP-7 filesystem for consistency
 #
