@@ -1,9 +1,11 @@
 
 
-#Scans
+# Scans
 
-This area contains the OCR'd versions of the PDP-7 scans that are at
-http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/0*.pdf
+This area contains the OCR'd versions of the PDP-7 scans that are at:
+
+https://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/
+
 The files should be unaltered versions of the scanned pages.
 
 Novell owns the rights to the Unix source code, so these files are probably
@@ -53,4 +55,3 @@ Details of the files:
 * as.s: pages 32-48 of 05-1-4.pdf
 * ed1.s: pages 7-20 of 08-rest.pdf
 * ed2.s: pages 21-29 of 08-rest.pdf
-
