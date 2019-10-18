@@ -133,6 +133,7 @@ usage() if ( @ARGV < 1 );
     clls   => 0641600,		# lls but clear AC first
     als    => 0640700,		# AC shift
     lrs    => 0640500,		# long right shift
+    ecla   => 0641000,		# clear AC
     lacs   => 0641001,		# load AC with SC
     lacq   => 0641002,		# load AC with MQ
     abs    => 0644000,		# absolute value
