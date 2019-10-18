@@ -62,11 +62,11 @@ dd 	         drwr- -1 4
       $
     dmr        drwr- 12
       system   l----  3
-      as.s     frwr- 12 ../src/cmd/as.s
+      as.s     frwr- 12 ../src/cmd/as/as.s
       b_readme frwr- 12 fs/b_readme
-      bi.s     frwr- 12 ../src/cmd/bi.s
-      bl.s     frwr- 12 ../src/cmd/bl.s
-      db.s     frwr- 12 ../src/cmd/db.s
+      bi.s     frwr- 12 ../src/cmd/bi/bi.s
+      bl.s     frwr- 12 ../src/cmd/bl/bl.s
+      db.s     frwr- 12 ../src/cmd/db/db.s
       hello.b  frwr- 12 ../src/other/hello.b
       ops.s    frwr- 12 ../src/other/ops.s
       $
