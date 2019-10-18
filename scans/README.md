@@ -62,3 +62,6 @@ Details of the files:
 * space-travel-5.s pages 19-20 of 12-92-119.pdf
 * space-travel-6.s pages 21-25 of 12-92-119.pdf
 * space-travel-7.s pages 26-28 of 12-92-119.pdf
+* ttt1.s pages 1-12 of 14-148-165.pdf
+* ttt2.s pages 13-17 of 14-148-165.pdf
+* un.s page 18 of 14-148-165.pdf
