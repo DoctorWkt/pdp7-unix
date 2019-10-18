@@ -1,3 +1,4 @@
+"** 14-148-165.pdf page 1
 " ttt1.s
 
 t = 0
@@ -61,6 +62,7 @@ unwind:
    jmp 1b
 t = t+1
 
+"** 14-148-165.pdf page 2
 move: 0
    lac dspflg
    sza
@@ -121,6 +123,7 @@ lphit:
    tad sbufp
    dac 9f+t
    lac noblink
+"** 14-148-165.pdf page 3
    dac blk1 i
    dac blk2 i
    dac 9f+t i
@@ -182,6 +185,7 @@ must: 0
    jmp 2f
    -4
    tad 8
+"** 14-148-165.pdf page 4
    dac 9
    cla
    xct 9 i
@@ -243,6 +247,7 @@ done:
 1:
    lac 9 i
    cma
+"** 14-148-165.pdf page 5
    tad boardp
    cma
    alss 4
@@ -304,6 +309,7 @@ mark: 0
    lac 9f+t
    and o2
    tad o60
+"** 14-148-165.pdf page 6
    dac 0f+2
    jms messg; 0:0;0;0;0
    jmp mark i
@@ -365,6 +371,7 @@ try: 0
    isz maxin
    jmp 1f
    -1
+"** 14-148-165.pdf page 7
    dac maxin
    isz try
    jmp try i
@@ -426,6 +433,7 @@ try: 0
    dac 9f+t+2 i
    lac o1000
    dac 9f+t+1 i
+"** 14-148-165.pdf page 8
    jms try; jmp prnt
    dzm 9f+t+1 i
    dzm 9f+t+2 i
@@ -487,6 +495,7 @@ t = t+5
 
 heur: 0
    jms addpri
+"** 14-148-165.pdf page 9
    -2
    tad force
    dac lforce
@@ -548,6 +557,7 @@ heur: 0
    jmp heiur i
 4:
    lac 9f+t+1
+"** 14-148-165.pdf page 10
    jsm mark; 1
    jmp heur i
 t = t+2
@@ -609,6 +619,7 @@ pstrat:
    jmp 3b i
 1:
    isz 3b
+"** 14-148-165.pdf page 11
    lacq
    tad 3b i
    lmq
@@ -669,8 +680,9 @@ dsboard: 0
    isz 9f+t+2
    isz 9f+t
    jmp 8b
+"** 14-148-165.pdf page 12
    -1
-   dac 11i
+   dac 11 i
    lac blinkpar
    dac blk1 i
    dac blk2 i

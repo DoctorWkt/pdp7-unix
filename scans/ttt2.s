@@ -1,3 +1,4 @@
+"** 14-148-165.pdf page 13
 " ttt2
 
 boardp: board
@@ -59,7 +60,8 @@ tb = tad board-1
    tb+14; tb+30; tb+46; tb+62
    tb+15; tb+27; tb+39; tb+51
    tb+53; tb+54; tb+55; tb+56
-   tb+13; tb+31; tb+47; tb+63
+   tb+15; tb+31; tb+47; tb+63
+"** 14-148-165.pdf page 14
    tb+16; tb+28; tb+40; tb+52
    tb+16; tb+27; tb+38; tb+49
    tb+16; tb+31; tb+46; tb+61
@@ -122,6 +124,7 @@ plane:
    tb+5; tb+6; tb+7; tb+8; tb+21; tb+22; tb+23; tb+24
    tb+37; tb+38; tb+39; tb+40; tb+53; tb+54; tb+55; tb+56
 
+"** 14-148-165.pdf page 15
    tb+1; tb+2; tb+3; tb+4; tb+17; tb+18; tb+19; tb+20
    tb+33; tb+34; tb+35; tb+36; tb+49; tb+50; tb+51; tb+52
 
@@ -182,6 +185,7 @@ oh:
    vy 040 v
    vx m 0140
    vy 0 v
+"** 14-148-165.pdf page 16
    vx m 040
    vy m 040 v
    dnop
@@ -243,6 +247,7 @@ sbuf: .=.+1050
 board: .=.+64
 maxin: .=.+1
 force: .=.+1
+"** 14-148-165.pdf page 17
 pri: .=.+1
 lpri: .=.+1
 lforce: .=.+1
