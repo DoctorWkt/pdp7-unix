@@ -14,6 +14,7 @@ PDP7=pdp7
 # source dirs
 SYSSRC=../src/sys
 CMDSRC=../src/cmd
+GAMESRC=../src/games
 ALTSRC=../src/alt
 OTHERSRC=../src/other
 TESTSRC=../src/tests
@@ -94,7 +95,7 @@ dirs:
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
-	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm
+	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm #$(BINDIR)/dmabs #$(BINDIR)/st
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -148,6 +149,30 @@ $(BINDIR)/stat: $(CMDSRC)/stat/stat.s
 
 $(BINDIR)/tm: $(CMDSRC)/tm/tm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm/tm.s
+
+# -- compile errors
+$(BINDIR)/dmabs: $(CMDSRC)/dmabs/dmabs.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dmabs $(CMDSRC)/dmabs/dmabs.s
+
+# -- compile errors
+$(BINDIR)/st: $(GAMESRC)/st/st1.s $(GAMESRC)/st/st2.s  $(GAMESRC)/st/st3.s  $(GAMESRC)/st/st4.s  $(GAMESRC)/st/st5.s  $(GAMESRC)/st/st6.s $(GAMESRC)/st/st7.s 
+	$(AS) $(ASARGS) -o $(BINDIR)/st $(GAMESRC)/st/st1.s $(GAMESRC)/st/st2.s  $(GAMESRC)/st/st3.s  $(GAMESRC)/st/st4.s  $(GAMESRC)/st/st5.s  $(GAMESRC)/st/st6.s $(GAMESRC)/st/st7.s 
+
+# -- compile errors
+$(BINDIR)/bc: $(CMDSRC)/bc/bc.s
+	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bc/bc.s
+
+# -- compile errors
+$(BINDIR)/dsw: $(CMDSRC)/dsw/dsw.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw/dsw.s
+
+# -- compile errors
+$(BINDIR)/apr: $(CMDSRC)/apr/apr.s
+	$(AS) $(ASARGS) -o $(BINDIR)/apr $(CMDSRC)/apr/apr.s
+
+# -- compile errors
+$(BINDIR)/adm: $(CMDSRC)/adm/adm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm/adm.s
 
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init/init.s
