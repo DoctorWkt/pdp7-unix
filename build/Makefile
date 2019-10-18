@@ -128,11 +128,11 @@ $(BINDIR)/cp: $(CMDSRC)/cp/cp.s
 $(BINDIR)/ds: $(CMDSRC)/ds/ds.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ds $(CMDSRC)/ds/ds.s
 
-$(BINDIR)/dskres: $(CMDSRC)/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
-	$(AS) $(ASARGS) -o $(BINDIR)/dskres $(CMDSRC)/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+$(BINDIR)/dskres: $(CMDSRC)/dskres/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dskres $(CMDSRC)/dskres/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
 
-$(BINDIR)/dsksav: $(CMDSRC)/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
-	$(AS) $(ASARGS) -o $(BINDIR)/dsksav $(CMDSRC)/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+$(BINDIR)/dsksav: $(CMDSRC)/dsksav/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dsksav $(CMDSRC)/dsksav/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
 
 $(BINDIR)/ed: $(CMDSRC)/ed/ed1.s $(CMDSRC)/ed/ed2.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ed $(CMDSRC)/ed/ed1.s $(CMDSRC)/ed/ed2.s
