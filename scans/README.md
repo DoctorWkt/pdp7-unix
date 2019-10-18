@@ -55,3 +55,10 @@ Details of the files:
 * as.s: pages 32-48 of 05-1-4.pdf
 * ed1.s: pages 7-20 of 08-rest.pdf
 * ed2.s: pages 21-29 of 08-rest.pdf
+* space-travel-1.s pages 1-5 of 12-92-119.pdf
+* space-travel-2.s pages 6-9 of 12-92-119.pdf
+* space-travel-3.s pages 10-13 of 12-92-119.pdf
+* space-travel-4.s pages 14-18 of 12-92-119.pdf
+* space-travel-5.s pages 19-20 of 12-92-119.pdf
+* space-travel-6.s pages 21-25 of 12-92-119.pdf
+* space-travel-7.s pages 26-28 of 12-92-119.pdf
