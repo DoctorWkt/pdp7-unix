@@ -247,7 +247,7 @@ proc3:
 proc4:
    jms error; .>
    lac d1
-"** 05-1-4.pdf page 34
+"** 05-1-4.pdf page 36
    dac dot
    dzm dot+1
    jmp skip

@@ -64,7 +64,7 @@ floop1:
 "** 05-1-4.pdf page 3
    tad name
    dac 8
-   r4
+   -4
    dac c1
 1:
    lac 8 i
@@ -218,7 +218,7 @@ discon:
 
 m1:
    <ha>;<ng>;<up>;012
-m2s = .-m1
+m1s = .-m1
 m2:
    <ab>;<or>;<te>;<d 012
 m2s = .-m2
@@ -495,7 +495,7 @@ retry:
    sad o122
    jmp i message
 "** 05-1-4.pdf page 10
-   lac distlg
+   lac disflg
    sna
    jmp discon
    jmp stop
