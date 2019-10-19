@@ -23,6 +23,7 @@ dd 	         drwr- -1 4
         apr      frwr- -1 bin/apr
         as       frwr- -1 bin/as
         bc       frwr- -1 bin/bc
+        cas      frwr- -1 bin/cas
         cat      frwr- -1 bin/cat
         check    frwr- -1 bin/check
         chmod    frwr- -1 bin/chmod
