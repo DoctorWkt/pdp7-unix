@@ -7,7 +7,7 @@
    tad d5
    dac name1
    tad d4
-   dac name 2
+   dac name2
    lac narg
    sad d4
    jmp 1f
@@ -134,7 +134,7 @@ adv1:
    dac vis
    jmp advanc
 1:
-   sad 0162
+   sad o162
    skp
    jmp letr
    isz mod3
@@ -301,7 +301,7 @@ a:
    cma
    tad d1
 1:
-   tad dlex
+   tad delx
    tad dm4
    sma
    cla
@@ -481,9 +481,9 @@ tmp: .=.+1
 buf: .=.+500
 bufp: buf-1
 lbuf: .=.+10
-lpbufp: lbuf-1
+lbufp: lbuf-1
 nwds: .=.+1
-o1770072: 0170072
+o170072: 0170072
 nins: .=.+1
 o100: 0100
 o12012: 012012
@@ -1020,7 +1020,7 @@ mh
 v
 ah
 ia
-ll
+il
 x
 mn
 r
