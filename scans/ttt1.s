@@ -17,13 +17,13 @@ t = 0
    law dbuf
    sys capt
    law 16
-   sys syloc
+   sys sysloc
    tad d1
    dac lpadr
    law 13
    sys sysloc
    dac pbadr
-   dxm lpadr i
+   dzm lpadr i
 loop:
    jms move
    jms must; jmp loop
@@ -103,7 +103,7 @@ move: 0
    jms mark; 512
    jmp move i
 
-dsmove:
+dspmove:
    jms getpb
    sza
    jmp pbhit
@@ -128,7 +128,7 @@ lphit:
    dac blk2 i
    dac 9f+t i
 1:
-   dzm lpaddr i
+   dzm lpadr i
    lacq
    cma
    tad sbufp
@@ -362,7 +362,7 @@ try: 0
    lac 9f+t+4
    sna
    jmp 1f
-   lsz try
+   isz try
    jmp try i
 
 " save
@@ -500,7 +500,7 @@ heur: 0
    tad force
    dac lforce
    -1000
-   dac lrpi
+   dac lpri
    -64
    dac 9f+t
    lac boardp
@@ -517,14 +517,14 @@ heur: 0
    jmp 4f
    lac pri
    cma
-   tad lrpi
+   tad lpri
    sma cma
    jmp 3f-1
    sza
    jmp 2f
    isz prob
    -1
-   cll; idiv; prob;.,
+   cll; idiv; prob;..
    lacq
    lrss 6
    dac force
@@ -554,11 +554,11 @@ heur: 0
    jmp 1b
    lac lmov
    jms mark; 1
-   jmp heiur i
+   jmp heur i
 4:
    lac 9f+t+1
 "** 14-148-165.pdf page 10
-   jsm mark; 1
+   jms mark; 1
    jmp heur i
 t = t+2
    
@@ -718,7 +718,7 @@ t = t+1
 
 getpb: 0
    sys time
-   lac pbar i
+   lac pbadr i
    and o2000
    sza
    sys exit

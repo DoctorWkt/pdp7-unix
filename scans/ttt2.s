@@ -2,12 +2,12 @@
 " ttt2
 
 boardp: board
-shufp: sbuf
+sbufp: sbuf
 qdt: <dt>
 imaxin: -4000
 noblink: 060000
 blinkpar: 070000
-setxy: setx
+setxv: setx
 setyv: sety
 o12: 012
 o14: 014
@@ -21,7 +21,7 @@ o4000: 04000
 o2: 2
 o1000: 01000
 d1: 1
-dm60: -060
+om60: -060
 o77: 077
 line:
 tb = tad board-1
@@ -178,8 +178,8 @@ ex:
    dnop
 oh:
    vx 0100
-   vy020 iv
-   vx0140
+   vy 020 iv
+   vx 0140
    vy 0 v
    vx 040
    vy 040 v
@@ -191,7 +191,7 @@ oh:
    dnop
    dnop
 dot:
-   ipenb
+   lpenb
    vx 0200
    vy 040 iv
    vx 05

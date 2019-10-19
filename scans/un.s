@@ -24,7 +24,7 @@
    lac t1
    tad d6
    dac t1
-   isz ca1
+   isz c1
    jmp 1b
 
    sys exit
