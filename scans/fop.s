@@ -278,7 +278,7 @@ fad = jms q
 "
 q:0
 fno = jms q
-  lac and
+  lac ans
   sad ams
   sza cll
   jmp 1f
@@ -366,7 +366,7 @@ garg = jms q
    and o400000
    dac asign
    lac ams
-   and 0377777
+   and o377777
    dac ams
    jmp i q
 
@@ -784,7 +784,7 @@ o400000: 0400000
 o640500: 0640500
 o200000: 0200000
 d34: 34
-o777743: o777743
+o777743: 0777743
 o2: 02
 o377777: 0377777
 dm18: -18
