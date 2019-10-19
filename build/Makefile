@@ -95,7 +95,7 @@ dirs:
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
-	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr
+	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr 
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -165,7 +165,6 @@ $(BINDIR)/bc: $(CMDSRC)/bc/bc.s
 $(BINDIR)/dsw: $(CMDSRC)/dsw/dsw.s
 	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw/dsw.s
 
-# -- compile errors
 $(BINDIR)/apr: $(CMDSRC)/apr/apr.s
 	$(AS) $(ASARGS) -o $(BINDIR)/apr $(CMDSRC)/apr/apr.s
 
