@@ -44,12 +44,12 @@ f400: 011;0310000;0
 crash: -028;0200000;0
 stheta: 01;0200000;0
 ctheta: 0;0;0
-fpzero; 0;0;0
+fpzero: 0;0;0
 scale: 0
-yscale: 6
+vscale: 6
 ascale: -1
 sdphi: -05;0253436;0700177
-cdphi; 000;0377743;0201725
+cdphi: 000;0377743;0201725
 dhalt: 0400000
 fpone: 01;0200000;0
 

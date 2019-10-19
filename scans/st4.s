@@ -93,7 +93,7 @@ surf: 0
 	cma
 	dac tsety
 	lac sety
-	tad o 165777
+	tad o165777
 	dac clistp i
 	lac narcs
 	dac nt
