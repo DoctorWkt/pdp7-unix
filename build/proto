@@ -42,6 +42,7 @@ dd 	         drwr- -1 4
         ls       frwr- -1 bin/ls
         lsd      frwr- -1 bin/lsd
         lsl      frwr- -1 bin/lsd
+        nm       frwr- -1 bin/nm
         od       frwr- -1 bin/od
         pd       frwr- -1 bin/pd        
         mv       frwr- -1 bin/mv
