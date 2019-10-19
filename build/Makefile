@@ -103,97 +103,93 @@ altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/altchrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/ed $(BINDIR)/altinit $(BINDIR)/altmkdir
 
-$(BINDIR)/as: $(CMDSRC)/as/as.s
-	$(AS) $(ASARGS) -o $(BINDIR)/as $(CMDSRC)/as/as.s
+$(BINDIR)/as: $(CMDSRC)/as.s
+	$(AS) $(ASARGS) -o $(BINDIR)/as $(CMDSRC)/as.s
 
-$(BINDIR)/cat: $(CMDSRC)/cat/cat.s
-	$(AS) $(ASARGS) -o $(BINDIR)/cat $(CMDSRC)/cat/cat.s
+$(BINDIR)/cat: $(CMDSRC)/cat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/cat $(CMDSRC)/cat.s
 
-$(BINDIR)/check: $(CMDSRC)/check/check.s
-	$(AS) $(ASARGS) -o $(BINDIR)/check $(CMDSRC)/check/check.s
+$(BINDIR)/check: $(CMDSRC)/check.s
+	$(AS) $(ASARGS) -o $(BINDIR)/check $(CMDSRC)/check.s
 
-$(BINDIR)/chmod: $(CMDSRC)/chmod/chmod.s
-	$(AS) $(ASARGS) -o $(BINDIR)/chmod $(CMDSRC)/chmod/chmod.s
+$(BINDIR)/chmod: $(CMDSRC)/chmod.s
+	$(AS) $(ASARGS) -o $(BINDIR)/chmod $(CMDSRC)/chmod.s
 
-$(BINDIR)/chown: $(CMDSRC)/chown/chown.s
-	$(AS) $(ASARGS) -o $(BINDIR)/chown $(CMDSRC)/chown/chown.s
+$(BINDIR)/chown: $(CMDSRC)/chown.s
+	$(AS) $(ASARGS) -o $(BINDIR)/chown $(CMDSRC)/chown.s
 
-$(BINDIR)/chrm: $(CMDSRC)/chrm/chrm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/chrm $(CMDSRC)/chrm/chrm.s
+$(BINDIR)/chrm: $(CMDSRC)/chrm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/chrm $(CMDSRC)/chrm.s
 
-$(BINDIR)/altchrm: $(ALTSRC)/chrm/chrm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altchrm $(ALTSRC)/chrm/chrm.s
+$(BINDIR)/altchrm: $(ALTSRC)/chrm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altchrm $(ALTSRC)/chrm.s
 
-$(BINDIR)/cp: $(CMDSRC)/cp/cp.s
-	$(AS) $(ASARGS) -o $(BINDIR)/cp $(CMDSRC)/cp/cp.s
+$(BINDIR)/cp: $(CMDSRC)/cp.s
+	$(AS) $(ASARGS) -o $(BINDIR)/cp $(CMDSRC)/cp.s
 
-$(BINDIR)/ds: $(CMDSRC)/ds/ds.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ds $(CMDSRC)/ds/ds.s
+$(BINDIR)/ds: $(CMDSRC)/ds.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ds $(CMDSRC)/ds.s
 
-$(BINDIR)/dskres: $(CMDSRC)/dskres/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
-	$(AS) $(ASARGS) -o $(BINDIR)/dskres $(CMDSRC)/dskres/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+$(BINDIR)/dskres: $(CMDSRC)/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dskres $(CMDSRC)/dskres.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
 
-$(BINDIR)/dsksav: $(CMDSRC)/dsksav/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
-	$(AS) $(ASARGS) -o $(BINDIR)/dsksav $(CMDSRC)/dsksav/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+$(BINDIR)/dsksav: $(CMDSRC)/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dsksav $(CMDSRC)/dsksav.s $(CMDSRC)/dskio.s $(SYSSRC)/sop.s
 
-$(BINDIR)/ed: $(CMDSRC)/ed/ed1.s $(CMDSRC)/ed/ed2.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ed $(CMDSRC)/ed/ed1.s $(CMDSRC)/ed/ed2.s
+$(BINDIR)/ed: $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ed $(CMDSRC)/ed1.s $(CMDSRC)/ed2.s
 
-$(BINDIR)/init: $(CMDSRC)/init/init.s
-	$(AS) $(ASARGS) -o $(BINDIR)/init $(CMDSRC)/init/init.s
+$(BINDIR)/init: $(CMDSRC)/init.s
+	$(AS) $(ASARGS) -o $(BINDIR)/init $(CMDSRC)/init.s
 
-$(BINDIR)/db: $(CMDSRC)/db/db.s
-	$(AS) $(ASARGS) -o $(BINDIR)/db $(CMDSRC)/db/db.s
+$(BINDIR)/db: $(CMDSRC)/db.s
+	$(AS) $(ASARGS) -o $(BINDIR)/db $(CMDSRC)/db.s
 
-$(BINDIR)/stat: $(CMDSRC)/stat/stat.s
-	$(AS) $(ASARGS) -o $(BINDIR)/stat $(CMDSRC)/stat/stat.s
+$(BINDIR)/stat: $(CMDSRC)/stat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/stat $(CMDSRC)//stat.s
 
-$(BINDIR)/tm: $(CMDSRC)/tm/tm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm/tm.s
+$(BINDIR)/tm: $(CMDSRC)/tm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm.s
 
-$(BINDIR)/cas: $(CMDSRC)/cas/cas.s
-	$(AS) $(ASARGS) -o $(BINDIR)/cas $(CMDSRC)/cas/cas.s
-
-# -- compile errors
-$(BINDIR)/dmabs: $(CMDSRC)/dmabs/dmabs.s
-	$(AS) $(ASARGS) -o $(BINDIR)/dmabs $(CMDSRC)/dmabs/dmabs.s
+$(BINDIR)/cas: $(CMDSRC)/cas.s
+	$(AS) $(ASARGS) -o $(BINDIR)/cas $(CMDSRC)/cas.s
 
 # -- compile errors
-$(BINDIR)/st: $(GAMESRC)/st/st1.s $(GAMESRC)/st/st2.s  $(GAMESRC)/st/st3.s  $(GAMESRC)/st/st4.s  $(GAMESRC)/st/st5.s  $(GAMESRC)/st/st6.s $(GAMESRC)/st/st7.s 
-	$(AS) $(ASARGS) -o $(BINDIR)/st $(GAMESRC)/st/st1.s $(GAMESRC)/st/st2.s  $(GAMESRC)/st/st3.s  $(GAMESRC)/st/st4.s  $(GAMESRC)/st/st5.s  $(GAMESRC)/st/st6.s $(GAMESRC)/st/st7.s 
+$(BINDIR)/dmabs: $(CMDSRC)/dmabs.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dmabs $(CMDSRC)/dmabs.s
 
 # -- compile errors
-$(BINDIR)/bc: $(CMDSRC)/bc/bc.s
-	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bc/bc.s
+$(BINDIR)/bc: $(CMDSRC)/bc.s
+	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bc.s
 
-$(BINDIR)/dsw: $(CMDSRC)/dsw/dsw.s
-	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw/dsw.s
+$(BINDIR)/dsw: $(CMDSRC)/dsw.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw.s
 
-$(BINDIR)/apr: $(CMDSRC)/apr/apr.s
-	$(AS) $(ASARGS) -o $(BINDIR)/apr $(CMDSRC)/apr/apr.s
+$(BINDIR)/apr: $(CMDSRC)/apr.s
+	$(AS) $(ASARGS) -o $(BINDIR)/apr $(CMDSRC)/apr.s
 
 # -- compile errors
-$(BINDIR)/adm: $(CMDSRC)/adm/adm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm/adm.s
+$(BINDIR)/adm: $(CMDSRC)/adm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm.s
 
-$(BINDIR)/sh: $(CMDSRC)/sh/sh.s
-	$(AS) $(ASARGS) -o $(BINDIR)/sh $(CMDSRC)/sh/sh.s
+$(BINDIR)/sh: $(CMDSRC)/sh.s
+	$(AS) $(ASARGS) -o $(BINDIR)/sh $(CMDSRC)/sh.s
 
-$(BINDIR)/rn: $(CMDSRC)/rn/rn.s
-	$(AS) $(ASARGS) -o $(BINDIR)/rn $(CMDSRC)/rn/rn.s
+$(BINDIR)/rn: $(CMDSRC)/rn.s
+	$(AS) $(ASARGS) -o $(BINDIR)/rn $(CMDSRC)/rn.s
 
-$(BINDIR)/rm: $(CMDSRC)/rm/rm.s
-	$(AS) $(ASARGS) -o $(BINDIR)/rm $(CMDSRC)/rm/rm.s
+$(BINDIR)/rm: $(CMDSRC)/rm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/rm $(CMDSRC)/rm.s
 
-$(BINDIR)/pd: $(CMDSRC)/pd/pd.s
-	$(AS) $(ASARGS) -o $(BINDIR)/pd $(CMDSRC)/pd/pd.s
+$(BINDIR)/pd: $(CMDSRC)/pd.s
+	$(AS) $(ASARGS) -o $(BINDIR)/pd $(CMDSRC)/pd.s
 
 # Alternative init: no dd directory
-$(BINDIR)/altinit: $(ALTSRC)/init/init.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altinit $(ALTSRC)/init/init.s
+$(BINDIR)/altinit: $(ALTSRC)/init.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altinit $(ALTSRC)/init.s
 
-$(BINDIR)/altmkdir: $(ALTSRC)/wktmkdir/wktmkdir.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altmkdir $(ALTSRC)/wktmkdir/wktmkdir.s
+$(BINDIR)/altmkdir: $(ALTSRC)/wktmkdir.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altmkdir $(ALTSRC)/wktmkdir.s
 
 
 # The commands that did not come from the scans
@@ -243,10 +239,10 @@ $(BINDIR)/od: $(OTHERSRC)/wktod.s
 	$(AS) $(ASARGS) -o $(BINDIR)/od $(OTHERSRC)/wktod.s
 
 # B compiler
-$(BINDIR)/bc: $(CMDSRC)/bl/bl.s $(CMDSRC)/bi/bi.s ../tools/b.c $(OTHERSRC)/b.b
+$(BINDIR)/bc: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
 	$(CC) $(CCARGS) -o b ../tools/b.c
 	./b $(OTHERSRC)/b.b b.s
-	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bl/bl.s b.s $(CMDSRC)/bi/bi.s
+	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
 	rm b b.s
 
 tests:
