@@ -75,3 +75,4 @@ Details of the files:
 * op.s page 35 of 09-1-35.pdf
 * ln.s pages 15-16 of 09-1-35.pdf
 * nm.s pages 31-34 of 09-1-35.pdf
+* ls.s pages 17-21 of 09-1-35.pdf
