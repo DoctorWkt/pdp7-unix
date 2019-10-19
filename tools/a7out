@@ -654,9 +654,11 @@ sub eae {
         $PC++;
         return;
     }
-    if ( $maskedinstr == 0660600 ) {    # llss: long left shift, signed
+    if ( ($maskedinstr == 0660600) ||
+	 ($maskedinstr == 0661600) ) {    # llss: long left shift, signed
 	# Set the link to be the AC sign bit
 	$LINK= ($AC & SIGN) ? LINKMASK : 0;
+	$AC = 0 if ($maskedinstr & 01000); # PLB: ecla llss seen in adm,apr,bc,ds,sh
         dprintf( "llss step %d\n", $step );
         foreach my $i ( 1 .. $step ) {
             my $MQmsb = ( $MQ & SIGN ) ? 1 : 0;
