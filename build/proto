@@ -20,6 +20,7 @@ dd 	         drwr- -1 4
         ttyout   irwr- -1 11
         display  irwr- -1 12
         pptout   irwr- -1 13
+        apr      frwr- -1 bin/apr
         as       frwr- -1 bin/as
         bc       frwr- -1 bin/bc
         cat      frwr- -1 bin/cat
@@ -33,6 +34,7 @@ dd 	         drwr- -1 4
         ds       frwr- -1 bin/ds
         dskres   frwr- -1 bin/dskres
         dsksav   frwr- -1 bin/dsksav
+        dsw      frwr- -1 bin/dsw
         ed       frwr- -1 bin/ed
 	init     frwr- -1 bin/init
         ln       frwr- -1 bin/ln
@@ -44,6 +46,8 @@ dd 	         drwr- -1 4
 	password frw-- -1 fs/password
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
+        tm       frwr- -1 bin/tm
+
 	$
     ken      drwr- 10
       system l----  3
