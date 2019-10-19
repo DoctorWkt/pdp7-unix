@@ -25,9 +25,9 @@ ballinit: 0
 " top row
 
 	lac d1
-	dac ball1+slfg
+	dac ball1+sflg
 	lac high
-	dac bal1+y
+	dac ball1+y
 	-diam-diam-diam
 	tad ball1+x
 	dac ball1+x
