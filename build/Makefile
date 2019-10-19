@@ -96,8 +96,8 @@ cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
 	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
-	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm
-	
+	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm \
+
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/altchrm $(BINDIR)/cp $(BINDIR)/ds \
@@ -183,6 +183,9 @@ $(BINDIR)/rm: $(CMDSRC)/rm.s
 
 $(BINDIR)/pd: $(CMDSRC)/pd.s
 	$(AS) $(ASARGS) -o $(BINDIR)/pd $(CMDSRC)/pd.s
+
+$(BINDIR)/ls: $(CMDSRC)/ls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ls $(CMDSRC)/ls.s
 
 $(BINDIR)/nm: $(CMDSRC)/nm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/nm $(CMDSRC)/nm.s
