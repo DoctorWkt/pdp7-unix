@@ -211,7 +211,7 @@ upda5:
 	dac maxj
 2:
 	fdv; dpar
-	dst; ftmp1
+	fst; ftmp1
 	fmp; absx
 	fad; ax
 	fst; ax
