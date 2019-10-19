@@ -1,5 +1,3 @@
-r
-
 :la
 x
 fb
@@ -77,11 +75,17 @@ r
 
 :le
 x
-me
+lk
 v
-ce
-ag
-ak
+mh
+me
+kb
+gb
+ee
+eh
+gk
+ik
+ib
 x
 mn
 r
@@ -627,6 +631,7 @@ r
 :colon
 x
 le
+v
 lf
 mf
 me
@@ -646,7 +651,7 @@ r
 x
 mf
 v
-mo
+mg
 oe
 mf
 x
@@ -654,6 +659,7 @@ ff
 v
 fg
 gg
+ge
 fe
 x
 mn
@@ -763,7 +769,7 @@ x
 mn
 r
 
-Llbr
+:lbr
 x
 ai
 v
@@ -857,5 +863,3 @@ ik
 x
 mn
 r
-
-
