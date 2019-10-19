@@ -51,6 +51,7 @@ dd           drwr- -1 4
         roff     frwr- -1 bin/roff
         rn       frwr- -1 bin/rn
         rm       frwr- -1 bin/rm
+        salv     frwr- -1 bin/salv
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
