@@ -143,6 +143,9 @@ $(BINDIR)/init: $(CMDSRC)/init.s
 $(BINDIR)/db: $(CMDSRC)/db.s
 	$(AS) $(ASARGS) -o $(BINDIR)/db $(CMDSRC)/db.s
 
+$(BINDIR)/sh: $(CMDSRC)/sh.s
+	$(AS) $(ASARGS) -o $(BINDIR)/sh $(CMDSRC)/sh.s
+
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init.s
 	$(AS) $(ASARGS) -o $(BINDIR)/altinit $(ALTSRC)/init.s
@@ -160,9 +163,6 @@ others: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
 altothers: dirs $(BINDIR)/sh $(BINDIR)/wktcat $(BINDIR)/wktcp $(BINDIR)/date \
 	$(BINDIR)/ln $(BINDIR)/altls $(BINDIR)/mv $(BINDIR)/stat $(BINDIR)/od
 
-
-$(BINDIR)/sh: $(OTHERSRC)/pbsh.s
-	$(AS) $(ASARGS) -o $(BINDIR)/sh $(OTHERSRC)/pbsh.s
 
 $(BINDIR)/wktcat: $(OTHERSRC)/wktcat.s
 	$(AS) $(ASARGS) -o $(BINDIR)/wktcat $(OTHERSRC)/wktcat.s
