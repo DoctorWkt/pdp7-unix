@@ -13,3 +13,4 @@ build/alt/a.lst
 build/alt/a.out
 build/alt/image.fs
 /.DS_Store
+/a.out
