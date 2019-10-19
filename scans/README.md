@@ -71,3 +71,4 @@ Details of the files:
 * ttt1.s pages 1-12 of 14-148-165.pdf
 * ttt2.s pages 13-17 of 14-148-165.pdf
 * un.s page 18 of 14-148-165.pdf
+* scope.v pages 3-18 of 03-scope.pdf
