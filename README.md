@@ -11,18 +11,21 @@ The scans of PDP-7 Unix are in the [Unix Archive](http://www.tuhs.org/)
 
 ## Current Status
 
-Update mid-March 2016: We've written an assembler, a user-mode simulator and
+March 2016: We've written an assembler, a user-mode simulator and
 commented several source files. We now have these utilities running:
 as, cat, chmod, chown, chrm, cp, date, ln, ls, mv, stat. We have a working
 shell with some functionality missing. We have a working filesystem and
 we can now boot the kernel, launch init, login, get to a shell prompt and
 run the utilities.
 
-Things to do: finish the shell, write the missing utilities, bring the
+Things to do: bring the
 system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
+October 2019 update: A second notebook with missing sources has been
+discovered and scanned.  New files are being added to the scans
+directory as they are typed in!
 
 ## Building pdp7-unix
 
