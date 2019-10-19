@@ -97,6 +97,7 @@ cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
 	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
 	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm \
+	$(BINDIR)/roff
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -189,6 +190,9 @@ $(BINDIR)/ls: $(CMDSRC)/ls.s
 
 $(BINDIR)/nm: $(CMDSRC)/nm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/nm $(CMDSRC)/nm.s
+
+$(BINDIR)/roff: $(CMDSRC)/roff.s
+	$(AS) $(ASARGS) -o $(BINDIR)/roff $(CMDSRC)/roff.s
 
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init.s
