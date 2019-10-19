@@ -11,7 +11,9 @@ The scans of PDP-7 Unix are in the [Unix Archive](http://www.tuhs.org/)
 
 ## Current Status
 
-March 2016: We've written an assembler, a user-mode simulator and
+###March 2016 
+
+We've written an assembler, a user-mode simulator and
 commented several source files. We now have these utilities running:
 as, cat, chmod, chown, chrm, cp, date, ln, ls, mv, stat. We have a working
 shell with some functionality missing. We have a working filesystem and
@@ -23,7 +25,9 @@ system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
-October 2019 update: A second notebook with missing sources has been
+### October 2019
+
+A second notebook with missing sources has been
 discovered and scanned.  New files are being added to the scans
 directory as they are typed in!
 
@@ -55,10 +59,13 @@ A typical pdp7-unix session on simh looks like:
 <pre>
 pdp7 unixv0.simh
 
-PDP-7 simulator V4.0-0 Beta        git commit id: e153b7f2
+PDP-7 simulator V4.0-0 Current        git commit id: aff3346e
 CPU	idle disabled
-	8192W, EAE
+	8KW, EAE
+/Users/tom/projects/pdp7-unix/build/unixv0.simh-13> att rb image.fs
 RB: buffering file in memory
+/Users/tom/projects/pdp7-unix/build/unixv0.simh-18> att -U g2in 12345
+Listening on port 12345
 PDP-7 simulator configuration
 
 CPU	idle disabled
@@ -67,19 +74,17 @@ PTR	devno=01
 PTP	devno=02
 TTI	devno=03
 TTO	devno=04
-LPT	devno=65-66
+LPT	disabled
 DRM	disabled
 RB	devno=71
-DT	devno=75-76, 8 units
+DT	disabled
+G2OUT	devno=05
+G2IN	devno=43-44
 
 login: ken
 password: ken
-@ ln dd ken .
-@ ls
-dd      
-system  
-hello   
-.       
+@ ls system
+system?
 @ ls system
 dd      
 ttyin   
@@ -88,24 +93,40 @@ pptin
 ttyout  
 display 
 pptout  
+apr     
 as      
+bc      
+cas     
 cat     
+check   
 chmod   
 chown   
 chrm    
 cp      
 date    
+db      
 ds      
+dskres  
+dsksav  
+dsw     
 ed      
 init    
 ln      
 ls      
+lsd     
+lsl     
+nm      
+od      
+p       
+pd      
 mv      
 password
+roff    
+rn      
+rm      
 sh      
 stat    
-@ cat hello
-Hello, world
+tm      
 @ 
 </pre>
 
