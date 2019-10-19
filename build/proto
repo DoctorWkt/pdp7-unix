@@ -43,8 +43,11 @@ dd 	         drwr- -1 4
         lsd      frwr- -1 bin/lsd
         lsl      frwr- -1 bin/lsd
         od       frwr- -1 bin/od
+        pd       frwr- -1 bin/pd        
         mv       frwr- -1 bin/mv
 	password frw-- -1 fs/password
+        rn       frwr- -1 bin/rn
+        rm       frwr- -1 bin/rm
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
