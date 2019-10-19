@@ -85,7 +85,7 @@ alt/image.fs: altcmd altothers
 clean:
 	rm -f boot.rim image.fs a.lst n.out a.out
 	rm -f alt/image.fs alt/a.out alt/a.lst
-	rm -rf $(BINDIR) $(TESTDIR)
+	rm -rf $(BINDIR) $(TESTDIR) 
 	rm -rf $(BINARIES)
 
 dirs:
@@ -95,7 +95,7 @@ dirs:
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
-	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm #$(BINDIR)/dmabs #$(BINDIR)/st
+	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -162,7 +162,6 @@ $(BINDIR)/st: $(GAMESRC)/st/st1.s $(GAMESRC)/st/st2.s  $(GAMESRC)/st/st3.s  $(GA
 $(BINDIR)/bc: $(CMDSRC)/bc/bc.s
 	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bc/bc.s
 
-# -- compile errors
 $(BINDIR)/dsw: $(CMDSRC)/dsw/dsw.s
 	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw/dsw.s
 
@@ -173,6 +172,9 @@ $(BINDIR)/apr: $(CMDSRC)/apr/apr.s
 # -- compile errors
 $(BINDIR)/adm: $(CMDSRC)/adm/adm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm/adm.s
+
+$(BINDIR)/sh: $(CMDSRC)/sh/sh.s
+	$(AS) $(ASARGS) -o $(BINDIR)/sh $(CMDSRC)/sh/sh.s
 
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init/init.s
