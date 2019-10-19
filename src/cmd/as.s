@@ -248,8 +248,8 @@ proc3:
 proc4:
    jms error; .>
    lac d1
-   dac dot		" set '.' type to 1
 "** 05-1-4.pdf page 36
+   dac dot		" set '.' type to 1
    dzm dot+1		" clear dot value
    jmp skip
 
