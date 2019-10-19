@@ -111,20 +111,20 @@ done:
    lac i .pbp
    sna
    jmp 1b
-   spa ra1
+   spa ral
    jmp 1f
-   spa ra1
+   spa ral
    jmp 2f
-   spa ra1
+   spa ral
    jmp 3f
-   spa ra1
+   spa ral
    jmp 4f
-   spa ra1
+   spa ral
    jmp 5f
-   spa ra1
+   spa ral
    jmp 6f
 " ** 11-45-91.pdf page 4
-   spa ra1
+   spa ral
    jmp 7f
    jms release
    sys exit
@@ -180,7 +180,7 @@ done:
    dac char
 3:
    fld; arg1
-   dmp; fm056
+   fmp; fm056
    lac char
    spa
    fng
@@ -212,12 +212,12 @@ doauto:
    omq
    tad 0
    tad stick
-   cli
+   cll
    mul
    78625
    lls 9
    dac stick
-   dzm sexp
+   dzm aexp
    and o177777
    xor o200000
    dac ams

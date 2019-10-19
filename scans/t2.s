@@ -27,7 +27,7 @@ advance:0
   jmp advance i
 
 retreat:
-  dmz junk
+  dzm junk
   lac gflag
   sza
   jmp 1f
@@ -173,7 +173,7 @@ reuu:
 rerb:
   cml
 rera:
-  dmz fflag
+  dzm fflag
   snl
   jmp goon
   jms aget
@@ -341,7 +341,7 @@ gegq:
   jms advance; jmp ggoon
   lac env
   add d.ii
-  dac jumk
+  dac junk
   jms aget
   add junk i
   dac junk

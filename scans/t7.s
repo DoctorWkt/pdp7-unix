@@ -90,7 +90,7 @@ equ = equread
 equbot: equtab
 equsiz = 500
 equmax: equsiz
-dleta: 2
+delta: 2
 mdelta:0-2
 
 sbsiz=50
