@@ -214,7 +214,7 @@ discon:
 
 m1:
    <ha>;<ng>;<up>;012
-m2s = .-m1
+m1s = .-m1
 m2:
    <ab>;<or>;<te>;<d 012
 m2s = .-m2
@@ -486,7 +486,7 @@ retry:
    lac opch
    sad o122
    jmp i message
-   lac distlg
+   lac disflg
    sna
    jmp discon
    jmp stop
