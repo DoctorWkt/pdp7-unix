@@ -61,6 +61,12 @@ Details of the files:
 * moo.s pages 22-30 of 09-1-35.pdf
 * nm.s pages 31-34 of 09-1-35.pdf
 * op.s page 35 of 09-1-35.pdf
+*      page 1 of 10-36-55.pdf
+* p1.s pages 2-6 of 10-36-55.pdf
+* p2.s pages 7-10 of 10-36-55.pdf
+* p3.s pages 11-13 of 10-36-55.pdf
+* p4.s pages 17 of 10-36-55.pdf
+* p5.s pages 18-20 of 10-36-55.pdf
 * pd.s: page 1 of 11-45-91.pdf
 * psych.s: page 2-6 of 11-45-91.pdf
 * rm.s: page 7 of 11-45-91.pdf
