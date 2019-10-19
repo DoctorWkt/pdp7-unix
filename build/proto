@@ -44,6 +44,7 @@ dd           drwr- -1 4
         lsl      frwr- -1 bin/lsd
         nm       frwr- -1 bin/nm
         od       frwr- -1 bin/od
+        p        frwr- -1 bin/p
         pd       frwr- -1 bin/pd        
         mv       frwr- -1 bin/mv
         password frw-- -1 fs/password
