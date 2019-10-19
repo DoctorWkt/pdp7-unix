@@ -1,3 +1,4 @@
+"** 05-1-4.pdf page 19
 " apr
 
    lac 017777 i
@@ -60,6 +61,7 @@ floop1:
    dac 017777 i
    lac name
    tad d4
+"** 05-1-4.pdf page 20
    dac name
 
    sys open; name: ..; 0
@@ -99,6 +101,13 @@ cloop:
    jmp pass2
    sad o10
    jmp bksp
+" -------------- sad o11
+"                jmp tab	"tab:
+"                       	"isz eol
+"                       	"lac col
+"                       	"ell: >div; 5
+"                               "jmp tab
+"                       	"jmp ell
    sad o15
    jmp cret
    sad o40
@@ -121,6 +130,7 @@ inb2:
    dac t
    dac crflg
    lac ch
+"** 05-1-4.pdf page 21
    dac t i
    isz col
    jmp cloop
@@ -182,6 +192,7 @@ p2loop:
    lac t i
    sad o44
    jmp dol
+"** 05-1-4.pdf page 22
    sad o41
    law 045
    sad o77
@@ -243,6 +254,7 @@ p2test:
 
 getc: 0
    lac ipt
+"** 05-1-4.pdf page 23
    sad eipt
    jmp 1f
    dac 2f
@@ -304,6 +316,7 @@ m3s = .-m3
 m4:
    <di>;<sc>;<on>;<ne>;<ct>;<ed>;012
 m4s = .-m4
+"** 05-1-4.pdf page 24
 
 stop:
    dpof
@@ -318,7 +331,7 @@ noc: 0
 carrier: 0100000
 ilock: 040000
 totime: 300
-disflg: 0
+disflg: 0	" 2: both cases
 
 casetab:
    2;2;2;2;2;2;2;2
@@ -328,9 +341,9 @@ casetab:
    2;1;2;2;2;0;0;2
    2;2;2;2;2;0;2;2
    2;2;2;2;2;2;2;2
-   2;2;2;2;2;2;2;1
-   0;0;0;0;0;0;0;0
-   0;0;0;0;0;0;0;0
+   2;2;2;2;2;2;2;1	" 0 - 100 case
+   0;0;0;0;0;0;0;0	" 1 - 200 case
+   0;0;0;0;0;0;0;0	" 2 - 300 case
    0;0;0;0;0;0;0;0
    0;0;0;0;0;0;2;1
    2;1;1;1;1;1;1;1
@@ -342,15 +355,15 @@ gcard: 0
    lac gcard i
    isz gcard
    sna
-   jmp gcard i
-   lrss 9
-   sad o45
-   jmp 1f
-   jms putc
-   jmp gcard+1
-1:
-   -1
-   tad gcard i
+   jmp gcard i	"circled with 3f written in and to the right:
+   lrss 9	"3: lac noc
+   sad o45	"sna
+   jmp 1f	"jmp gcard i
+   jms putc	"sad d80
+   jmp gcard+1  "jmp gcard i
+1:            	"law 040
+   -1         	"jms putc
+   tad gcard i	"jmp 3b
    cma
    dac 2f
    isz gcard
@@ -365,6 +378,7 @@ gcard: 0
 done:
    lac noc
    sna
+"** 05-1-4.pdf page 25
    jmp 1f
    sad d72
    jmp 1f
@@ -426,6 +440,7 @@ connect: 0
    dac dpwrite
    tad d1
    dac dpchar
+"** 05-1-4.pdf page 26
    dzm dpstat i
    las
    dac opch
@@ -450,14 +465,14 @@ message: 0
    dac stsch
 
 retry:
-   lac dpstat i
+   lac dpstat i	"* lac dpstat crossed through and dpstart written in
    and carrier
    sza
    jmp retry
    dprs
-   and ilock
-   sna
-   jmp hangup
+   and ilock	"* arrow to note carrier drops + iloc
+   sna		"* carrier = 0
+   jmp hangup	"* ilock = 1
    lac d1
    dac dpwrite i
    sys time
@@ -486,7 +501,7 @@ retry:
 " echo the sequence character
    lac echoch
    jms transch
-
+"** 05-1-4.pdf page 27
 " if there is a buffer pointer
 " put out 160 words of data
    -1
@@ -547,6 +562,7 @@ retry:
    and o177
    sza
    jmp error
+"** 05-1-4.pdf page 28
 
 " and exit
    lac seqch
@@ -608,6 +624,7 @@ recvch: 0
 
 checktim: 0
    lac systime i
+"** 05-1-4.pdf page 29
    cma
    tad rctim
    spa
@@ -669,6 +686,7 @@ echoch: .=.+1
 seqch: .=.+1
 tbuf: .=.+144
 rbuf: .=.+64
+"** 05-1-4.pdf page 30
 rctim: .=.+1
 sum: .=.+1
 ch: .=.+1
