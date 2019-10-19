@@ -112,7 +112,7 @@ loop3:
 	cma
 	tad vscale
 	tad aexp
-	tad aexp
+	dac aexp
 	jms inscr
 		jmp loop4
 	tad o141577
@@ -135,7 +135,7 @@ loop4:
 	lac lanflg
 	sma
 	jmp 2f
-	lac o114 "1
+	lac o114 "l
 	dac dispcl
 2:
 	lac dhalt

@@ -88,7 +88,7 @@ updshp: 0
 	fst; oy
 	lac maxj
 	dac par
-	jms absy
+	jms absv
 	fld; ox
 	fng
 	fad; absx
@@ -186,4 +186,3 @@ fldins:
 	jmp i absxy
 "** 12-92-119.pdf page 13
 	t = t+1
-

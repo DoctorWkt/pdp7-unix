@@ -51,14 +51,14 @@ io: <io>;0
 jupiter: <ju>;<pi>;<te>;<r
 mars: <ma>;<rs>;0
 mercury: <me>;<cu>;<ry>;0
-mimas; <mi>;<ma>;<s
+mimas: <mi>;<ma>;<s
 miranda: <mi>;<ra>;<nd>;<a
 neptune: <ne>;<pt>;<un>;<e
 nereid: <ne>;<re>;<id>;0
 oberon: <ob>;<er>;<on>;0
 phobos: <ph>;<ob>;<os>;0
 phoebe: <ph>;<oe>;<be>;0
-pluto; <pl>;<ut>;<o
+pluto: <pl>;<ut>;<o
 rhea: <rh>;<ea>;0
 saturn: <sa>;<tu>;<rn>;0
 "** 12-92-119.pdf page 22
@@ -165,7 +165,7 @@ accl: .+1
 -033;0303403;0
 -030;0245752;0
 -017;0201414;0
--026;0203753;0
+-026;0263753;0
 -026;0205241;0
 -040;0256464;0
 -041;0272051;0
@@ -290,4 +290,3 @@ pww: .+1
 -037;0650025;0224325
 -071;0717663;0701773
 -052;0754612;0304722
-
