@@ -136,9 +136,8 @@ tm
 The code in the original scans are (c) Novell who own the rights to the Unix
 source code. Everything that didn't come from the scanned files is GPLv3.
 
-* /binaries  holds pre-build boot and filesystem binaries for users who wish to run pdp7-unix without building it.
 * /build     is an area to build the kernel & filesystem and run them
-* /man		 holds man pages
+* /man       holds man pages
 * /misc	     holds miscellaneous notes and information
 * /scans     holds the unmodified OCR versions of the scanned files
 * /src/cmd   holds the modified source code of the user-mode programs
