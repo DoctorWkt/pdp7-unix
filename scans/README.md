@@ -57,6 +57,7 @@ Details of the files:
 * ed2.s: pages 21-29 of 08-rest.pdf
 * pd.s: page 1 of 11-45-91.pdf
 * psych.s: page 2-6 of 11-45-91.pdf
+* rm.s: page 7 of 11-45-91.pdf
 * salv.s: pages 25-29 of 11-45-91.pdf
 * sh.s: pages 30-36 of 11-45-91.pdf
 * st-1.s pages 1-5 of 12-92-119.pdf
