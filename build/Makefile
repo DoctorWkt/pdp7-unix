@@ -14,6 +14,7 @@ PDP7=pdp7
 # source dirs
 SYSSRC=../src/sys
 CMDSRC=../src/cmd
+GAMESRC=../src/games
 ALTSRC=../src/alt
 OTHERSRC=../src/other
 TESTSRC=../src/tests
@@ -57,9 +58,9 @@ a.out:
 # Alternative kernel: no dd, but . and ..
 alt/a.out:
 	$(AS) -f ptr -o alt/a.out $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
-		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
+		$(ALTSRC)/s2/s2.s $(SYSSRC)/s[3-8].s
 	$(AS) -n -f list -o alt/a.lst $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
-		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
+		$(ALTSRC)/s2/s2.s $(SYSSRC)/s[3-8].s
 
 # Phil's bootstrap code
 boot.rim: $(SYSSRC)/sop.s $(OTHERSRC)/pbboot.s
@@ -84,7 +85,7 @@ alt/image.fs: altcmd altothers
 clean:
 	rm -f boot.rim image.fs a.lst n.out a.out
 	rm -f alt/image.fs alt/a.out alt/a.lst
-	rm -rf $(BINDIR) $(TESTDIR)
+	rm -rf $(BINDIR) $(TESTDIR) 
 	rm -rf $(BINARIES)
 
 dirs:
@@ -94,7 +95,9 @@ dirs:
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
-	$(BINDIR)/db
+	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
+	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm \
+	$(BINDIR)/roff $(BINDIR)/p
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -143,6 +146,57 @@ $(BINDIR)/init: $(CMDSRC)/init.s
 $(BINDIR)/db: $(CMDSRC)/db.s
 	$(AS) $(ASARGS) -o $(BINDIR)/db $(CMDSRC)/db.s
 
+$(BINDIR)/stat: $(CMDSRC)/stat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/stat $(CMDSRC)//stat.s
+
+$(BINDIR)/tm: $(CMDSRC)/tm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm.s
+
+$(BINDIR)/cas: $(CMDSRC)/cas.s
+	$(AS) $(ASARGS) -o $(BINDIR)/cas $(CMDSRC)/cas.s
+
+# -- compile errors
+$(BINDIR)/dmabs: $(CMDSRC)/dmabs.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dmabs $(CMDSRC)/dmabs.s
+
+# -- compile errors
+$(BINDIR)/bc: $(CMDSRC)/bc.s
+	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bc.s
+
+$(BINDIR)/dsw: $(CMDSRC)/dsw.s
+	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw.s
+
+$(BINDIR)/apr: $(CMDSRC)/apr.s
+	$(AS) $(ASARGS) -o $(BINDIR)/apr $(CMDSRC)/apr.s
+
+# -- compile errors
+$(BINDIR)/adm: $(CMDSRC)/adm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm.s
+
+$(BINDIR)/sh: $(CMDSRC)/sh.s
+	$(AS) $(ASARGS) -o $(BINDIR)/sh $(CMDSRC)/sh.s
+
+$(BINDIR)/rn: $(CMDSRC)/rn.s
+	$(AS) $(ASARGS) -o $(BINDIR)/rn $(CMDSRC)/rn.s
+
+$(BINDIR)/rm: $(CMDSRC)/rm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/rm $(CMDSRC)/rm.s
+
+$(BINDIR)/pd: $(CMDSRC)/pd.s
+	$(AS) $(ASARGS) -o $(BINDIR)/pd $(CMDSRC)/pd.s
+
+$(BINDIR)/ls: $(CMDSRC)/ls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ls $(CMDSRC)/ls.s
+
+$(BINDIR)/nm: $(CMDSRC)/nm.s
+	$(AS) $(ASARGS) -o $(BINDIR)/nm $(CMDSRC)/nm.s
+
+$(BINDIR)/roff: $(CMDSRC)/roff.s
+	$(AS) $(ASARGS) -o $(BINDIR)/roff $(CMDSRC)/roff.s
+
+$(BINDIR)/p: $(CMDSRC)/p0.s $(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
+	$(AS) $(ASARGS) -o $(BINDIR)/p $(CMDSRC)/p0.s $(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
+
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init.s
 	$(AS) $(ASARGS) -o $(BINDIR)/altinit $(ALTSRC)/init.s
@@ -182,8 +236,8 @@ $(BINDIR)/ls: $(OTHERSRC)/wktls.s
 $(BINDIR)/lsd: $(OTHERSRC)/pblsd.s
 	$(AS) $(ASARGS) -o $(BINDIR)/lsd $(OTHERSRC)/pblsd.s
 
-$(BINDIR)/altls: $(ALTSRC)/wktls.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altls $(ALTSRC)/wktls.s
+$(BINDIR)/altls: $(ALTSRC)/wktls/wktls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altls $(ALTSRC)/wktls/wktls.s
 
 $(BINDIR)/lsl: $(OTHERSRC)/pblsd.s
 	$(AS) $(ASARGS) -o $(BINDIR)/lsl $(OTHERSRC)/pblsd.s

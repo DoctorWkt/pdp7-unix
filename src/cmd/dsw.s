@@ -24,7 +24,7 @@ wr:
    lac d1
    sys write; o12; 1
    sys save
-io:
+do:
    sys unlink; dir+1
    sys exit
 

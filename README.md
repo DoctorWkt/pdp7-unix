@@ -48,12 +48,6 @@ To run pdp-unix from the pdp7-unix source tree, do:
 
 Press `ctl-e` to break out the simulator into simh
 
-### Precompiled Binaries
-
-You can also run pdp7-unix from precompiled binaries in the [/binaries](/binaries) directory. 
-
-`cd binaries/; pdp7 unixv0.simh`
-
 ### Typical Output
 
 A typical pdp7-unix session on simh looks like:
