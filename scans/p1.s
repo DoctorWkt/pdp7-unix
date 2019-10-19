@@ -62,7 +62,7 @@ loop:
 	sad stime
 	jmp loop
 "** 10-36-55.pdf page 3
-	tad dmi
+	tad dm1
 	sad stime
 	jmp loop
 	tad d1
