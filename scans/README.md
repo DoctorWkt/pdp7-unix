@@ -55,6 +55,8 @@ Details of the files:
 * as.s: pages 32-48 of 05-1-4.pdf
 * ed1.s: pages 7-20 of 08-rest.pdf
 * ed2.s: pages 21-29 of 08-rest.pdf
+* salv.s: pages 25-29 of 11-45-91.pdf
+* sh.s: pages 30-36 of 11-45-91.pdf
 * st-1.s pages 1-5 of 12-92-119.pdf
 * st-2.s pages 6-9 of 12-92-119.pdf
 * st-3.s pages 10-13 of 12-92-119.pdf
