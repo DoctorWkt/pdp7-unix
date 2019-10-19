@@ -62,7 +62,7 @@ floop1:
    -1
    tad name
    dac 8
-   r4
+   -4
    dac c1
 1:
    lac 8 i

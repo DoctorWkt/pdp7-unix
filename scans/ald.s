@@ -175,7 +175,7 @@ notbin:
    lac d1
    sys write; m3; m3s
    jms wait
-   cmp cloop
+   jmp cloop
 
 timeout:
    lac d1
