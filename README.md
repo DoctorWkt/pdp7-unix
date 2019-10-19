@@ -11,7 +11,7 @@ The scans of PDP-7 Unix are in the [Unix Archive](http://www.tuhs.org/)
 
 ## Current Status
 
-###March 2016 
+### March 2016 
 
 We've written an assembler, a user-mode simulator and
 commented several source files. We now have these utilities running:
