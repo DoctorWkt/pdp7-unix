@@ -49,7 +49,7 @@ floop:
    jms putc
    law 044
    jms putc
-   law040
+   law 040
    jms putc
 
 floop1:
