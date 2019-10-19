@@ -56,6 +56,7 @@ Details of the files:
 * ed1.s: pages 7-20 of 08-rest.pdf
 * ed2.s: pages 21-29 of 08-rest.pdf
 * ln.s pages 15-16 of 09-1-35.pdf
+* ls.s pages 17-21 of 09-1-35.pdf
 * nm.s pages 31-34 of 09-1-35.pdf
 * op.s page 35 of 09-1-35.pdf
 * pd.s: page 1 of 11-45-91.pdf
@@ -84,8 +85,3 @@ Details of the files:
 * ttt1.s pages 1-12 of 14-148-165.pdf
 * ttt2.s pages 13-17 of 14-148-165.pdf
 * un.s page 18 of 14-148-165.pdf
-* scope.v pages 3-18 of 03-scope.pdf
-* op.s page 35 of 09-1-35.pdf
-* ln.s pages 15-16 of 09-1-35.pdf
-* nm.s pages 31-34 of 09-1-35.pdf
-* ls.s pages 17-21 of 09-1-35.pdf
