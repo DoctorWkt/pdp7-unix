@@ -82,6 +82,7 @@ Details of the files:
 * st6.s pages 21-25 of 12-92-119.pdf
 * st7.s pages 26-28 of 12-92-119.pdf
 * stat.s: pages 1-2 of 13-120-147.pdf
+* tm.s: pages 3-4 of 13-120-147.pdf
 * t1.s: pages 5-6 of 13-120-147.pdf
 * t2.s: pages 7-13 of 13-120-147.pdf
 * t3.s: pages 14-18 of 13-120-147.pdf
