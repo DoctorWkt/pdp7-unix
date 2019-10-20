@@ -108,7 +108,7 @@ ddisp: 0
    lac lastv
    jms dspnt
    -1
-   dac B i
+   dac 8 i
    lac pbs i
    sza
    jmp .-2
@@ -199,7 +199,7 @@ hisinit: 0
    tad dm1
    dac 8
 1:
-   dsm 8 i
+   dzm 8 i
    isz t1
    jmp 1b
    jmp hisinit i
