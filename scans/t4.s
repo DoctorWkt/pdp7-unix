@@ -14,7 +14,7 @@ table:
   dac 8
   lac symwrite
   dac 8 i
-  add sumbot
+  add symbot
   dac 2f
   lac mdelta
 1:dzm 8 i
