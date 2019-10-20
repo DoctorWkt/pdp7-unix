@@ -65,7 +65,7 @@ iloop:
 " ** 11-45-91.pdf page 26
 
    lac iflags
-   and 040
+   and o40
    sza
    jmp iloop
    law idskps
@@ -94,7 +94,7 @@ iloop:
    sna
    jmp 3f
    jms dskrd i
-   jms copy i; dskbuf: 0; idskbuf: 64
+   jms copy i; dskbuf: 0; ldskbuf: 64
    isz indircnt
    law ldskbuf
    dac t3
@@ -155,7 +155,7 @@ dup:
       sys write; dupmes; 3
       jmp i dupcheck
 dupmes:
-      < d>;<up><a 012
+      < d>;<up>;<a 012
 
 print: 0
       lmq
@@ -209,7 +209,7 @@ part2:
       tad usetabp
       dac t2
       cla
-      lrss 4
+      llss 4
       tad alsscom
       dac 2f
       lac d1
@@ -219,13 +219,17 @@ part2:
       and bit
       sza
       jmp 1b
-
+      lac t1
+      jms free i
+      isz blcnt
+      jmp 1b
 
 part3:
       lac blcnt
       jms print
       lac d1
       sys write; m7; m7s
+      sys exit
 
 d1: 1
 d2: 2
@@ -248,7 +252,6 @@ d6400: 6400
 m3:
       040;<fi>;<le>;<s 012
    m3s = .-m3
-
 m4:
 " ** 11-45-91.pdf page 29
       040;<la>;<rg>;<e 012
@@ -289,6 +292,7 @@ copyz: 0
 betwen: 0
 dskrd: 0
 free: 0
+
 
 ldskbuf: .=.+64
 linode: .=.+12
