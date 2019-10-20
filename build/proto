@@ -57,6 +57,15 @@ dd           drwr- -1 4
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
 
+# new versions, from the scans
+
+        nsh      frwr- -1 bin/nsh
+        nls      frwr- -1 bin/nls
+#       nbc      frwr- -1 bin/nbc
+        nstat    frwr- -1 bin/nstat
+
+
+
   $
     ken      drwr- 10
       system l----  3

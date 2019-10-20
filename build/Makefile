@@ -98,7 +98,7 @@ cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/db $(BINDIR)/nstat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
 	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm \
 	$(BINDIR)/roff $(BINDIR)/p $(BINDIR)/apr $(BINDIR)/salv $(BINDIR)/moo \
-	$(BINDIR)/nsh $(BINDIR)/nls
+	$(BINDIR)/nsh $(BINDIR)/nls $(BINDIR)/nstat
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -149,7 +149,7 @@ $(BINDIR)/db: $(CMDSRC)/db.s
 
 # -- new stat from the scans
 $(BINDIR)/nstat: $(CMDSRC)/stat.s
-	$(AS) $(ASARGS) -o $(BINDIR)/sstat $(CMDSRC)/stat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/nstat $(CMDSRC)/stat.s
 
 $(BINDIR)/tm: $(CMDSRC)/tm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm.s
