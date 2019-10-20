@@ -207,7 +207,7 @@ putoct:0
   dac 9f+t+1
 
 1:lac 9f+t
-  cil
+  cll
   lrs 15
   add o60
   dac 8f+1
