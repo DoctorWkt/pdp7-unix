@@ -56,7 +56,7 @@ obranch:
   opr        ;pl=op;op=op+1
   jmp romi   ;mi=op;op=op+1
   cma        ;cm=op;op=op+1
-  jmp roindir;inter=op;op=op+1
+  jmp roindir;indir=op;op=op+1
   lac holdlv ;addr=op;op=op+1
 unary:xct obranch+1+pl
 
@@ -84,7 +84,7 @@ sub:0
   cma
   jmp sub i
 
-roor
+roor:
   lmq
   lac rand2
   omq
