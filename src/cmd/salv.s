@@ -94,7 +94,7 @@ iloop:
    sna
    jmp 3f
    jms dskrd i
-   jms copy i; dskbuf: 0; ldskbuf: 64
+   jms copy i; dskbuf: 0; ldskbuf; 64
    isz indircnt
    law ldskbuf
    dac t3
