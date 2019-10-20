@@ -1124,7 +1124,7 @@ sub sys_write {
     my $count = $Mem[ $PC + 2 ];
     my $end   = ( $start + $count - 1 ) & MAXADDR;
     die("sys_write: bad start/end addresses $start $end\n")
-      if ( $end < $start );
+      if ( $count != 0 && $end < $start );
     printf( "write: %d words from %s to fd %d\n", $count, addr($start), $fd )
 					if ( ($debug) || ($singlestep) );
 
