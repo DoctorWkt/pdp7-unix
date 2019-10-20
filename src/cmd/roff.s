@@ -1,4 +1,4 @@
-" ** 11-45-91.pdf page 9
+" ** 11-56-91.pdf page 9
 " roff
 
    lac i 017777
@@ -61,7 +61,7 @@ getchar: 0
    skp
    jmp 1f
    -64
-" ** 11-45-91.pdf page 10
+" ** 11-56-91.pdf page 10
    dac 3f
    law ibuf-1
    dac 15
@@ -123,10 +123,10 @@ nextfile: 0
    sys exit
 2: 040077;012
 1:
-" ** 11-45-91.pdf page 11
+" ** 11-56-91.pdf page 11
    dac input
    lac eibufp
-   dac otal
+   dac ital
    jmp i nextfile
 
 getsc:0
@@ -167,7 +167,7 @@ dac i sctal
 lacq
 jmp i putsc
 
-" conmtrol card decoder
+" control card decoder
 control: 0
    law 2f-1
    dac 8
@@ -185,7 +185,7 @@ control: 0
    jmp i control
 2:
    ncase = 0
-" ** 11-45-91.pdf page 12
+" ** 11-56-91.pdf page 12
 <ad>; jmp casead; ncase = ncase+1
 <bp>; jmp casebp; ncase = ncase+1
 <br>; jmp casebr; ncase = ncase+1
@@ -247,7 +247,7 @@ caseds:
    jmp i control
 
 casefi:
-" ** 11-45-91.pdf page 13
+" ** 11-56-91.pdf page 13
    jms break
    -1
    dac fi
@@ -309,7 +309,7 @@ casene:
 casenf:
    jms break
    dzm fi
-" ** 11-45-91.pdf page 14
+" ** 11-56-91.pdf page 14
    jmp i control
 
 casepl:
@@ -371,7 +371,7 @@ skipcont: 0
    lac i 8
    sad o40
    jmp 1f
-" ** 11-45-91.pdf page 15
+" ** 11-56-91.pdf page 15
    sad o12
    jmp 2f
    jmp 1b
@@ -414,7 +414,7 @@ break: 0
    lac o55
    jms putchar
    isz c
-   jmp 1f
+   jmp 1b
    lac ma1
    dac c
 1:
@@ -433,7 +433,7 @@ break: 0
    jms putchar
    isz c
    jmp 2b
-" ** 11-45-91.pdf page 16
+" ** 11-56-91.pdf page 16
 1:
    lac i 8
    jms putchar
@@ -473,6 +473,8 @@ number: 0
    jmp 3f
    sad o53
    jmp 2f
+   sad o55
+   jmp 2f
    tad om72
    sma
    jmp 1b
@@ -493,7 +495,7 @@ number: 0
    lac any
    sma
    jmp 1f
-" ** 11-45-91.pdf page 17
+" ** 11-56-91.pdf page 17
    lac d1
    isz number
    jmp i number
@@ -555,7 +557,7 @@ storechar: 0
    dac ne
    -1
    tad nc
-" ** 11-45-91.pdf page 18
+" ** 11-56-91.pdf page 18
    dac nc
    jmp i storechar
 
@@ -572,8 +574,6 @@ getword: 0
 2:
    dac i 8
    lmq
-   jms width
-   cma
    jms width
    cma
    tad d1
@@ -620,7 +620,7 @@ need: 0
    dac 1f
    lac i need
    jms laci
-" ** 11-45-91.pdf page 19
+" ** 11-56-91.pdf page 19
    cll; mul; 1: 0
    lacq
    tad nl
@@ -681,7 +681,7 @@ text: 0
    lac i 8
    sad o40
    skp
-" ** 11-45-91.pdf page 20
+" ** 11-56-91.pdf page 20
    jmp 3f+1
    isz wch
    jmp 1b
@@ -742,7 +742,7 @@ adjust: 0
    jmp i adjust
 
 fill: 0
-" ** 11-45-91.pdf page 21
+" ** 11-56-91.pdf page 21
    lac nrem
    sna
    jmp 2f
@@ -804,7 +804,7 @@ undline: 0
    dac 9
 1:
    lac i 8
-" ** 11-45-91.pdf page 22
+" ** 11-56-91.pdf page 22
    dac i 9
    sad o12
    jmp 1f
@@ -865,7 +865,7 @@ center: 0
    dac i 9
    isz c
    jmp 1b
-" ** 11-45-91.pdf page 23
+" ** 11-56-91.pdf page 23
 1:
    lac i 8
    dac i 9
@@ -900,7 +900,7 @@ nwd: 0
 nl: 0
 nc: 0
 ne: 0
-pl: 88
+pl: 66
 ad: -1
 fi: -1
 cc: .>
@@ -921,11 +921,12 @@ d4: 4
 dm4: -4
 d0: 0
 dm1: -1
+
 c: .=.+1
 nrem: .=.+1
 ndiv: .=.+1
 num: .=.+1
-" ** 11-45-91.pdf page 24
+" ** 11-56-91.pdf page 24
 any: .=.+1
 ital: .=.+1
 otal: .=.+1
