@@ -72,7 +72,7 @@ bundle:
   dac nframe i
   isz nframe
   jmp goon
-j=j+1
+t=t+1
 
 "   jms between;add a; add b; skip if a<=ac<b
 
