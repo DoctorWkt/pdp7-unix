@@ -1,3 +1,4 @@
+"** 03-scope.pdf page 3
 :la
 x
 fb
@@ -60,6 +61,7 @@ ak
 v
 nk
 x
+"** 03-scope.pdf page 4
 gk
 v
 eh
@@ -121,6 +123,7 @@ le
 lh
 jk
 x
+"** 03-scope.pdf page 5
 mn
 r
 
@@ -182,6 +185,7 @@ mn
 r
 
 :lk
+"** 03-scope.pdf page 6
 x
 cb
 v
@@ -243,6 +247,7 @@ hb
 v
 ff
 fh
+"** 03-scope.pdf page 7
 hk
 nk
 x
@@ -304,6 +309,7 @@ x
 mn
 r
 
+"** 03-scope.pdf page 8
 :lr
 x
 md
@@ -365,6 +371,7 @@ ki
 ci
 x
 mk
+"** 03-scope.pdf page 9
 v
 ki
 x
@@ -426,11 +433,13 @@ dc
 v
 di
 mb
+"** 03-scope.pdf page 10
 mj
 x
 mn
 r
 
+"** 03-scope.pdf page 11
 :space
 x
 mn
@@ -493,6 +502,7 @@ v
 bd
 db
 eb
+"** 03-scope.pdf page 12
 gd
 gh
 ij
@@ -554,6 +564,7 @@ v
 gk
 x
 dd
+"** 03-scope.pdf page 13
 v
 ki
 x
@@ -615,6 +626,7 @@ ak
 x
 v
 bj
+"** 03-scope.pdf page 14
 x
 mn
 r
@@ -676,6 +688,7 @@ mn
 r
 
 :great
+"** 03-scope.pdf page 15
 x
 cb
 v
@@ -737,6 +750,7 @@ r
 :cmflx
 x
 bc
+"** 03-scope.pdf page 16
 v
 af
 bj
@@ -798,6 +812,7 @@ mn
 r
 
 :or
+"** 03-scope.pdf page 17
 x
 af
 v
@@ -859,6 +874,7 @@ kc
 ld
 mf
 lh
+"** 03-scope.pdf page 18
 ik
 x
 mn
