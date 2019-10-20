@@ -95,9 +95,10 @@ dirs:
 cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/chown $(BINDIR)/chrm $(BINDIR)/cp $(BINDIR)/ds \
 	$(BINDIR)/dskres $(BINDIR)/dsksav $(BINDIR)/ed $(BINDIR)/init \
-	$(BINDIR)/db $(BINDIR)/stat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
+	$(BINDIR)/db $(BINDIR)/nstat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
 	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm \
-	$(BINDIR)/roff $(BINDIR)/p $(BINDIR)/apr $(BINDIR)/salv $(BINDIR)/moo
+	$(BINDIR)/roff $(BINDIR)/p $(BINDIR)/apr $(BINDIR)/salv $(BINDIR)/moo \
+	$(BINDIR)/nsh $(BINDIR)/nls
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -146,8 +147,9 @@ $(BINDIR)/init: $(CMDSRC)/init.s
 $(BINDIR)/db: $(CMDSRC)/db.s
 	$(AS) $(ASARGS) -o $(BINDIR)/db $(CMDSRC)/db.s
 
-$(BINDIR)/stat: $(CMDSRC)/stat.s
-	$(AS) $(ASARGS) -o $(BINDIR)/stat $(CMDSRC)//stat.s
+# -- new stat from the scans
+$(BINDIR)/nstat: $(CMDSRC)/stat.s
+	$(AS) $(ASARGS) -o $(BINDIR)/sstat $(CMDSRC)/stat.s
 
 $(BINDIR)/tm: $(CMDSRC)/tm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm.s
@@ -159,9 +161,9 @@ $(BINDIR)/cas: $(CMDSRC)/cas.s
 $(BINDIR)/dmabs: $(CMDSRC)/dmabs.s
 	$(AS) $(ASARGS) -o $(BINDIR)/dmabs $(CMDSRC)/dmabs.s
 
-# -- compile errors
-$(BINDIR)/bc: $(CMDSRC)/bc.s
-	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bc.s
+# -- new bc from the scans
+$(BINDIR)/nbc: $(CMDSRC)/bc.s
+	$(AS) $(ASARGS) -o $(BINDIR)/nbc $(CMDSRC)/bc.s
 
 $(BINDIR)/dsw: $(CMDSRC)/dsw.s
 	$(AS) $(ASARGS) -o $(BINDIR)/dsw $(CMDSRC)/dsw.s
@@ -173,8 +175,9 @@ $(BINDIR)/apr: $(CMDSRC)/apr.s
 $(BINDIR)/adm: $(CMDSRC)/adm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm.s
 
-$(BINDIR)/sh: $(CMDSRC)/sh.s
-	$(AS) $(ASARGS) -o $(BINDIR)/sh $(CMDSRC)/sh.s
+# -- new sh from the scans
+$(BINDIR)/nsh: $(CMDSRC)/sh.s
+	$(AS) $(ASARGS) -o $(BINDIR)/nsh $(CMDSRC)/sh.s
 
 $(BINDIR)/rn: $(CMDSRC)/rn.s
 	$(AS) $(ASARGS) -o $(BINDIR)/rn $(CMDSRC)/rn.s
@@ -185,8 +188,9 @@ $(BINDIR)/rm: $(CMDSRC)/rm.s
 $(BINDIR)/pd: $(CMDSRC)/pd.s
 	$(AS) $(ASARGS) -o $(BINDIR)/pd $(CMDSRC)/pd.s
 
-$(BINDIR)/ls: $(CMDSRC)/ls.s
-	$(AS) $(ASARGS) -o $(BINDIR)/ls $(CMDSRC)/ls.s
+# -- new ls from the scans
+$(BINDIR)/nls: $(CMDSRC)/ls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/nls $(CMDSRC)/ls.s
 
 $(BINDIR)/nm: $(CMDSRC)/nm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/nm $(CMDSRC)/nm.s
@@ -194,8 +198,8 @@ $(BINDIR)/nm: $(CMDSRC)/nm.s
 $(BINDIR)/roff: $(CMDSRC)/roff.s
 	$(AS) $(ASARGS) -o $(BINDIR)/roff $(CMDSRC)/roff.s
 
-$(BINDIR)/p: $(CMDSRC)/p0.s $(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
-	$(AS) $(ASARGS) -o $(BINDIR)/p $(CMDSRC)/p0.s $(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
+$(BINDIR)/p: $(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
+	$(AS) $(ASARGS) -o $(BINDIR)/p $(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
 
 $(BINDIR)/salv: $(CMDSRC)/salv.s
 	$(AS) $(ASARGS) -o $(BINDIR)/salv $(CMDSRC)/salv.s
