@@ -524,7 +524,7 @@ heur: 0
    jmp 2f
    isz prob
    -1
-   cll; idiv; prob;..
+   cll; idiv; prob:..
    lacq
    lrss 6
    dac force
