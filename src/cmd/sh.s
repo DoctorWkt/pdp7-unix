@@ -1,4 +1,4 @@
-" ** 11-45-91.pdf page 30
+" ** 11-56-91.pdf page 30
 " sh
 
 clear:
@@ -7,7 +7,7 @@ clear:
 1:
    dzm i 8
    isz clear
-   jms 1b
+   jmp 1b
    lacq
    jmp 017771
 zerop: .-1
@@ -15,6 +15,7 @@ zerop: .-1
 comerr:
    lac d1
    sys write; errmes; 1
+
 
 shell:
    lac d1
@@ -44,14 +45,15 @@ shell1:
    lac delim
    sad amper
    jmp shell1
-   lacq			" hand written
-   clq			" send mesg to child
-   sys smes
+   lacq			" hand written: send
+   clq			" "done" (crossed out)
+   sys smes		" mesg to child
 comretrn:
    lac delim
    sad newln
    jmp shell
    jmp shell1
+
 
 loadcom:
    sys open; args; 0
@@ -59,9 +61,7 @@ loadcom:
    jmp 1f
    sys link; system; args; args
    spa
-
-" ** 11-45-91.pdf page 30
-
+" ** 11-56-91.pdf page 31
    jmp 2f
    -1
    dac lnkflg
@@ -95,6 +95,7 @@ loadcom:
    jmp 2f
    lac d1
    sys write; in; 4
+   lac d1
    sys write; errmes; 1
    sys exit
 2:
@@ -119,12 +120,10 @@ loadcom:
    dac boot+2
    cma
    tad d7
-   dac close
+   dac clear
    lac nargp
    dac 9
-
-" ** 11-45-91.pdf page 32
-
+" ** 11-56-91.pdf page 32
 2:
    lac i 9
    dac i 8
@@ -186,9 +185,7 @@ endcom:
    jmp getcom i
 
 cls:
-
-" ** 11-45-91.pdf page 33
-
+" ** 11-56-91.pdf page 33
    jms get
    jms getparm
    dac t1
@@ -231,7 +228,7 @@ getparm:0
    jmp comerr
    jmp 2f
 1:
-   jmp get
+   jms get
    jms checkdlm
    jmp fill1
 2:
@@ -251,8 +248,7 @@ getparm:0
    jmp i getparm
    jmp 1b
 
-" ** 11-45-91.pdf page 34
-
+" ** 11-56-91.pdf page 34
 fill:
    dac t1
    lac space
@@ -314,8 +310,7 @@ rline:0
    dac 8
 1:
    jms getcha
-
-" ** 11-45-91.pdf page 35
+" ** 11-56-91.pdf page 35
    dac i 15
    sad newln
    jmp i rline
@@ -377,8 +372,7 @@ doch:
    dac 1b
    jmp 2b
 cherr:
-
-" ** 11-45-91.pdf page 36
+" ** 11-56-91.pdf page 36
    lac 1b
    dac .+3
    lac d1
@@ -391,10 +385,11 @@ lgout:
    sys smes
    sys exit
 
+
 d1: 1
 dm1: -1
 d4: 4
-dm4: -5
+dm4: -4
 d2: 2
 d7: 7
 o17: 017
