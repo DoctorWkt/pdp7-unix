@@ -39,7 +39,7 @@ loop:
    fld; z
    fad; g
    fst; z
-   fld g;
+   fld; g
    fng
    fmp; fact
    fst; g
@@ -71,7 +71,7 @@ loop:
    fix
    spa
    xor o775777
-   sad vecx
+   tad vecx
    dac i 10
    fld; oldy
    fng
@@ -128,7 +128,8 @@ done:
    jmp 7f
    jms release
    sys exit
-7: cla
+7:
+   cla
    sys read; tmp; 1
    lac tmp
    sad o141000
@@ -269,7 +270,7 @@ auto: 0
 
 setx: 0142000 +512
 sety: 0146000 +512
-vacx: 0100000
+vecx: 0100000
 vecy: 0124000
 o775777: 0775777
 o177777: 0177777
@@ -294,10 +295,10 @@ fm110: 7;0734000;0
 arg1: 7;0234167;0
 arg2: 1;0275531;0
 fp0: 0;0;0
-fp01: -6;024656;0
+fp01: -6;0243656;0
 fm056: -4;0745301;0
-pp500: 11;0372000;0
-fp90000: 032;0257620;0
+fp500: 11;0372000;0
+fp90000: 021;0257620;0
    .pbp: .=.+1
    .pbp1: 0
 buf:
