@@ -425,7 +425,7 @@ break: 0
    law char-1
    dac 8
    lac un
-   sza
+   sma
    jmp 1f
    dac c
 2:
@@ -647,6 +647,7 @@ text: 0
    sad o12
    jmp 1f-1
    sad o40
+   jmp 1f-1
    lac fi
    sza
    jmp 2f
@@ -698,6 +699,7 @@ adjust: 0
    lac nwd
    sna
    jmp i adjust
+   law char-1
    dac 8
    law tchar-1
    dac 9
