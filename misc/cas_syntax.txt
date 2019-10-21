@@ -1,0 +1,71 @@
+It's strongly believed that cas is a "character assembler".  The input
+describes character shapes, and the output is data for GRAPHICS-2.
+
+
+CAS INPUT SYNTAX
+================
+
+: means record following string as a label.
+
+x means following moves are invisible.
+
+v means following moves are visible.
+
+r means end, output label=x-b+number.
+
+All other commands are character pairs denoting y,x coordinates in a
+12x14 character raster.  Draw a line to that coordinate.  Vertical
+coordinates are a-l, and horizontal are a-m.  aa is upper left and mn
+is lower right.  All characters end with a "x mn r" sequence to move
+to the beginning of the next character.
+
+
+CAS OUTPUT
+==========
+
+The output for each character is:
+
+The label x:
+
+18-bit octal words. Each word is three 6-bit incremental moves.
+
+label=x-b+number.  Number is 01, six bits saying how many moves, and
+10 zeroes.
+
+
+EXAMPLE
+=======
+
+Input:
+
+   :lbk
+   x
+   ai
+   v
+   af
+   mf
+   mj
+   x
+   mn
+   r
+
+This character is labelled "lbk" (left bracket).  Move invisibly to
+"ai" near upper right.  Draw line left to "af".  Draw down to "mf".
+Draw right to "mj".  Invisibly move to "mn" beoynd lower right.  End.
+
+Output:
+
+   x:
+   0010101
+   0010101
+   0010160
+   0567474
+   0747262
+   lbk=x-b+0236000
+
+01 means move diagonally up and right one step; do this eight times.
+60 means move up four steps.  56 means draw left three steps.  74
+means draw down four steps.  72 means draw left four steps.  62 means
+move left four steps.
+
+0236000 means there are 15 moves, or 6-bit bytes.
