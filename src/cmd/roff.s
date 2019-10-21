@@ -425,7 +425,7 @@ break: 0
    law char-1
    dac 8
    lac un
-   sza
+   sma
    jmp 1f
    dac c
 2:
