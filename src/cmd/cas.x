@@ -1,10 +1,7 @@
-"** 04-cas.pdf page 8
-" captital character definitions???
-" lower case definitions at 03-scope.pdf, page 2 ???
 :ca
 v
 af
-nl "???
+nl
 x
 hd
 v
@@ -20,7 +17,7 @@ v
 gi
 ik
 kk
-mi "???
+mi
 ma
 aa
 ai
@@ -35,7 +32,7 @@ r
 x
 kk
 v
-mi "???
+mi
 mc
 ka
 ca
@@ -63,7 +60,6 @@ x
 mk
 v
 ma
-"** 04-cas.pdf page 10
 aa
 ak
 x
@@ -112,7 +108,7 @@ aa
 v
 na
 x
-gb "???
+gb
 v
 gk
 x
@@ -125,7 +121,6 @@ r
 
 :ci
 x
-"** 04-cas.pdf page 11
 md
 v
 mi
@@ -148,11 +143,11 @@ v
 mc
 mg
 ki
-ai "???
+ai
 x
 ag
 v
-al "???
+al
 x
 mn
 r
@@ -187,7 +182,6 @@ r
 :cm
 v
 aa
-"** 04-cas.pdf page 12
 hf
 ak
 nk
@@ -207,7 +201,7 @@ mn
 r
 
 :co
-x "???
+x
 ai
 v
 ch
@@ -217,7 +211,7 @@ ai
 ac
 ca
 ka
-mc "???
+mc
 mi
 kk
 ck
@@ -249,7 +243,6 @@ ck
 kk
 mi
 mc
-"** 04-cas.pdf page 13
 x
 jh
 v
@@ -311,9 +304,8 @@ x
 aa
 v
 ka
-"** 04-cas.pdf page 14
 mc
-mi "???
+mi
 kk
 x
 ak
@@ -373,7 +365,6 @@ v
 if
 x
 ak
-"** 04-cas.pdf page 15
 v
 if
 nf
@@ -434,8 +425,7 @@ gi
 gc
 ia
 ma
-ml "???
-"** 04-cas.pdf page 17
+ml
 x
 mn
 r
@@ -497,7 +487,6 @@ ai
 ac
 ca
 ka
-"** 04-cas.pdf page 16
 mc
 mi
 kk
@@ -559,7 +548,3 @@ hi
 fk
 x
 mn
-" The end of file seems abrupt, every other :cX section ends with:
-" x
-" mn
-" r
