@@ -1,8 +1,8 @@
 "** 04-cas.pdf page 1
 " cas
 
-	" Usage: cas [ input [ output ] ]
-	" graphics display character assembler???
+	" Usage: cas output input
+	" graphics display character assembler
 
    narg = i 017777
 
