@@ -128,8 +128,6 @@ dupcheck: 0
    lac i t6
    xor bit
    dac i t6
-   xor bit
-   dac i t6
    jmp i dupcheck
 
 badadr:
