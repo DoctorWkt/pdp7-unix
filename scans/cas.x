@@ -1,7 +1,8 @@
+"** 04-cas.pdf page 9
 :ca
 v
 af
-nl
+nl "???
 x
 hd
 v
@@ -17,7 +18,7 @@ v
 gi
 ik
 kk
-mi
+mi "???
 ma
 aa
 ai
@@ -32,7 +33,7 @@ r
 x
 kk
 v
-mi
+mi "???
 mc
 ka
 ca
@@ -60,6 +61,7 @@ x
 mk
 v
 ma
+"** 04-cas.pdf page 10
 aa
 ak
 x
@@ -108,7 +110,7 @@ aa
 v
 na
 x
-gb
+gb "???
 v
 gk
 x
@@ -121,6 +123,7 @@ r
 
 :ci
 x
+"** 04-cas.pdf page 11
 md
 v
 mi
@@ -143,11 +146,11 @@ v
 mc
 mg
 ki
-ai
+ai "???
 x
 ag
 v
-al
+al "???
 x
 mn
 r
@@ -182,6 +185,7 @@ r
 :cm
 v
 aa
+"** 04-cas.pdf page 12
 hf
 ak
 nk
@@ -201,7 +205,7 @@ mn
 r
 
 :co
-x
+x "???
 ai
 v
 ch
@@ -211,7 +215,7 @@ ai
 ac
 ca
 ka
-mc
+mc "???
 mi
 kk
 ck
@@ -243,6 +247,7 @@ ck
 kk
 mi
 mc
+"** 04-cas.pdf page 13
 x
 jh
 v
@@ -304,8 +309,9 @@ x
 aa
 v
 ka
+"** 04-cas.pdf page 14
 mc
-mi
+mi "???
 kk
 x
 ak
@@ -365,6 +371,7 @@ v
 if
 x
 ak
+"** 04-cas.pdf page 15
 v
 if
 nf
@@ -425,68 +432,8 @@ gi
 gc
 ia
 ma
-ml
-x
-mn
-r
-
-:c3
-x
-aa
-v
-ak
-fe
-fi
-hk
-kk
-mi
-mc
-x
-ka
-v
-nd
-x
-mn
-r
-
-:c4
-x
-mh
-v
-ah
-ia
-il
-x
-mn
-r
-
-:c5
-x
-ak
-v
-aa
-fa
-fi
-hk
-kk
-mi
-mc
-x
-ka
-v
-nd
-x
-mn
-r
-
-:c6
-x
-ck
-v
-ai
-ac
-ca
-ka
+ml "???
+"** 04-cas.pdf page 16
 mc
 mi
 kk
@@ -548,4 +495,70 @@ hi
 fk
 x
 mn
+"** 04-cas.pdf page 17
+x
+mn
 r
+
+:c3
+x
+aa
+v
+ak
+fe
+fi
+hk
+kk
+mi
+mc
+x
+ka
+v
+nd
+x
+mn
+r
+
+:c4
+x
+mh
+v
+ah
+ia
+il
+x
+mn
+r
+
+:c5
+x
+ak
+v
+aa
+fa
+fi
+hk
+kk
+mi
+mc
+x
+ka
+v
+nd
+x
+mn
+r
+
+:c6
+x
+ck
+v
+ai
+ac
+ca
+ka
+
+" The end of file seems abrupt, every other :cX section ends with:
+" x
+" mn
+" r
