@@ -25,23 +25,24 @@ pibreak:		" priority interrupt break processing "chain"
    dac dpwrite		" dpwrite = -1
    jmp piret	"** END OF CROSSOUT
 
-1: clsf			" clock overflow (line frequency ticks)?
+1: clsf			" clock overflow (60hz tick increment of loc 7 (-1))
    jmp 1f		"  no
 
    lpb			" load display push buttons
    dac pbsflgs		" save
    isz s.tim+1		" increment low order tick count
-   skp			"  no overflow, skip second increment
+   skp			"  no overflow, skip high order word increment
    isz s.tim		"   low order overflowed, increment high order count
-   isz uquant		"    increment user quantum counter
-	"** written: ttydelay -> ttyd1
+			"   ("never" skips: 36 bits overflows every 36 years!)
+   isz uquant		"    increment user quantum counter (ignore overflow)
+			"     (18 bits overflows in 72 minutes)
+	"** written: ttydelay -> ttyd1 ;
 	"** written: ttyrestart -> ttyres1
-
-cnop:			" fetched as constant in iread
-   nop			
+cnop:			" constant location for iread (stored at iwrite!)
+   nop
    -1
-   dac 7		" set location 7 to -1 (nothing ever checks/clears it?)
-   clon			" enable clock interrupts, reset flag
+   dac 7		" reset rt clock count to -1 (overflow on next tick)
+   clon			" enable clock interrupts, clear overflow flag
    lac ttydelay		" tty delay positive?
    spa			"  yes: skip to skp
    isz ttydelay		"   no: done delaying?
@@ -129,7 +130,7 @@ dsprestart:
    jmp piret		"   no: done
    lac sfiles+1		" get ttyout sleep word
    sma			" highest bit set?
-   xor o400000		" no, make it so (why???)
+   xor o400000		" no, make it so
    dac sfiles+1		" save back
 
 "** 01-s1.pdf page 43
@@ -168,7 +169,7 @@ ttyrestart: 0
    tad o20		" bump by 16
    rcr			" divide by two
    cma			" complement
-   dac ttydelay		" save
+   dac ttydelay		" save as delay countdown
    jmp ttyrestart i
 2:
    lac sfiles+1		" run out of characters to send: wake user(s)

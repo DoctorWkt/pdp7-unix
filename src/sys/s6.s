@@ -270,12 +270,10 @@ t = t+3
 	" AC/ file offset
 	"    jms iwrite; addr; count
 
-iwrite: 0
+iwrite: 0				" set to skp (or nop by iread)
    dac 9f+t				" save arg in t0
    lac iwrite				" load return address
-
 "** 01-s1.pdf page 38
-
    dac iread				" save as iread return addr
    lac cskp				" load skip instruction
    dac iwrite				" save as iwrite instruction
@@ -287,7 +285,7 @@ iwrite: 0
 iread: 0
    dac 9f+t				" save offset in t0
    lac cnop				" get nop
-   dac iwrite				" save as iwrite instruction
+   dac iwrite				" save in iwrite return location
 1:					" common code for iread/iwrite
    -1
    tad iread i				" get word before return addr
@@ -322,17 +320,17 @@ iread: 0
    tad dm1
    xct iwrite				" skip if write
    jmp .+3
-   dac 10
-cskp:
+   dac 10				" here on read
+cskp:					" literal for store to iwrite
    skp
-   dac 11
+   dac 11				" here on write
 2:
    lac 11 i
    dac 10 i
    isz 9f+t
    isz 9f+t+1
    jmp 3f
-      xct iwrite
+      xct iwrite			" skip if write
       jmp 4f
       lac 9f+t
       jms betwen; d0; i.size
@@ -348,7 +346,7 @@ cskp:
    and o77
    sza
    jmp 2b
-   xct iwrite
+   xct iwrite			" skip if write
    jmp 1b
    lac 9f+t+3
    jms dskwr

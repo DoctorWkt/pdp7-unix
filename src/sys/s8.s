@@ -123,7 +123,7 @@ coldentry:
    dzm 0100 " not re-entrant
    caf				" clear all flags
    ion				" enable interrupts
-   clon				" clear clock flag
+   clon				" clear clock overflow flag
    law 3072			" initialize display....
    wcga
    jms dspinit

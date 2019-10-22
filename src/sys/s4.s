@@ -56,8 +56,7 @@ free: 0
    jmp free i		" Return from the routine
 t = t+1
 
-	" load AC indirect (without using indirect!)
-	" need to avoid use of indirect in interrupt service routines
+	" "load ac indirect"
 	" AC/ address
 	"   jms laci
 	" AC/ contents of address
@@ -143,7 +142,7 @@ copyz: 0
 t = t+1
 
 	" Character queue management routines
-	" (CALLED FROM PI: USE OF INDIRECT AVOIDED!)
+	" (CALLED FROM PI: USE OF INDIRECT AVOIDED TO AVOID DISK DMA UNDERRUN)
 
 	" Queue numbers:
 	"  0: free list
@@ -366,42 +365,44 @@ t = t+1
 
 	" perform disk I/O (both filesystem buffer and swapping)
 	" passed physical (BCD) disk address
+	" waits for disk interrupt: no overlapped operation
+	" to avoid disk DMA underrun
 	" called:
-	"   jms dsktrans; -WC; MAC; addr_ptr; dsld_ptr
+	"   jms dsktrans; -words; mem_addr; disk_addr_ptr; op_ptr_ptr
 dsktrans: 0
-   -10
+   -10				" set retry counter
    dac 9f+t
 1:
    -1
-   tad dsktrans
-   dac 12
+   tad dsktrans			" get arg pointer
+   dac 12			" store as auto-index
 "** 01-s1.pdf page 26
    dscs				" clear status register
-   lac 12 i
+   lac 12 i			" pick up word count
    dslw				" load WC
-   lac 12 i
+   lac 12 i			" pick up memory address
    dslm				" load MAC
-   lac 12 i
-   jms laci
-   dsld				" load TA & SA
-   dzm .dskb
-   lac 12 i
-   jms laci
-   jms laci
-   dsls				" load status
+   lac 12 i			" get disk_addr_ptr
+   jms laci			" get disk address
+   dsld				" load BCD track and sector (TA & SA)
+   dzm .dskb			" clear disk interrupt indicator
+   lac 12 i			" load status (op) pointer pointer
+   jms laci			" fetch pointer
+   jms laci			" fetch op
+   dsls				" load status register (sets busy, int enb)
    lac .dskb			" check for interrupt
    sna
-   jmp .-2
+   jmp .-2			" loop until interrupt seen
    lac .dske			" get status from interrupt
    sma
    jmp 12 i			" return
-   isz 9f+t
-   jmp 1b
+   isz 9f+t			" increment retry counter
+   jmp 1b			"  less than 10 tries: try again
    jms halt " 10 disk errors
 t = t+1
 
 halt: 0
-   isz 9f+t			" spin for a while (process interrupts)
+   isz 9f+t			" spin for a while (process interrupts?)
    jmp .-1
    iof				" disable interrupts
    hlt				" halt
