@@ -30,7 +30,7 @@ Details of the files:
 * trysys.s: page 65  of 01-s1.pdf
 * scope.v: pages 3-18 of 03-scope.pdf
 * cas.s: pages 1-8 of 04-cas.pdf
-* cas.x: pages 9-17 of 04-cas.pdf
+* cas.cas: pages 9-17 of 04-cas.pdf
 * adm.s: pages 2-11  of 05-1-4.pdf
 * ald.s: pages 13-17 of 05-1-4.pdf
 * apr.s: pages 19-30 of 05-1-4.pdf
