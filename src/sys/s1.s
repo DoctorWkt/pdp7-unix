@@ -6,12 +6,16 @@ orig:
    hlt				" overwritten with interrupt return addr
    jmp pibreak			" dispatch to interrupt processing
 
-. = orig+7
-   -1				" only ever set (to -1): never read?!
+. = orig+7			" real time (60Hz) clock
+   -1				" -1 will cause "clock overflow" on next tick
+				" Overflow is checked by "clsf" instr
+				" in PI service (pibreak) routine,
+				" reset to -1 after tick handling
+				" results in an interrupt every "jiffy"
 
 . = orig+020			" syscall (CAL) and user "interrupt" processing
    1f				" addr for "CAL I": store return here on "CAL"
-   iof				" interrupts off
+   iof				" here on CAL: interrupts off
    dac u.ac			" save user AC
    lac 020			" save user return addr
    dac 1f			" save as if "CAL I"
@@ -22,29 +26,29 @@ orig:
    1f				" literal to restore location 20
 1: 0				" "CAL I" PC stored here
    iof				" interrupts off
-   dac u.ac			" save user AC
+   dac u.ac			" save user AC in user area
    lacq
-   dac u.mq			" save user MQ
+   dac u.mq			" save user MQ in user area
    lac 8
-   dac u.rq			" save user auto-index location 8
+   dac u.rq			" save user auto-index location 8 in uarea
    lac 9
-   dac u.rq+1			" save user auto-index location 9
-   jms copy; 10; u.rq+2; 6	" save user auto-index locations 10-15
-   lac 1b			" load user PC after system call
-   dac u.rq+8			" save user PC
+   dac u.rq+1			" save auto-index location 9 in user area
+   jms copy; 10; u.rq+2; 6	" save auto-index locations 10-15 (using 8/9!)
+   lac 1b			" load user PC
+   dac u.rq+8			" save in user area
    -1				" load -1
    dac .savblk			" set "save" flag (cleared by disk I/O?)
    dac .insys			" set "in system" flag
-   lac uquant			" load user quantum count
-   jms betwen; d0; maxquant	" check if between 0 & maxquant??
-      jms swap			" no: swap processes
+   lac uquant			" load user quantum (tick) count
+   jms betwen; d0; maxquant	" check if between 0 & maxquant (30 jiffies)
+      jms swap			"  no: quantum expired: swap process out
    ion				" interrupts on
    -1
    tad u.rq+8			" get address of system call
-   jms laci			" load AC indirect??
-   jms betwen; o20001; swn	" range check
+   jms laci			" load system call instruction
+   jms betwen; o20001; swn	" range check (expects CAL I!)
       jmp badcal		" bad system call
-   tad swp			" add system call table base
+   tad swp			" add "jmp syscall_table_base"
    dac .+1			" save as next instruction
    jmp .. i			" dispatch system call
 
@@ -137,7 +141,7 @@ swp:			" system call dispatch table
    .chdir; .chmod; .chown; badcal; .sysloc; badcal; .capt; .rele
    .status; badcal; .smes; .rmes; .fork
 swn:
-   .-swp-1 i		" count of system calls, plus indirect!
+   .-swp-1 i		" last system call number: "CAL I n"
 
 	" AC/ new value for intflg (non-zero to ignore interrupt char)
 	"   sys intrp
