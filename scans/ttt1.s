@@ -32,7 +32,7 @@ loop:
    law stack-1
    dac 10
    jms try; jmp unwind
-   jmp heur; jmp loop
+   jms heur; jmp loop
 
 unwind:
    lac 12
@@ -67,7 +67,7 @@ move: 0
    lac dspflg
    sza
    jmp dspmove
-   jms messg; m>;>o>;v>;e>;0
+   jms messg; m>;o>;v>;e>;0
    dzm 9f+t
 1:
    jms getc
@@ -160,7 +160,7 @@ t = t+2
 
 must: 0
 
-" check for 3g,4g,4b
+" check for 3g.4g.4b
 
    law line-1
    dac 8
@@ -307,7 +307,7 @@ mark: 0
    tad o60
    dac 0f+1
    lac 9f+t
-   and o2
+   and o3
    tad o60
 "** 14-148-165.pdf page 6
    dac 0f+2
@@ -632,13 +632,14 @@ dsboard: 0
    -64
    dac 9f+t
    dzm 9f+t+2
+   law board-1
    dac 8
    law sbuf-1
    dac 11
 
 8:
    lac noblink
-   dac 11
+   dac 11 i
    lac 9f+t+2
    and o3
    alss 6
@@ -674,7 +675,7 @@ dsboard: 0
    lac 9 i
    dac 11 i
    isz 9f+t+1
-   jmp 1
+   jmp 1b
    lac noblink
    dac 11 i
    isz 9f+t+2
