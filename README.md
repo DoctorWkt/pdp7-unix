@@ -83,8 +83,23 @@ G2IN	devno=43-44
 
 login: ken
 password: ken
-@ ls system
-system?
+@ ln dd ken .
+@ ls
+dd
+system
+sop.s
+s1.s
+s2.s
+s3.s
+s4.s
+s5.s
+s6.s
+s7.s
+s8.s
+maksys.s
+trysys.s
+sys.rc
+.
 @ ls system
 dd      
 ttyin   
