@@ -36,7 +36,7 @@ loop:
    -2
    jms octal
    -1
-   tad iniks
+   tad inlks
    cma
    lmq
    -2
@@ -110,7 +110,7 @@ statbuf:
    iflags: .=.+1
    .=.+7
    iuid: .=.+1
-   iniks: .=.+1
+   inlks: .=.+1
    isize: .=.+1
    .=.+1
    ii: .=.+1
