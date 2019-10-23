@@ -1,4 +1,4 @@
-" ** 11-45-91.pdf page 2
+" ** 11-56-91.pdf page 2
 " psych
 
    lac d1
@@ -61,7 +61,7 @@ loop:
    fst; yy
    jms in
    jmp done
-" ** 11-45-91.pdf page 3
+" ** 11-56-91.pdf page 3
    lac o400000
    dac i 11
    dac i 11
@@ -123,7 +123,7 @@ done:
    jmp 5f
    spa ral
    jmp 6f
-" ** 11-45-91.pdf page 4
+" ** 11-56-91.pdf page 4
    spa ral
    jmp 7f
    jms release
@@ -185,7 +185,7 @@ done:
    lac char
    spa
    fng
-" ** 11-45-91.pdf page 5
+" ** 11-56-91.pdf page 5
    fad; arg1
    fst; arg1
    jmp restart
@@ -247,7 +247,7 @@ in: 0
 capture: 0
    law buf-1
    dac 10
-" ** 11-45-91.pdf page 6
+" ** 11-56-91.pdf page 6
    dac 11
    lac o400000
    dac i 11
