@@ -54,7 +54,7 @@ Details of the files:
 * init.s:   pages 47-51 of 07-13-19.pdf
 * ind.b:   page 2 of 08-rest.pdf
 * lcase.b: page 4 of 08-rest.pdf
-* ed1.s: pages 7-20 of 08-rest.pdf
+* ed1.s: pages 8-20 of 08-rest.pdf
 * ed2.s: pages 21-29 of 08-rest.pdf
 * fop.s: pages 1-14 of 09-1-35.pdf
 * ln.s: pages 15-16 of 09-1-35.pdf
