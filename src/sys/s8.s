@@ -159,7 +159,7 @@ uniqpid: 1			" pid generator
 lu: .=.+4			" user (process) table entry copy
 sfiles: .=.+10			" wait addresses for special files
 		" (bit vectors of waiting processes?)
-		" bit zero (MSB) is special, bit 1 first ulist entry, ....
+		" bit zero (MSB) means busy?, bit 1 first ulist entry, ....
 		" offsets:	0: ttyin, 1: ttyout, 2: keyboard,
 		"		3: ptr,   4: ptp,    6: display
 dpdata:				" dataphone data
@@ -191,8 +191,9 @@ sysdata:			" system data 64 words saved to disk
 	" second word: process pid
 	" third word:  smes/rmes status:
 	"	 0: not waiting
-	"	-1: this process waiting (rmes)
-	"	other: complement of sender pid
+	"	rmes: -1 (waiting for message)
+	"	smes: pid of process we're waiting to send to
+	"	      complement sender pid in dest process
 	" fourth word: smes message
 ulist:
    0131000;1;0;0
@@ -211,7 +212,7 @@ userdata:			" "ustruct" (swappable)
    u.rq: .=.+9			" user 010-017, user PC
    u.uid: -1			" user id
    u.pid: 1			" process id
-   u.cdir: 3			" connected directory (inode number?)
+   u.cdir: 3			" current directory (i-num?)
    u.ulistp: ulist		" pointer to process table entry
    u.swapret: 0			" kernel routine to resume at after swap in
    u.base: 0			" start of user buffer

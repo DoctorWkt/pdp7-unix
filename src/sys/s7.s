@@ -129,8 +129,8 @@ dsprestart:
    skp			"  yes
    jmp piret		"   no: done
    lac sfiles+1		" get ttyout sleep word
-   sma			" highest bit set?
-   xor o400000		" no, make it so
+   sma			" busy?
+   xor o400000		"  no, mark as busy now!
    dac sfiles+1		" save back
 
 "** 01-s1.pdf page 43
@@ -204,7 +204,7 @@ ttyrestart: 0
    sna			" have saved char?
    jmp .+5		"  no: jump to second rrb
    dac char		" yes: save as current char
-   rrb			" clear flag, read reader buffer
+   rrb			" clear flag, read ptr buffer
    dac npptchar		" save as saved char
    jmp .+3
    rrb			" here without saved char: read new
@@ -222,14 +222,14 @@ ttyrestart: 0
 2:
    lac npptchar		" get saved char (if any)
    sna			" had saved char?
-   jmp .+4		"  no: wake up writer
+   jmp .+4		"  no
    dac char		" yes: save as char to send
    dzm npptchar		" clear saved char
    jmp 3b
    rsa			" reader select alphanumeric mode
    lac sfiles+3
    jms wakeup		" wake sleepers; returns zero
-   xor o400000		" set high bit (rsa before sleep)
+   xor o400000		" mark busy (rsa before sleep @ rppti)
    dac sfiles+3
    jmp piret
 3:
@@ -285,7 +285,7 @@ ttyrestart: 0
    dac crread
    jmp piret
 
-1: crrb			" read card reader buffer??
+1: crrb			" clear CR flag for good measure???
 
 piret:			" return from priority interrupt
    lac 0		" get LINK (in bit 0)
@@ -314,7 +314,7 @@ wakeup: 0
    dac 9f+t
    sma			" high bit set?
    jmp 2f+2		"  no: skip the fun
-   lac o700000		" yes: decrement process status (wake)
+   lac o700000		" yes: decrement process status (mark ready)
 2: tad ..		" (avoiding indirect)
    dac ..
    lac 2b		" advance tad operand by 4 words
