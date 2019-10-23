@@ -1,6 +1,7 @@
 "** 08-rest.pdf page 8
 "[handwritten page number top right of scan - 1]
 " ed1
+
    lac d1
    sys write; 1f; 3		" say hello
    lac o17
@@ -32,6 +33,7 @@
    jmp advanc
 1:
    <ed>; <it>; 012
+
 advanc:
    jms rline
    lac linep
@@ -92,6 +94,7 @@ comand:
    sad o75			" =?
    jmp ceq
    jmp error
+
 ca:				" a(ppend)
    jms newline
    jms setfl
@@ -149,7 +152,7 @@ cp1:
    lac d1
    sys write; line; 2: 0
    lac addr1
-   sad addr1
+   sad addr2
    jmp advanc
    tad d1
    dac addr1
@@ -216,6 +219,7 @@ cr:				" r(ead)
    isz c1
    jmp 2b
    jmp 1b
+
 cw:				" w(rite)
    jms setfl
    lac i addr1
@@ -709,7 +713,6 @@ addline: 0
    isz apt1
    jmp 1b
    jmp i addline
-
 
 getdsk: 0                  "[the entire getdsk procedure was surrounded
    and o776000             " by a box that was Xed out]:
