@@ -2,7 +2,7 @@
 " nm
 
    lac 017777 i
-   sad d3
+   sad d4
    skp
    jmp 1f
    law n.out
