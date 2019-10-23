@@ -133,7 +133,7 @@ guessloop:
    sad a4
    isz ncow
    lac g2
-   sad a2
+   sad a1
    isz ncow
    sad a2
    isz nbull
@@ -346,7 +346,7 @@ average:
    jmp gloop
 
 standing:
-   jms messg; <ta>; <nd>; 12; 0
+   jms messg; <ta>; <nd>; 012; 0
    lac user
    dac 2f
    dzm user
@@ -380,7 +380,7 @@ paver: 0
    jms number
    lac u.nguess
    jms aver
-   jms messg; 040; <t; 075; 0
+   jms messg; 040; <t 075; 0
    lac u.ntime
    cll; idiv; 15
    lacq
@@ -430,7 +430,7 @@ messg: 0
    sna
    jmp 8 i
    dac 1f
-   dac d1
+   lac d1
    sys write; 1f; 1
    jmp 1b
 "** 09-1-35.pdf page 29
@@ -478,7 +478,7 @@ m7s = .-m7
 m8: <av>;<g 075
 m8s = .-m8
 m9: 057
-9s = .-m9
+m9s = .-m9
 m10: 040075; 040
 m10s = .-m10
 moostat: <mo>;<os>;<ta>;<t 040
