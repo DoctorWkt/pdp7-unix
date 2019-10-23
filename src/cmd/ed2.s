@@ -81,6 +81,7 @@ cs:
    skp
    jmp 3b
    jms addline
+
 2:
    lac addr1
    sad addr2
@@ -341,7 +342,7 @@ found: 0
    jmp 2f
    jmp 3f
 1: "???
-   lac charno
+   lac lchrno
    cma
    tad charno
    spa
