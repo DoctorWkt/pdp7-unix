@@ -129,7 +129,7 @@ nextfile: 0
    dac ital
    jmp i nextfile
 
-getsc:0
+getsc: 0
 lac i getsc
 dac sctalp
 isz getsc
@@ -186,26 +186,26 @@ control: 0
 2:
    ncase = 0
 " ** 11-56-91.pdf page 12
-<ad>; jmp casead; ncase = ncase+1
-<bp>; jmp casebp; ncase = ncase+1
-<br>; jmp casebr; ncase = ncase+1
-<cc>; jmp casecc; ncase = ncase+1
-<ce>; jmp casece; ncase = ncase+1
-<ds>; jmp caseds; ncase = ncase+1
-<fi>; jmp casefi; ncase = ncase+1
-<in>; jmp casein; ncase = ncase+1
-<li>; jmp caseli; ncase = ncase+1
-<ll>; jmp casell; ncase = ncase+1
-<ls>; jmp casels; ncase = ncase+1
-<na>; jmp casena; ncase = ncase+1
-<ne>; jmp casene; ncase = ncase+1
-<nf>; jmp casenf; ncase = ncase+1
-<pl>; jmp casepl; ncase = ncase+1
-<sp>; jmp casesp; ncase = ncase+1
-<ss>; jmp casess; ncase = ncase+1
-<ti>; jmp caseti; ncase = ncase+1
-<ul>; jmp caseul; ncase = ncase+1
-<un>; jmp caseun; ncase = ncase+1
+   <ad>; jmp casead; ncase = ncase+1
+   <bp>; jmp casebp; ncase = ncase+1
+   <br>; jmp casebr; ncase = ncase+1
+   <cc>; jmp casecc; ncase = ncase+1
+   <ce>; jmp casece; ncase = ncase+1
+   <ds>; jmp caseds; ncase = ncase+1
+   <fi>; jmp casefi; ncase = ncase+1
+   <in>; jmp casein; ncase = ncase+1
+   <li>; jmp caseli; ncase = ncase+1
+   <ll>; jmp casell; ncase = ncase+1
+   <ls>; jmp casels; ncase = ncase+1
+   <na>; jmp casena; ncase = ncase+1
+   <ne>; jmp casene; ncase = ncase+1
+   <nf>; jmp casenf; ncase = ncase+1
+   <pl>; jmp casepl; ncase = ncase+1
+   <sp>; jmp casesp; ncase = ncase+1
+   <ss>; jmp casess; ncase = ncase+1
+   <ti>; jmp caseti; ncase = ncase+1
+   <ul>; jmp caseul; ncase = ncase+1
+   <un>; jmp caseun; ncase = ncase+1
 
 " control cases
 casead:
@@ -815,6 +815,7 @@ undline: 0
    lac o10
    dac i 9
    lac o137
+   dac i 9
    jmp 1b
 1:
    law tchar-1
@@ -906,6 +907,7 @@ pl: 66
 ad: -1
 fi: -1
 cc: .>
+
 o12: 012
 o40: 040
 o177: 0177
