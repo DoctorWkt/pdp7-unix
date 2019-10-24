@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# shell script to help compare src/{cmd,sys}/file and scans/file
+
+SCAN=$1
+SRC=$2
+
+TMPDIR=/tmp/compare$$
+trap "rm -fr $TMPDIR" 0
+mkdir -p $TMPDIR/scan $TMPDIR/src
+
+F=`basename $SCAN`
+TSCAN=$TMPDIR/scan/$F
+TSRC=$TMPDIR/src/$F
+
+sed -e '/^		*"/d' -e 's/		*".*$//' < $SCAN > $TSCAN
+sed -e '/^		*"/d' -e 's/		*".*$//' < $SRC > $TSRC
+
+diff -uw $TSCAN $TSRC
