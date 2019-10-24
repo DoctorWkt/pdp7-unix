@@ -1,5 +1,6 @@
 "** 09-1-35.pdf page 15
 " ln
+
    lac 017777 i
    sad d4
    jmp error
@@ -24,7 +25,7 @@ loop:
    tad d4
    dac name
    dac name1
-   sys link; dirn; 0; name: 0; name1: 0
+   sys link; dirn: 0; name: 0; name1: 0
    sma
    jmp loop
    lac name
@@ -60,7 +61,7 @@ arg2:
    tad d5
    dac larg
    tad d4
-"** 14-148-165.pdf page 16
+"** 09-1-35.pdf page 16
    dac larg+1
    dac larg+2
    jmp dlink
@@ -73,7 +74,7 @@ arg3:
    tad d4
    dac larg+2
 dlink:
-   sys link; larg; defdir;0;0
+   sys link; larg: defdir;0;0
    sma
    sys exit
    lac larg
