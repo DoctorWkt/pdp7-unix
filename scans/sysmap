@@ -1,24 +1,24 @@
 "** 01-s1.pdf page 57 -- system assembly map
-.        004671 r
-.ac      004012 r
+.	 004671 r
+.ac	 004012 r
 .chown	 000426 r
 .capt	 000404 r
-.creat   000665 r
+.creat	 000665 r
 .chdir	 000622 r
-.chmod   000414 r
+.chmod	 000414 r
 .dskb	 004105 r
 .dspb	 005547 r
 .dsptm	 004104	r
 .dske	 004106 r
 .exit	 001170 r
 .fork	 001116 r
-.getuid  000433 r
+.getuid	 000433 r
 .halt	 001343 r
 .int1	 004100 r
 .insys	 004077 r
 .int2	 004101 r
 .intrp	 000257 r
-.link    000474 r
+.link	 000474 r
 .lpba	 005550 r
 .open	 000633 r
 .rmes	 001204 r
@@ -60,7 +60,7 @@ d.name	 005761 r
 d.uniq	 005765 r
 d.i	 005760 r
 "** 01-s1.pdf page 58
-d0       004127 r
+d0	 004127 r
 d10	 004141 r
 d1	 004130 r
 d2	 004131 r
