@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 42
 " dskio
 
 dskrd0: 0
@@ -60,6 +61,7 @@ iskio: 0
    dssf
    jmp .-1
    dsrs
+"** 07-13-19.pdf page 43
    sma
    jmp 1f
    isz 3f
