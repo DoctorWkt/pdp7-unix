@@ -1,9 +1,10 @@
+"** 07-13-19.pdf page 45
 " dsw
 
    lac djmp
    dac .-1
    oas cla
-   oma
+   cma
    tad d1
    dac t1
    sys open; dd; 0
