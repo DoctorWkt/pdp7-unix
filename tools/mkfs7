@@ -62,6 +62,7 @@ my $nextinum   = 1;	# i-num 0 is never used
 my @Dirstack;	# Stack of directories. Each value is a ref
                 # to a [ blocknum, offset, inum ] array which
                 # is the next free position in the directory
+my $lastinum   = -1;	# last inum assigned, for link to i-num -1
 
 # Debug printing
 sub dprint {
@@ -277,6 +278,8 @@ sub add_block_to_inode {
 sub add_direntry {
     my ( $name, $inum ) = @_;
 
+    $inum = $lastinum if ($inum == -1);
+
     # Get the block and offset to the next empty slot in the directory
     my $dirref = $Dirstack[-1];
 
@@ -320,6 +323,7 @@ sub add_direntry {
 
     # Finally, increment the link count
     increment_link_count($inum);
+    $lastinum = $inum;
 }
 
 # Given a name, perms, a user-id and an optional i-node number, make a
@@ -360,8 +364,11 @@ sub make_dir {
     if (!$no_dd) {
       add_direntry( "dd", $Dirstack[0]->[2] );
       dprintf("Added a dd entry to i-num %d\n", $Dirstack[0]->[2] );
+      if (!$wantdotdot && !$wantdot) {	# PLB 2019
+	add_direntry( "..", $inum );
+	dprint("Added a .. entry to ourselves\n");
+      }
     }
-
     dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
 }

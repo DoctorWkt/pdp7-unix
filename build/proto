@@ -61,9 +61,9 @@ dd           drwr- -1 4
 
         nsh      frwr- -1 bin/nsh
         nls      frwr- -1 bin/nls
+	list     l---- -1
 #       nbc      frwr- -1 bin/nbc
         nstat    frwr- -1 bin/nstat
-
 
 
   $
