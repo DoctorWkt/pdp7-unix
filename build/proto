@@ -56,6 +56,7 @@ dd           drwr- -1 4
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
+        un       frwr- -1 bin/un
 
 # new versions, from the scans
 

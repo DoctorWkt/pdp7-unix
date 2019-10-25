@@ -98,7 +98,7 @@ cmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
 	$(BINDIR)/db $(BINDIR)/nstat $(BINDIR)/tm $(BINDIR)/dsw $(BINDIR)/apr \
 	$(BINDIR)/cas $(BINDIR)/rm $(BINDIR)/rn $(BINDIR)/pd $(BINDIR)/nm \
 	$(BINDIR)/roff $(BINDIR)/p $(BINDIR)/apr $(BINDIR)/salv $(BINDIR)/moo \
-	$(BINDIR)/nsh $(BINDIR)/nls $(BINDIR)/nstat
+	$(BINDIR)/nsh $(BINDIR)/nls $(BINDIR)/nstat $(BINDIR)/un
 
 # Alternate commands: no dd, but . and ..
 altcmd: dirs $(BINDIR)/as $(BINDIR)/cat $(BINDIR)/check $(BINDIR)/chmod \
@@ -206,6 +206,9 @@ $(BINDIR)/salv: $(CMDSRC)/salv.s
 
 $(BINDIR)/moo: $(CMDSRC)/moo.s
 	$(AS) $(ASARGS) -o $(BINDIR)/moo $(CMDSRC)/moo.s
+
+$(BINDIR)/un: $(CMDSRC)/un.s
+	$(AS) $(ASARGS) -o $(BINDIR)/un $(CMDSRC)/un.s
 
 # Alternative init: no dd directory
 $(BINDIR)/altinit: $(ALTSRC)/init.s
