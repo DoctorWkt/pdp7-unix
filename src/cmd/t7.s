@@ -124,3 +124,31 @@ rtop:rstack+rsiz
 owrite:0
 obot:obuf
 osiz=64
+
+	" **************** missing last page? below this line added by phil
+
+omax:osiz
+
+jsiz=100	" PLB: total guess (char buffer?)
+j:0
+jsav:0
+jmax:jsiz
+jmin:0
+jbot:jbuf
+ljsiz:jsiz	" PLB: likely bogus!
+
+ksiz=100	" PLB: total guess (char buffer?)
+kmax:ksiz
+kbot:kbuf
+
+lochunk: 0	" PLB: WAG
+
+" tables/buffers: last so not allocated in executable
+symtab: .=.+symsiz
+equtab: .=.+equsiz
+sbbuf: .=.+sbsiz
+rstack: .=.+rsiz
+obuf: .=.+osiz
+jbuf: .=.+jsiz
+kbuf: .=.+ksiz
+start: .=.+100		" pointed to by ii: may be a stack?
