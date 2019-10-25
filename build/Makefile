@@ -8,7 +8,7 @@ ASARGS=--format=ptr
 MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
-CCARGS=-Wno-multichar -Wno-implicit
+BFLAGS=-Wno-multichar -Wno-implicit
 PDP7=pdp7
 
 # source dirs
@@ -215,10 +215,10 @@ $(BINDIR)/un: $(CMDSRC)/un.s
 
 others: dirs $(BINDIR)/b $(BINDIR)/date $(BINDIR)/mv $(BINDIR)/od
 
-# B compiler -- renamed from bc to b
+# PLB: B compiler -- renamed from bc to b
 # there is a bc.s in the second set of scans!
 $(BINDIR)/b: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
-	$(CC) $(CCARGS) -o b ../tools/b.c
+	$(CC) $(BFLAGS) -o b ../tools/b.c
 	./b $(OTHERSRC)/b.b b.s
 	$(AS) $(ASARGS) -o $(BINDIR)/b $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
 	rm b b.s
