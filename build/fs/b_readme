@@ -1,10 +1,11 @@
 Here is how to compile and run hello.b:
 
   @ bc hello.b hello.s
-  @ as ops.s bl.s hello.s bi.s
+  @ ln dmr op.s
+  @ as op.s bl.s hello.s bi.s
   I
   II
-  ops.s   
+  op.s
   bl.s    
   hello.s 
   bi.s    
