@@ -114,7 +114,7 @@ $(BINDIR)/as: $(CMDSRC)/as.s
 	$(AS) $(ASARGS) -o $(BINDIR)/as $(CMDSRC)/as.s
 
 # NOT the B compiler!
-$(BINDIR)/bcx: $(CMDSRC)/bc.s
+$(BINDIR)/bc: $(CMDSRC)/bc.s
 	$(AS) $(ASARGS) -o $(BINDIR)/bcx $(CMDSRC)/bc.s
 
 $(BINDIR)/cas: $(CMDSRC)/cas.s
@@ -213,14 +213,14 @@ $(BINDIR)/un: $(CMDSRC)/un.s
 ################
 # The commands that did not come from the scans
 
-others: dirs $(BINDIR)/bc $(BINDIR)/date $(BINDIR)/mv $(BINDIR)/od
+others: dirs $(BINDIR)/b $(BINDIR)/date $(BINDIR)/mv $(BINDIR)/od
 
-# B compiler
-# NOTE!! there is a bc.s in the second set of scans!
-$(BINDIR)/bc: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
+# B compiler -- renamed from bc to b
+# there is a bc.s in the second set of scans!
+$(BINDIR)/b: $(CMDSRC)/bl.s $(CMDSRC)/bi.s ../tools/b.c $(OTHERSRC)/b.b
 	$(CC) $(CCARGS) -o b ../tools/b.c
 	./b $(OTHERSRC)/b.b b.s
-	$(AS) $(ASARGS) -o $(BINDIR)/bc $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
+	$(AS) $(ASARGS) -o $(BINDIR)/b $(CMDSRC)/bl.s b.s $(CMDSRC)/bi.s
 	rm b b.s
 
 $(BINDIR)/date: $(OTHERSRC)/wktdate.s
