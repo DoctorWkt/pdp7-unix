@@ -42,6 +42,7 @@ dd           drwr- -1 4
         ed       frwr- -1 bin/ed
         init     frwr- -1 bin/init
         ln       frwr- -1 bin/ln
+        link     l---- -1
         ls       frwr- -1 bin/ls
         list     l---- -1
         moo      frwr- -1 bin/moo
@@ -81,5 +82,5 @@ dd           drwr- -1 4
       bl.s     frwr- 12 ../src/cmd/bl.s
       db.s     frwr- 12 ../src/cmd/db.s
       hello.b  frwr- 12 ../src/other/hello.b
-      ops.s    frwr- 12 ../src/other/ops.s
+      op.s     frwr- 12 ../src/cmd/op.s
       $
