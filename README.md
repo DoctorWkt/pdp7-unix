@@ -27,9 +27,10 @@ and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
 ### October 2019
 
-A second notebook with missing sources has been
-discovered and scanned.  New files are being added to the scans
-directory as they are typed in!
+A second notebook with missing sources has been discovered and
+scanned.  New files are being added to the scans directory as they are
+typed in!  The original commands are currently being added in the
+original-commands branch.
 
 ## Building pdp7-unix
 
@@ -83,7 +84,6 @@ G2IN	devno=43-44
 
 login: ken
 password: ken
-@ ln dd ken .
 @ ls
 dd
 system
