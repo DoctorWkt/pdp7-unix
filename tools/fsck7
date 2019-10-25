@@ -213,8 +213,8 @@ sub print_direntry {
     # Warn about empty filename
     $name= "EMPTY FILENAME" if ($name=~ m{/$});
 
-    printf( "%4d %s%s%s%s%s %2d %3d %5d %s\n",
-        $inum, $p1, $p2, $p3, $p4, $p5, $links, $uid, $size, $name );
+    printf( "%4d %s%s%s%s%s %2d %3o %5d %s\n",
+        $inum, $p1, $p2, $p3, $p4, $p5, $links, $uid & 0777, $size, $name );
 }
 
 # Given a directory's i-num and name, check it

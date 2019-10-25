@@ -58,7 +58,7 @@ dd           drwr- -1 4
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
         un       frwr- -1 bin/un
-    $
+	$
     ken      drwr- 10
       system l----  3
       sop.s      frwr- 10 ../src/sys/sop.s
@@ -74,27 +74,27 @@ dd           drwr- -1 4
       trysys.s   frwr- 10 ../src/sys/trysys.s
       sys.rc     frwr- 10 fs/sys.rc
       $
-    dmr        drwr- 12
+    dmr        drwr- 11
       system   l----  3
-      as.s     frwr- 12 ../src/cmd/as.s
-      op.s     frwr- 12 ../src/cmd/op.s
+      as.s     frwr- 11 ../src/cmd/as.s
+      op.s     frwr- 11 ../src/cmd/op.s
       $
-    bwk        drwr- 14
+    bwk        drwr- 12
       system   l----  3
-      b_readme frwr- 14 fs/b_readme
-      bi.s     frwr- 14 ../src/cmd/bi.s
-      bl.s     frwr- 14 ../src/cmd/bl.s
-      db.s     frwr- 14 ../src/cmd/db.s
-      hello.b  frwr- 14 ../src/other/hello.b
+      b_readme frwr- 12 fs/b_readme
+      bi.s     frwr- 12 ../src/cmd/bi.s
+      bl.s     frwr- 12 ../src/cmd/bl.s
+      db.s     frwr- 12 ../src/cmd/db.s
+      hello.b  frwr- 12 ../src/other/hello.b
       $
-    doug       drwr- 15
+    doug       drwr- 14
       system   l----  3
-      t1.s     frwr- 15 ../src/cmd/t1.s
-      t2.s     frwr- 15 ../src/cmd/t2.s
-      t3.s     frwr- 15 ../src/cmd/t3.s
-      t4.s     frwr- 15 ../src/cmd/t4.s
-      t5.s     frwr- 15 ../src/cmd/t5.s
-      t6.s     frwr- 15 ../src/cmd/t6.s
-      t7.s     frwr- 15 ../src/cmd/t7.s
-      t8.s     frwr- 15 ../src/cmd/t8.s
+      t1.s     frwr- 14 ../src/cmd/t1.s
+      t2.s     frwr- 14 ../src/cmd/t2.s
+      t3.s     frwr- 14 ../src/cmd/t3.s
+      t4.s     frwr- 14 ../src/cmd/t4.s
+      t5.s     frwr- 14 ../src/cmd/t5.s
+      t6.s     frwr- 14 ../src/cmd/t6.s
+      t7.s     frwr- 14 ../src/cmd/t7.s
+      t8.s     frwr- 14 ../src/cmd/t8.s
       $

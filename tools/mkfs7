@@ -221,7 +221,7 @@ sub fill_inode {
     $Block[$blocknum][ $offset + I_FLAGS ] = $flags;
 
     dprintf( "Fill inum %d: flags %06o uid %06o size %d (%06o)=> blk %d off %d\n",
-        $inum, $flags, $uid, $size, $size, $blocknum, $offset );
+        $inum, $flags, $uid & 0777, $size, $size, $blocknum, $offset );
     return ($inum);
 }
 
@@ -369,7 +369,7 @@ sub make_dir {
 	dprint("Added a .. entry to ourselves\n");
       }
     }
-    dprintf( "Made directory %s perms %06o uid %d in inum %d\n\n",
+    dprintf( "Made directory %s perms %06o uid %06o in inum %d\n\n",
         $dirname, $perms, $uid, $inum );
 }
 
@@ -442,7 +442,7 @@ sub write_file {
 # the dirstack.
 sub add_file {
     my ( $name, $perms, $uid, $extfile, $inum ) = @_;
-    dprintf( "Adding file %s perms %06o uid %d extfile %s\n",
+    dprintf( "Adding file %s perms %06o uid %06o extfile %s\n",
         $name, $perms, $uid, $extfile );
 
     # Read the file into a buffer
@@ -543,17 +543,17 @@ sub parse_proto_file {
 
         if ( $type eq I_DIRECTORY ) {
             my ( $name, $permstr, $uid, $inum ) = @words;
-            make_dir( $name, $perms, $uid, $inum );
+            make_dir( $name, $perms, oct($uid), $inum );
             next;
         }
         if ( $type eq I_FILE ) {
             my ( $name, $permstr, $uid, $extfile, $inum ) = @words;
-            add_file( $name, $perms, $uid, $extfile, $inum );
+            add_file( $name, $perms, oct($uid), $extfile, $inum );
             next;
         }
         if ( $type eq I_SPECIAL ) {
             my ( $name, $permstr, $uid, $inum ) = @words;
-            add_special( $name, $perms, $uid, $inum );
+            add_special( $name, $perms, oct($uid), $inum );
             next;
         }
         if ( $type eq I_LINK ) {
