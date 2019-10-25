@@ -185,6 +185,7 @@ finis:
    lac bfi
    sys close
    sys exit
+
 "** 05-1-4.pdf page 35
 n.out:
    0156056;0157165;0164040;040040
@@ -266,7 +267,7 @@ bufwr: 0
    dac maxsto
    jmp i bufwr
 
-:number: 0
+number: 0
    dac 3f
    lac d1000
    dac 2f
@@ -330,6 +331,7 @@ putsc: 0
 
 sctalp: 0
 sctal: 0
+
 
 betwen: 0
    dac 2f
@@ -464,7 +466,7 @@ nf1:
    lac fname
    dac 1f
    lac d1
-   sys write; 1; 0; 4
+   sys write; 1: 0; 4
    lac iof
    sma
    jmp 1f
@@ -539,7 +541,6 @@ gsymb: 0
    dac char
 1:
    jmp 0
-
 jmpsw1:
    jmp .+1
    jmp i gsymb

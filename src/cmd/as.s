@@ -1014,6 +1014,7 @@ lineno: .=.+1		" source file line number
 fakename: .=.+6		" dummy namelist entry returned by tlookup??
 namlst:			" symbol table
 .=.+4			" dot name
+"** 05-1-4.pdf page 48
 dot:			" dot type, value
 .=.+6			" dot dot name
 cmflx:			" dotdot type, value
