@@ -17,7 +17,7 @@
    skp
    jmp 2f
    lac d1
-   sys write; t1; buf; 4
+   sys write; t1: buf; 4
    lac d1
    sys write; mes+1; 1
 2:
