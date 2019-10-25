@@ -21,6 +21,8 @@ dd           drwr- -1 4
         display  irwr- -1 12
         pptout   irwr- -1 13
         adm      frwr- -1 bin/adm
+        password frw-- -1 fs/password
+        adm      frwr- -1 bin/adm
         apr      frwr- -1 bin/apr
         as       frwr- -1 bin/as
         bc       frwr- -1 bin/bc
@@ -41,34 +43,21 @@ dd           drwr- -1 4
         init     frwr- -1 bin/init
         ln       frwr- -1 bin/ln
         ls       frwr- -1 bin/ls
-        lsd      frwr- -1 bin/lsd
-        lsl      frwr- -1 bin/lsd
+        list     l---- -1
         moo      frwr- -1 bin/moo
+        mv       frwr- -1 bin/mv
         nm       frwr- -1 bin/nm
         od       frwr- -1 bin/od
         p        frwr- -1 bin/p
-        pd       frwr- -1 bin/pd        
-        mv       frwr- -1 bin/mv
-        password frw-- -1 fs/password
-        roff     frwr- -1 bin/roff
-        rn       frwr- -1 bin/rn
         rm       frwr- -1 bin/rm
+        rn       frwr- -1 bin/rn
+        roff     frwr- -1 bin/roff
         salv     frwr- -1 bin/salv
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
         un       frwr- -1 bin/un
-
-# new versions, from the scans
-
-        nsh      frwr- -1 bin/nsh
-        nls      frwr- -1 bin/nls
-	list     l---- -1
-#       nbc      frwr- -1 bin/nbc
-        nstat    frwr- -1 bin/nstat
-
-
-  $
+    $
     ken      drwr- 10
       system l----  3
       sop.s      frwr- 10 ../src/sys/sop.s
