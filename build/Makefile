@@ -72,7 +72,7 @@ dirs:
 
 # The commands that came from the original scans
 cmd: dirs \
-	$(BINDIR)/apr \
+	$(BINDIR)/adm \
 	$(BINDIR)/apr \
 	$(BINDIR)/as \
 	$(BINDIR)/cas \
