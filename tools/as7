@@ -274,6 +274,10 @@ sub set_label
 {
   my ($label,$loc)= @_;
 
+  # PLB: truncate to eight: moo.s declares "standing"
+  # but references it as "standings"
+  $label = substr($label, 0, 8);
+
   # It is a local label if we're told it is, or if it starts with "L"
   if ($Islocal{$file}{$label} || $label=~ m{^L}) {
 	# An error to have different values
@@ -304,6 +308,9 @@ sub set_label
 sub get_label
 {
   my $label= shift;
+  # PLB: truncate to eight: moo.s declares "standing"
+  # but references it as "standings"
+  $label = substr($label, 0, 8);
   return($Llabel{$file}{$label}) if (defined($Llabel{$file}{$label}));
   return($Glabel{$label});
 }
