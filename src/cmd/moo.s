@@ -447,7 +447,7 @@ rqhand:
    jmp gstart1
    jmp quit
    jmp average
-   jmp standing
+   jmp standings
    jmp reset
 
 quit:
