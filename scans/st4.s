@@ -164,7 +164,7 @@ surf: 0
 	jmp i surf
 
 drcirc: 0
-	lac crvflg
+	lac grvflg
 	spa
 	jmp i drcirc
 	lac fcplan
