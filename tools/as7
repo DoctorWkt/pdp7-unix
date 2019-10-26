@@ -361,7 +361,7 @@ sub parse_directive
   print("Got directive $directive\n") if ($debug);
 
   # Set this as a local label
-  if ($directive=~ m{^\.local\s+(\S+)}) {
+  if ($directive=~ m{^\@local\s+(\S+)}) {
     $Islocal{$file}{$1}=1;
   }
 }
@@ -383,14 +383,14 @@ sub parse_line {
 
 	print "parse_line: '$line'\n" if ($debug);
 
-	# Assembler directives start with a tab and a .
-	if ($line =~ m{^\t(\..*)}) {
-	   parse_directive($1);
-	   return;
-	}
-
 	# Lose any leading whitespace
 	$line =~ s{^\s*}{};
+
+	# Assembler directives start with an @
+	if ($line =~ m{^\@}) {
+	   parse_directive($line);
+	   return;
+	}
 
 	while ($line =~ s{^([A-Za-z0-9_\.]+):\s*}{}) { # labels
 	    process_label($1);
