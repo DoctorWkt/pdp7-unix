@@ -101,6 +101,7 @@ cmd: dirs \
 	$(BINDIR)/sh \
 	$(BINDIR)/stat \
 	$(BINDIR)/tm \
+	$(BINDIR)/ttt \
 	$(BINDIR)/un
 
 # -- compile errors
@@ -171,7 +172,6 @@ $(BINDIR)/ln: $(CMDSRC)/ln.s
 $(BINDIR)/ls: $(CMDSRC)/ls.s
 	$(AS) $(ASARGS) -o $(BINDIR)/ls $(CMDSRC)/ls.s
 
-# bullcow game: put elsewhere?
 $(BINDIR)/moo: $(CMDSRC)/moo.s
 	$(AS) $(ASARGS) -o $(BINDIR)/moo $(CMDSRC)/moo.s
 
@@ -206,6 +206,10 @@ $(BINDIR)/stat: $(CMDSRC)/stat.s
 
 $(BINDIR)/tm: $(CMDSRC)/tm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/tm $(CMDSRC)/tm.s
+
+TTT=$(CMDSRC)/ttt1.s $(CMDSRC)/ttt2.s
+$(BINDIR)/ttt: $(TTT)
+	$(AS) $(ASARGS) -o $(BINDIR)/ttt $(TTT)
 
 $(BINDIR)/un: $(CMDSRC)/un.s
 	$(AS) $(ASARGS) -o $(BINDIR)/un $(CMDSRC)/un.s

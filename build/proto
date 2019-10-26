@@ -57,6 +57,8 @@ dd           drwr- -1 4
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
         tm       frwr- -1 bin/tm
+        ttt      frwr- -1 bin/ttt
+        dttt     l---- -1
         un       frwr- -1 bin/un
 	$
     ken      drwr- 10
