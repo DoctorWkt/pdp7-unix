@@ -9,8 +9,11 @@ buildit:
 run: buildit
 	cd build && $(MAKE) run
 
-altrun: buildit
-	cd build && $(MAKE) alt && $(MAKE) altrun
+alt:
+	cd build && $(MAKE) alt
+
+altrun: alt
+	cd build && $(MAKE) altrun
 
 clean:
 	cd build && $(MAKE) clean
