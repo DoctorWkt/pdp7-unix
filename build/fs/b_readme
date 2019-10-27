@@ -1,6 +1,6 @@
 Here is how to compile and run hello.b:
 
-  @ bc hello.b hello.s
+  @ b hello.b hello.s
   @ ln dmr op.s
   @ as op.s bl.s hello.s bi.s
   I
