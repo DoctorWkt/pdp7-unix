@@ -1,8 +1,8 @@
 rm op.s
 link dmr op.s
 as sop.s op.s maksys.s
-mv a.out maksys
+rn a.out maksys
 as sop.s op.s trysys.s
-mv a.out trysys
+rn a.out trysys
 rm op.s
 as sop.s s1.s s2.s s3.s s4.s s5.s s6.s s7.s s8.s
