@@ -3,38 +3,42 @@
 
 ## About
 
-pdp7-unix is a project to resurrect Unix on the PDP-7 from scans of the original
-assembly code done by
+pdp7-unix is a project to resurrect Unix on the PDP-7 from scans of
+the original assembly code done by
 [Norman Wilson](http://www.cs.toronto.edu/~norman/pers/index.html).
 The scans of PDP-7 Unix are in the [Unix Archive](http://www.tuhs.org/)
-[as the files 0*.pdf](http://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/).
+as the files
+[0*.pdf and 1*.pdf](http://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/).
 
 ## Current Status
 
+### October 2019
+
+A second notebook with missing sources has been discovered and
+scanned.  The original commands are now in the disk image
+(only the B compiler, date, mv and od are modern programs).
+
+Graphics programs (including Space Travel) are being debugged
+along with a simulation of the display hardware.
+
 ### March 2016 
 
-We've written an assembler, a user-mode simulator and
-commented several source files. We now have these utilities running:
-as, cat, chmod, chown, chrm, cp, date, ln, ls, mv, stat. We have a working
-shell with some functionality missing. We have a working filesystem and
-we can now boot the kernel, launch init, login, get to a shell prompt and
-run the utilities.
+We've written an assembler, a user-mode simulator and commented
+several source files. We now have these utilities running: as, cat,
+chmod, chown, chrm, cp, date, ln, ls, mv, stat. We have a working
+(replacement) shell. We have a working filesystem and we can now boot
+the kernel, launch init, login, get to a shell prompt and run the
+utilities.
 
 Things to do: bring the
 system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
-### October 2019
-
-A second notebook with missing sources has been discovered and
-scanned.  New files are being added to the scans directory as they are
-typed in!  The original commands are currently being added in the
-original-commands branch.
-
 ## Building pdp7-unix
 
-pdp7-unix requires [Perl5](https://www.perl.org/) to build.
+pdp7-unix requires [Perl5](https://www.perl.org/) to build,
+plus the perl DateTime package (debian/Ubuntu libtimedate-perl).
 
 To compile it:
 
@@ -86,6 +90,7 @@ login: ken
 password: ken
 @ ls
 dd
+..
 system
 sop.s
 s1.s
@@ -99,7 +104,6 @@ s8.s
 maksys.s
 trysys.s
 sys.rc
-.
 @ ls system
 dd      
 ttyin   
@@ -159,11 +163,6 @@ source code. Everything that didn't come from the scanned files is GPLv3.
 * /src/sys   holds the modified source code of the kernel
 * /src/other holds PDP-7 source code which did not come from the scanned files
 * /tools     holds the source for the tools written to assist the project
-
-## License
-
-pdp7-unix is under the [GPLv3](LICENSE)
-
 
 ## Mailing List
 
