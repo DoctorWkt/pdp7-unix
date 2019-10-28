@@ -58,9 +58,9 @@ a.out:
 # Alternative kernel: no dd, but . and ..
 alt/a.out:
 	$(AS) -f ptr -o alt/a.out $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
-		$(ALTSRC)/s2/s2.s $(SYSSRC)/s[3-8].s
+		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
 	$(AS) -n -f list -o alt/a.lst $(SYSSRC)/sop.s $(SYSSRC)/s1.s \
-		$(ALTSRC)/s2/s2.s $(SYSSRC)/s[3-8].s
+		$(ALTSRC)/s2.s $(SYSSRC)/s[3-8].s
 
 # Phil's bootstrap code
 boot.rim: $(SYSSRC)/sop.s $(OTHERSRC)/pbboot.s
@@ -249,8 +249,8 @@ $(BINDIR)/ls: $(OTHERSRC)/wktls.s
 $(BINDIR)/lsd: $(OTHERSRC)/pblsd.s
 	$(AS) $(ASARGS) -o $(BINDIR)/lsd $(OTHERSRC)/pblsd.s
 
-$(BINDIR)/altls: $(ALTSRC)/wktls/wktls.s
-	$(AS) $(ASARGS) -o $(BINDIR)/altls $(ALTSRC)/wktls/wktls.s
+$(BINDIR)/altls: $(ALTSRC)/wktls.s
+	$(AS) $(ASARGS) -o $(BINDIR)/altls $(ALTSRC)/wktls.s
 
 $(BINDIR)/lsl: $(OTHERSRC)/pblsd.s
 	$(AS) $(ASARGS) -o $(BINDIR)/lsl $(OTHERSRC)/pblsd.s
