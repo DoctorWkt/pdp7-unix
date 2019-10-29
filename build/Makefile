@@ -8,7 +8,7 @@ ASARGS=--format=ptr
 MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
-CCARGS=-Wno-multichar
+CCARGS=-Wno-multichar -Wno-implicit
 PDP7=pdp7
 
 # source dirs
