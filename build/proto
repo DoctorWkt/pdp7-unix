@@ -94,3 +94,14 @@ dd           drwr- -1 4
       hello.b  frwr- 014 ../src/other/hello.b
       ops.s    frwr- 014 ../src/other/ops.s
       $
+    doug       drwr- 015
+      system   l----  3
+      t1.s     frwr- 015 ../src/cmd/t1.s
+      t2.s     frwr- 015 ../src/cmd/t2.s
+      t3.s     frwr- 015 ../src/cmd/t3.s
+      t4.s     frwr- 015 ../src/cmd/t4.s
+      t5.s     frwr- 015 ../src/cmd/t5.s
+      t6.s     frwr- 015 ../src/cmd/t6.s
+      t7.s     frwr- 015 ../src/cmd/t7.s
+      t8.s     frwr- 015 ../src/cmd/t8.s
+      $
