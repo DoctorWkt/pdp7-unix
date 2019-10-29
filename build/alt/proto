@@ -9,7 +9,7 @@
 #    link     l---- inumber
 #
 # The top directory's name is ignored
-# Numeric values are in decimal
+# numbers are in decimal (-1 for inode means last)
 # Contents of each directory ends with a $ on a line by itself
 # Format was inspired by 6th Edition mkfs
 #
@@ -41,10 +41,10 @@
         sh       frwr- -1 bin/sh
         stat     frwr- -1 bin/stat
 	$
-    ken      drwr- 10
+    ken      drwr- 012
       system l----  3
-        hello     frwr- 10 fs/hello
+        hello     frwr- 012 fs/hello
       $
-    dmr      drwr- 12
+    dmr      drwr- 014
       system l----  3
       $

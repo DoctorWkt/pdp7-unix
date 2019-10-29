@@ -7,7 +7,7 @@
 #    link     l---- inumber
 #
 # The top directory's name is ignored
-# Numeric values are in decimal
+# numbers are in decimal (-1 for inode means last)
 # Contents of each directory ends with a $ on a line by itself
 # Format was inspired by 6th Edition mkfs
 #
@@ -69,28 +69,28 @@ dd           drwr- -1 4
 
 
   $
-    ken      drwr- 10
+    ken      drwr- 012
       system l----  3
-      sop.s      frwr- 10 ../src/sys/sop.s
-      s1.s       frwr- 10 ../src/sys/s1.s
-      s2.s       frwr- 10 ../src/sys/s2.s
-      s3.s       frwr- 10 ../src/sys/s3.s
-      s4.s       frwr- 10 ../src/sys/s4.s
-      s5.s       frwr- 10 ../src/sys/s5.s
-      s6.s       frwr- 10 ../src/sys/s6.s
-      s7.s       frwr- 10 ../src/sys/s7.s
-      s8.s       frwr- 10 ../src/sys/s8.s
-      maksys.s   frwr- 10 ../src/sys/maksys.s
-      trysys.s   frwr- 10 ../src/sys/trysys.s
-      sys.rc     frwr- 10 fs/sys.rc
+      sop.s      frwr- 012 ../src/sys/sop.s
+      s1.s       frwr- 012 ../src/sys/s1.s
+      s2.s       frwr- 012 ../src/sys/s2.s
+      s3.s       frwr- 012 ../src/sys/s3.s
+      s4.s       frwr- 012 ../src/sys/s4.s
+      s5.s       frwr- 012 ../src/sys/s5.s
+      s6.s       frwr- 012 ../src/sys/s6.s
+      s7.s       frwr- 012 ../src/sys/s7.s
+      s8.s       frwr- 012 ../src/sys/s8.s
+      maksys.s   frwr- 012 ../src/sys/maksys.s
+      trysys.s   frwr- 012 ../src/sys/trysys.s
+      sys.rc     frwr- 012 fs/sys.rc
       $
-    dmr        drwr- 12
+    dmr        drwr- 014
       system   l----  3
-      as.s     frwr- 12 ../src/cmd/as.s
-      b_readme frwr- 12 fs/b_readme
-      bi.s     frwr- 12 ../src/cmd/bi.s
-      bl.s     frwr- 12 ../src/cmd/bl.s
-      db.s     frwr- 12 ../src/cmd/db.s
-      hello.b  frwr- 12 ../src/other/hello.b
-      ops.s    frwr- 12 ../src/other/ops.s
+      as.s     frwr- 014 ../src/cmd/as.s
+      b_readme frwr- 014 fs/b_readme
+      bi.s     frwr- 014 ../src/cmd/bi.s
+      bl.s     frwr- 014 ../src/cmd/bl.s
+      db.s     frwr- 014 ../src/cmd/db.s
+      hello.b  frwr- 014 ../src/other/hello.b
+      ops.s    frwr- 014 ../src/other/ops.s
       $
