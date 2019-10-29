@@ -12,8 +12,7 @@ set tti unix
 set rb ena
 att rb alt/image.fs
 
-# uncomment to TELNET in GRAPHICS-2 keyboard/display(!!)
-# (requires github.com/philbudne/simh)
+# enable TELNET in GRAPHICS-2 keyboard/display(!!)
 set g2in ena
 att -U g2in 12345
 
