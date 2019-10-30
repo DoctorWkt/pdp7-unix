@@ -71,7 +71,7 @@ sysexit:			" common system call exit code
    jms chkint			" pending user interrupt?
       skp			"  no, return to user
    jmp .save			"   yes: dump core
-   jms copy; u.rq+2; 10; 6	" restore auto-index locations 10-15
+   jms copy; u.rq+2; 10; 6	" restore auto-index locations 10-15 (use 8/9)
    lac u.rq+1			" restore auto-index location 9
    dac 9
    lac u.rq			" restore auto-index location 8
@@ -122,14 +122,14 @@ swap: 0
    jms dskswap; 06000		" read process in?
    lac u.swapret		" set our return addr
    dac swap			" to saved return addr
-   lac o20			" reset maxquant to 16 ticks
+   lac o20			" reset maxquant to 16 ticks (149.333ms)
    dac maxquant
    lac u.dspbuf
    sza				" using display?
 "** 01-s1.pdf page 4
    jms movdsp			"  yes. switch to user display bufferx
 3:
-   dzm uquant			" no. reset process tick count
+   dzm uquant			" reset process tick count
    iof
    jmp swap i			" return
 t = t+1

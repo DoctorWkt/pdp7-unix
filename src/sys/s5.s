@@ -88,40 +88,44 @@ fput: 0
    jmp fput i
 t = t+1
 
-	" helper for special device write routines
-	" return to caller with next character to write:
-	" when done return character count to user.
+	" helper for special device write routines to fetch
+	" returns next character from user buffer
+	" when done returns from system call w/ character count in AC.
 forall: 0
    lac u.base
    sad u.limit
    jmp 1f			" done
-   lac u.base			" get base pointer (again?)
+   lac u.base			" get base pointer (again?? already in AC?!)
    ral				" rotate MSB into LINK
    lac u.base i			" fetch word via base pointer
-   snl				" link set?
-   lrs 9			"  no: get low 9 bits
+   snl				" LINK set?
+   lrs 9			"  no: shift high character down
    and o777			" mask to 9 bits
    jmp forall i			" return char
-fallr:				" jump here for subsequent characters
+fallr:		" original caller jumps to here for subsequent characters
    lac u.base			" get base
-   add o400000			" advance pointer
-   dac u.base			" start from top
-   jmp forall+1
+   add o400000			" advance character pointer
+   dac u.base
+   jmp forall+1			" start from top
 1:
    lac u.count
    dac u.ac
    jmp sysexit
 
-	" wait for a condition variable
+	" prepare to sleep on a (character) device
+	" word after call is pointer to per-device sleepers word
+	" (bit vector indexed by ulist entry number)
+	" bit zero (MSB) of sleepers word is special (device busy?)
 	" call:
-	"   jmr sleep; sfiles+N
+	"   jms sleep; sfiles+N
+	"   jms swap
 sleep: 0
    law ulist-1		" pointer to process table
    dac 8		" in index register
    lac o200000
-   lmq			" get 200000 in MQ
-1:
-   lac u.ulistp i	" get current process status word
+   lmq			" get bit for process slot zero in MQ
+1:			" loop to get mask bit for our process in MQ
+   lac u.ulistp i	" get our process status word (contains swap addr)
    sad 8 i		" compare to next process table entry
    jmp 1f		"  match
    isz 8		" no match: skip other 3 words of process table
@@ -130,13 +134,13 @@ sleep: 0
    cla; lrs 1		" shift MQ down one
    jmp 1b		" loop
 1:
-   tad o100000		" mark process not ready
+   tad o100000		" increment our status to mark process not ready
    dac u.ulistp i
    lac sleep i		" get sleep variable pointer
    dac 9f+t
    lac 9f+t i		" get sleep variable contents
-   omq			" or in MQ (bit vector of processes waiting)
-   dac 9f+t i		" save
+   omq			" or in MQ (set bit for our process)
+   dac 9f+t i		" write sleep variable
    isz sleep		" skip sleep variable pointer
    jmp sleep i
 t = t+1

@@ -93,7 +93,7 @@ badcal:				" bad (unimplemented) system call
 	" fall into "save" system call
 	" Ken says save files could be resumed, and used for checkpointing!
 .save:				" "sys save" system call
-   lac d1			" get inode 1 (core file?)
+   lac d1			" get inode 1 (core file)
    jms iget			" load inode
    cla
    jms iwrite; 4096; 4096	" dump core
@@ -160,15 +160,15 @@ t = t+1
    dac 9f+t
    dzm 9f+t i			" clear ulist 3rd word (not waiting)
    jms error
-1: 0				" worker for searchu
+1: 0				" worker routine for searchu
    lac lu+1			" get process pid
    sad u.ac			" match?
    skp				"  yes
-   jmp 1b i			"   no: return
-   lac lu+2			" get mailbox status
+   jmp 1b i			"   no: return to searchu
+   lac lu+2			" get dest process mailbox status
    sad dm1			" -1?
    jmp 1f			"  yes: process in rmes: ok to send
-   lac o100000			" no: bump our process status (to notready?)
+   lac o100000			" no: bump our process status (to notready)
    tad u.ulistp i
    dac u.ulistp i
    law 2
@@ -176,31 +176,33 @@ t = t+1
    dac 9f+t
    lac u.ac			" get dest pid
    dac 9f+t i			" save in 3rd word of our ulist entry
-   jms swap
-   law 2			" where when swapped ready
+   jms swap			" go to sleep
+   law 2			" here when ready (swapped back in)
    tad u.ulistp
    dac 9f+t
-   dzm 9f+t i			" clear 3rd word of ulist entry
-   jmp .smes			" restart smes
-1:
+   dzm 9f+t i			" clear 3rd word of our ulist entry
+   jmp .smes			" restart smes (will fail if process gone)
+
+1:				" dest process found, and in rmes call
    -3
    tad 8
    dac 9f+t			" pointer to dest process ulist entry word 0
-   lac o700000			" decrement process status: marks ready
+   lac o700000			" decrement dest process status: marks ready
    tad 9f+t i
    dac 9f+t i
    isz 9f+t
    isz 9f+t			" point to message status
    lac u.pid			" get our pid
    cma				" complement
-   dac 9f+t i			" store in status
+   dac 9f+t i			" store in dest process status
    isz 9f+t			" advance to next word
    lac u.mq			" get user MQ
-   dac 9f+t i			" save as message
+   dac 9f+t i			" save as dest process message
    jmp okexit
 t = t+1
 
 	" wake up all processes hanging on smes to current process
+	" called on process exit and rmes system call
 awake: 0
    jms searchu; 1f
    jmp awake i
@@ -208,7 +210,7 @@ awake: 0
    lac u.pid			" get caller pid
    sad lu+2			" waiting to send to us?
    skp				"  yes
-   jmp 1b i			"   no, return
+   jmp 1b i			"   no, return to searchu
    -3
    tad 8			" get pointer to process table entry
    dac 9f+t			" save in t0
@@ -222,7 +224,7 @@ t = t+1
 	" device read/write switch
 swr:
 sww:
-   jmp .-4 i
+   jmp .-4 i			" added to special device i-number
    .halt; rttyi; rkbdi; rppti; .halt
    .halt; wttyo; wdspo; wppto
 
@@ -249,7 +251,7 @@ rttyi:
 wttyo:
    jms chkint1
    jms forall
-   sna
+   sna				" jmp fallr "returns" here
    jmp fallr
    lmq				" save char in MQ
    lac sfiles+1			" get sleep word
@@ -317,7 +319,7 @@ rkbdi:
 wdspo:
    jms chkint1
    jms forall
-   jms dspput			" put char (fallr "returns" here)
+   jms dspput			" put char (jmp fallr "returns" here)
       jmp fallr			" go back for next (continuation!)
    jms sleep; sfiles+6
    jms swap
@@ -343,7 +345,7 @@ rppti:
 	" write routine (upper half) for paper tape punch special file
 wppto:
    jms forall
-   sna
+   sna				" jmp fallr "returns" here
    jmp fallr
    lmq
    lac sfiles+4			" get sleepers
@@ -374,16 +376,21 @@ passone:
    dac u.ac
    jmp sysexit
 
+	" error return from a system call
+	" return address @error never used
+	" (perhaps saved as a kind of "errno"?)
 error: 0
    -1
    dac u.ac
    jmp sysexit
 
+	" here on tty & kbd/display read/write calls
+	" check for pending "interrupt" and terminate process
 chkint1: 0
    dzm .insys
    jms chkint
       skp
-   jmp .save
+   jmp .save			" save core and exit
    -1
    dac .insys
    jmp chkint1 i

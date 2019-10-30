@@ -300,7 +300,7 @@ open1:				" common exit for open/creat
    jmp 1f			"  no
    iof				" yes: disable interrupts
    lac ii			" get i number
-   tad swr			" add to base instruction
+   tad swr			" add to base (indirect jmp)
    dac .+1
    jmp .. i			" dispatch to read routine
 1:
@@ -339,14 +339,14 @@ open1:				" common exit for open/creat
    jmp 1f			"  no
    iof				" yes, special: turn interrupts off
    lac ii			" get i number
-   tad sww			" get write routine entry addr
+   tad sww			" add to indirect jmp
    dac .+1
    jmp .. i			" dispatch to write routine
 1:				" here with regular file
    lac u.base			" get base
    dac 1f+1			" save as iwrite arg 1
    lac u.count			" get count
-   dac 1f+2			" save as iwrite 2
+   dac 1f+2			" save as iwrite arg 2
    lac f.badd			" get fd offset
 1:
    jms iwrite; ..; ..		" write to file
