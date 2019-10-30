@@ -1,21 +1,18 @@
 .oh '11/3/70''RN(I)'
 .ta 18 31
-NAME	rn -- rename a file
+NAME	rn -- rename files
 .sp
 SYNOPSIS	
 .ul
 rn
-name1 name2
+from1 to1 [ from2 to2 ... ]
 .sp
-DESCRIPTION	
-.ul
-mv
-changes the name of name with the rename
-	system call.
+DESCRIPTION	Files are taken in pairs; The file from1
+	is renamed to to1, and so on...
 .sp
 FILES	--
 .sp
-SEE ALSO	--
+SEE ALSO	cp
 .sp
 DIAGNOSTICS
 	"? file"	- either unable to remove or create
