@@ -40,6 +40,7 @@ my $debug = 0;		# Run in debug mode
 my $format = 'a7out';	# output format
 my $namelist = 0;	# output n.out file
 my $output = 'a.out';	# output file
+my $no_label_warnings = 0; # suppress multiply defined label warnings
 
 # keep this near the GetOptions call to make it easy to add documentation!
 sub usage {
@@ -52,6 +53,7 @@ GetOptions(
     'format|f=s' => \$format,
     'namelist|n' => \$namelist,
     'output|o=s' => \$output,
+    'no-label-warnings' => \$no_label_warnings,
 ) or usage();
 
 usage() if ( @ARGV < 1 );
@@ -284,23 +286,21 @@ sub set_label
 	if ( defined( $Llabel{$file}{$label} ) && $Llabel{$file}{$label} != $loc ) {
 	    # non-fatal: as.s doesn't even warn!!!!
 	    print STDERR "$file:$lineno: Local label $label multiply defined\n"
-	        if ($stage == 2);
+	        if ($stage == 2 && !$no_label_warnings);
 	}
 	else {
 	    $Llabel{$file}{$label} = $loc;
 	    printf( "Set local label %s to %#o\n", $label, $loc ) if ($debug);
 	}
   } else {
-	# An error to have different values
+	# original as doesn't complain about multiple definitions of labels
+	# (Space Travel depends on this).  Now a warning (on by default)
 	if ( defined( $Glabel{$label} ) && $Glabel{$label} != $loc ) {
-	    # non-fatal: as.s doesn't even warn!!!!
-	    print STDERR "$file:$lineno: NOTE: Global label $label multiply defined (not an error)\n"
-	        if ($stage == 2);
+	    print STDERR "$file:$lineno: Warning: Global label $label multiply defined\n"
+	        if ($stage == 2 && !$no_label_warnings);
 	}
-	else {
-	    $Glabel{$label} = $loc;
-	    printf( "Set global label %s to %#o\n", $label, $loc ) if ($debug);
-	}
+	$Glabel{$label} = $loc;
+	printf( "Set global label %s to %#o\n", $label, $loc ) if ($debug);
   }
 }
 
