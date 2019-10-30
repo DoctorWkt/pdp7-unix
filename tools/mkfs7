@@ -513,6 +513,12 @@ sub parse_perms {
     return ( $filetype, $perms );
 }
 
+sub uid {
+    my $uid = shift;
+    return -1 if ($uid eq '-1');
+    return oct($uid);
+}
+
 # Open the named proto file and parse it
 sub parse_proto_file {
     my $file = shift;
@@ -543,17 +549,17 @@ sub parse_proto_file {
 
         if ( $type eq I_DIRECTORY ) {
             my ( $name, $permstr, $uid, $inum ) = @words;
-            make_dir( $name, $perms, $uid, $inum );
+            make_dir( $name, $perms, uid($uid), $inum );
             next;
         }
         if ( $type eq I_FILE ) {
             my ( $name, $permstr, $uid, $extfile, $inum ) = @words;
-            add_file( $name, $perms, $uid, $extfile, $inum );
+            add_file( $name, $perms, uid($uid), $extfile, $inum );
             next;
         }
         if ( $type eq I_SPECIAL ) {
             my ( $name, $permstr, $uid, $inum ) = @words;
-            add_special( $name, $perms, $uid, $inum );
+            add_special( $name, $perms, uid($uid), $inum );
             next;
         }
         if ( $type eq I_LINK ) {

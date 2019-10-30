@@ -294,7 +294,7 @@ sub set_label
 	# An error to have different values
 	if ( defined( $Glabel{$label} ) && $Glabel{$label} != $loc ) {
 	    # non-fatal: as.s doesn't even warn!!!!
-	    print STDERR "$file:$lineno: Global label $label multiply defined\n"
+	    print STDERR "$file:$lineno: NOTE: Global label $label multiply defined (not an error)\n"
 	        if ($stage == 2);
 	}
 	else {
@@ -398,7 +398,7 @@ sub parse_line {
 
 	return if (eol());
 
-	if ( $line =~ s{^(\S+)\s*=}{}) { # assignment
+	if ( $line =~ s{^([^;= \t]+)\s*=}{}) { # assignment
 	    my $lhs = $1;
 	    my $word = parse_expression();
 	    printf( "Setting variable %s to 0%o\n", $lhs, $word ) if ($debug);
