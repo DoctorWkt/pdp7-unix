@@ -21,7 +21,6 @@ dd           drwr- -1 4
         ttyout   irwr- -1 11
         display  irwr- -1 12
         pptout   irwr- -1 13
-        adm      frwr- -1 bin/adm
         password frw-- -1 fs/password
         adm      frwr- -1 bin/adm
         apr      frwr- -1 bin/apr
