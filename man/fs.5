@@ -4,109 +4,128 @@ NAME	format of file system
 .sp
 SYNOPSIS	--
 .sp
-DESCRIPTION	The RB09 fixed head disk has 8,000 64-word
-	blocks on each of its two surfaces. Unix uses
-	the second surface (physical blocks 8,000 to
-	15,999) and numbers them from logical block 0 to
-	logical block 7,999. The following discussion
-	refers to logical blocks.
+DESCRIPTION
+.in 8
+The RB09 fixed head disk has 8,000 64-word
+blocks (100 tracks of 80 bloocks)
+on each of its two surfaces. The Unix filesystem
+is stored in the first 80 tracks of
+the second surface (physical blocks 8,000 to
+14,399 -- physical tracks 100 to 179)
+and numbers them from logical block 0 to
+logical block 6,399.
 .sp
-	The Unix filesystem is divided into 8,000 blocks
-	of 64 words per block. Block 0 is the "sysdata"
-	block. The first word points to the first block
-	of the free-storage map. Each block in the
-	free-storage map is structured as follows: the
-	first word is the block number of the next block
-	in the free-storage map, or zero if this is the
-	end of the free-storage map. The next nine words
-	hold free block numbers, or zero (no block
-	number).
+The Unix filesystem is divided into 6,400 logical blocks
+of 64 words per block. Block 0 is the "sysdata"
+block. The first word points to the first block
+of the free-storage map. Each block in the
+free-storage map is structured as follows: the
+first word is the block number of the next block
+in the free-storage map, or zero if this is the
+end of the free-storage map. The next nine words
+hold free block numbers, or zero (no block
+number).
 .sp
-	Block 1 on the filesystem is unused. (?)
+Block 1 on the filesystem is unused. (?)
 .sp
-	I-numbers begin at 1, and the storage for
-	i-nodes begins at block 2. Blocks 2 to 711
-	contain the i-nodes, with five consecutive
-	i-nodes per block. Certain i-nodes are reserved
-	for special files, directories and devices:
+I-numbers begin at 1, and the storage for
+i-nodes begins at block 2. Blocks 2 to 711
+contain the i-nodes, with five 12-word
+i-nodes per block. Certain i-nodes are reserved
+for special files, directories and devices:
 .sp
-		1	The core file written by "sys save" or a
-			bad system call
-		2	The "dd" directory directory
-		3	The "system" directory
-		6	The "ttyin" special file
-		7	The "keyboard" (graphic-2) special file
-		8	The "pptin" (paper tape reader) special
-			file
-		10	The "ttyout" special file
-		11	The "display" (graphic-2) special file
-		12	The "pptout" (paper tape punch) special
-			file
+.nf
+1	The core file written by "sys save"
+	or a bad system call
+2	The "dd" directory directory
+3	The "system" directory
+6	The "ttyin" special file
+7	The "keyboard" (GRAPHIC-2)
+	special file
+8	The "pptin" (paper tape reader)
+	special file
+10	The "ttyout" special file
+11	The "display" (GRAPHIC-2)
+	special file
+12	The "pptout" (paper tape punch)
+	special file
+.fi
 .sp
-	There is only one file system which is always
-	mounted; it resides on the RB disk. This device
-	is also used for swapping. The swap areas are at
-	the high blocks on this device: blocks 6,400 to
-	7,999. These blocks do not appear in the free
-	list.
+There is only one file system which is always
+mounted; it resides on the RB disk.
 .sp
-	Each i-node represents one file. The format of
-	an i-node is as follows, where the left column
-	represents the offset in words from the
-	beginning of the i-node:
+The last twenty tracks of the second disk surface
+are use for bootable images and swapping:
 .sp
-		0	flags (see below)
-		1	first indirect block or contents block
-		...
-		7	seventh indirect block or contents block
-		8	user ID of owner
-		9	link count
-		10	size in words
-		11	unique value assigned at creation
+Each physical track from 180 to 189
+contains a bootable system image of 3K words.
 .sp
-	The flags are as follows:
+Each physical track from 190 to 199 is used to swap
+a user process (4K words plus a 64-word swapable
+"userdata" area).
 .sp
-		400000   i-node is allocated
-		200000   large file
-		??????   allocated bit (always on)
-		000040   special file
-		000020   directory
-		000010   read, owner
-		000004   write, owner
-		000002   read, non-owner
-		000001   write, non-owner
+Each i-node represents one file. The format of
+an i-node is as follows, where the left column
+represents the offset in words from the
+beginning of the i-node:
 .sp
-	The allocated bit (flag ??????) is believed even
-	if the i-node map says the i-node is free; thus
-	corruption of the map may cause i-nodes to
-	become unallocatable, but will not cause active
-	nodes to be reused.
+.nf
+0	flags (see below)
+1	first indirect block or data block
+...
+7	seventh indirect block or data block
+8	user ID of owner
+9	link count
+10	size in words
+11	unique value assigned at creation
 .sp
-	Word number n of a file is accessed as follows:
-	n is divided by 64 to find its logical block
-	number (say b) in the file. If the file is small
-	(flag 200000 is 0), then b must be less than 7,
-	and the physical block number corresponding to b
-	is the bth entry in the address portion of the
-	i-node.
+.in 8
+The flags are as follows:
 .sp
-	If the file is large, b is divided by 64 to
-	yield a number which must be less than 8 (or
-	the file is too large for UNIX to handle).
-	The corresponding slot in the i-node address
-	portion gives the physical block number of an
-	indirect block. The residue mod 64 gives a
-	word offset in the indirect block, and the
-	word found there is the physical address of
-	the block corresponding to b.
+400000   i-node is allocated
+200000   large file
+??????   allocated bit (always on)
+000040   special file
+000020   directory
+000010   read, owner
+000004   write, owner
+000002   read, non-owner
+000001   write, non-owner
+.fi
+.in 8
 .sp
-	If block b in a file exists, it is not necessary
-	that all blocks less than b exist. A zero block
-	number either in the address words of the i-node
-	or in an indirect block indicates that the
-	corresponding block has never been allocated.
-	Such a missing block reads as if it contained
-	all zero words.
+The allocated bit (flag ??????) is believed even
+if the i-node map says the i-node is free; thus
+corruption of the map may cause i-nodes to
+become unallocatable, but will not cause active
+nodes to be reused.
+.sp
+Word number n of a file is accessed as follows:
+n is divided by 64 to find its logical block
+number (say b) in the file. If the file is small
+(flag 200000 is 0), then b must be less than 7,
+and the physical block number corresponding to b
+is the bth entry in the address portion of the
+i-node.
+.sp
+If the file is large, b is divided by 64 to
+yield a number which must be less than 8 (or
+the file is too large for UNIX to handle).
+The corresponding slot in the i-node address
+portion gives the physical block number of an
+indirect block. The residue mod 64 gives a
+word offset in the indirect block, and the
+word found there is the physical address of
+the block corresponding to b.
+.sp
+If block b in a file exists, it is not necessary
+that all blocks less than b exist. A zero block
+number either in the address words of the i-node
+or in an indirect block indicates that the
+corresponding block has never been allocated.
+Such a missing block reads as if it contained
+all zero words.
+.in 0
 .sp
 FILES	--
 .sp
