@@ -10,52 +10,44 @@ name
 DESCRIPTION	
 .ul
 stat
-gives several kinds of information about
-	one file:
+gives several kinds of information about one file.
 .sp
-		access mode
-		number of links
-		owner
-		size in words
-		name
+.nf
+	i-number
+	flags
+	owner
+	links
+	size
 .sp
-	All information is self-explanatory except the
-	mode. The mode is a five-character string whose
-	characters mean the following:
+flag bits are:
+.nf
+.in 8
+40   special file
+20   directory
+10   read, owner
+04   write, owner
+02   read, non-owner
+01   write, non-owner
+.in 8
 .sp
-		1	s: file is small (smaller than 448 words)
-			l: file is large
-			d: file is a directory
-.sp
-		2	r: owner can read
-			-: owner cannot read
-.sp
-		3	w: owner can write
-			-: owner cannot write
-.sp
-		4	r: non-owner can read
-			-: non-owner cannot read
-.sp
-		5	w: non-owner can write
-			-: non-owner cannot write
-.sp
-	All numeric values are printed in octal.
+All values are printed in octal.
+.in 0
 .sp
 FILES	--
 .sp
-SEE ALSO	
+SEE ALSO
+.in 8
 .ul
-ls
-with the -l option gives the same information
-	as
+list
+shows all files in a directory in the same format as
 .ul
-stat,
-except that it also shows the i-node
-	number for each file.
+stat.
+.in 0
 .sp
 DIAGNOSTICS	"name  ?" for any error. "nofiles" if no file
 	name is given.
 .sp
 BUGS	none
 .sp
-OWNER	wkt
+OWNER	ken, dmr
+

@@ -2,21 +2,19 @@
 .ta 18 21 24
 NAME	ls -- list contents of directory
 .sp
-SYNOPSIS	ls [ -l ] directory
+SYNOPSIS	ls [directory]
 .sp
 DESCRIPTION	
 .ul
 ls
-lists the contents of the named directory
-	under control of one option:
+lists the contents of the current,
+or named directory.
 .sp
-		l	list in long format, giving i-number,
-			mode, owner, size in words, and name of
-			each file. (see
+.ul
+list
+lists details in the format of
 .ul
 stat
-for format of the
-			mode). Numeric values are in octal.
 .sp
 FILES	--
 .sp
@@ -29,16 +27,13 @@ BUGS	In a simulated environment, a filename larger
 	than eight characters will cause
 .ul
 ls
-to exit
-	prematurely.
+	to exit	prematurely.
 .sp
 	
 .ul
 ls
-will try to open up a directory named "." if
-	no directory is named. If the user desires this
-	functionality, they need to link "." to the
-	directory in question.
+will try to open up a directory named ".." if
+	no directory is named.
 
 .sp
-OWNER	wkt
+OWNER	ken, dmr
