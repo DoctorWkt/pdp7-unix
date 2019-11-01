@@ -81,7 +81,7 @@ lookfor: 0
    dac u.pid			" set child pid
    isz 9f+t			" advance to second word in process table
    dac 9f+t i			" set pid in process table
-   isz u.rq+8			" give skip return
+   isz u.rg+8			" give skip return
    dzm u.intflg			" clear int flag
    jmp sysexit			" return in child process
 t= t+1
