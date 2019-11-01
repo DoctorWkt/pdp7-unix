@@ -81,6 +81,7 @@ cs:
    skp
    jmp 3b
    jms addline
+
 2:
    lac addr1
    sad addr2
@@ -201,7 +202,7 @@ cadvanc:
    "sad o52
    "jmp clsure
    dac 1f
-   jmp comp
+   jms comp
    1; jms matchar; 1: 0; 0
    jmp cadvanc
 
@@ -341,7 +342,7 @@ found: 0
    jmp 2f
    jmp 3f
 1: "???
-   lac charno
+   lac lchrno
    cma
    tad charno
    spa
@@ -515,5 +516,5 @@ line: .=.+64
 nlist: .=.+50
 clist: .=.+50
 compbuf: .=.+100
-dskbuf: .=.+1 "[line crossed out - scan markup]
+dskbuf: .=.+1024 "[line crossed out - scan markup]
 lnodes: .=.+1000
