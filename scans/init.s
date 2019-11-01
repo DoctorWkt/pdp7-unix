@@ -1,4 +1,5 @@
 " init
+"** 07-13-19.pdf page 47
 
    -1
    sys intrp
@@ -60,6 +61,7 @@ login:
    sad o72
    skp
    jmp 2b
+"** 07-13-19.pdf page 48
    lac 9 i
    sad o72
    jmp 1f
@@ -120,6 +122,7 @@ login:
    cll; als 3
    omq
    dac nchar
+"** 07-13-19.pdf page 49
    jmp 1b
 2:
    lac nchar
@@ -181,6 +184,7 @@ rline: 0
    sad 8
    jmp 1b
    -1
+"** 07-13-19.pdf page 50
    tad 8
    dac 8
    jmp 1b
@@ -242,6 +246,7 @@ m1:
 m1s = .-m1
 m2:
    <?; 012
+"** 07-13-19.pdf page 51
 m2s = .-m2
 m3:
    <pa>;<ss>;<wo>;<rd>;<: 040
