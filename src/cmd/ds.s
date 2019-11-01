@@ -72,7 +72,7 @@ loop:
    jmp 1b
 
    lac ddfilp
-   tad i1
+   tad d1
    dac i1
    lac i1 i
    dac .+3
@@ -382,7 +382,7 @@ octal: 0
    lac octal i		" Save the actual number of print digits into c
    dac c		" as a negative number.
 1:
-   cla
+   ecla
    llss 3		" Shift 3 more bits into AC
    tad o60		" Add AC to ASCII '0'
    jms putc		" and print out the digit
