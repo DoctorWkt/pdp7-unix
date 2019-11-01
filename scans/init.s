@@ -4,16 +4,16 @@
    sys intrp
    jms init1
    jms init2
-1:
+l:
    sys rmes
    sad pid1
    jmp 1f
    sad pid2
    jms init2
-   jmp 1
+   jmp l
 1:
    jms init1
-   jmp 1
+   jmp l
 
 init1: 0
    sys fork
@@ -52,7 +52,7 @@ login:
    dac 9
 2:
    lac 8 i
-   sac o12
+   sad o12
    lac o72
    sad 9 i
    skp
@@ -225,7 +225,7 @@ gchar: 0
    lac bufp
    dac tal
    lac d2
-   sys tead; buf; 64
+   sys read; buf; 64
    sna
    jmp error
    jmp gchar+1
@@ -238,7 +238,7 @@ error:
    sys exit
 
 m1:
-   012; <lo>;<gi>;<n;<:;<
+   012;<lo>;<gi>;<n;<:;<
 m1s = .-m1
 m2:
    <?; 012
@@ -269,7 +269,7 @@ password:
 d1: 1
 o43: 043
 o100: 0100
-o400000; 0400000
+o400000: 0400000
 d2: 2
 o12: 012
 om60: -060
