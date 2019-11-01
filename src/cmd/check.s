@@ -173,7 +173,7 @@ print: 0
 
 part2:
    lac icnt
-   jmp print
+   jms print
    lac d1
    sys write; m3; m3s
    lac licnt
