@@ -1,3 +1,4 @@
+"** 06-5-12.pdf page 7
 " bc
 
    jmp start
@@ -60,6 +61,7 @@ trace: 0
    jmp trace i
 
 dtrace: 0
+"** 06-5-12.pdf page 8
    lac pc
    dac 8
    lac 8 i
@@ -121,6 +123,7 @@ dspblk: 0
    dac t1
    dzm t2
 1:
+"** 06-5-12.pdf page 9
    lac t1
    sna
    jmp 1f
@@ -182,6 +185,7 @@ histog: 0
    tad histbuf
    dac t1
    isz t1 i
+"** 06-5-12.pdf page 10
    jmp histog i
    jmp .
 
@@ -243,6 +247,7 @@ badsp:
 badasgn:
    jms flush
    lac d1
+"** 06-5-12.pdf page 11
    sys write; mas; mass
    jmp stop
 mpc:
