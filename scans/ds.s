@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 30
 " ds
 
    lac 017777 i
@@ -60,6 +61,7 @@ loop:
    lac i1 i
    sad ddfilp i
    jmp 2f
+"** 07-13-19.pdf page 31
    isz i1
    isz c1
    jmp 1b
@@ -120,6 +122,7 @@ loop:
    sad i2 i
    skp
    jmp 3f
+"** 07-13-19.pdf page 32
    -1
    tad i1
    dac i3
@@ -181,6 +184,7 @@ loop:
    jms putname; scrname
    jms putname; dd
    law 012
+"** 07-13-19.pdf page 33
    jms putc
 
 3:
@@ -242,6 +246,7 @@ longout: 0
    lac statbuf+10
    jms octal; -5
    jmp longout i
+"** 07-13-19.pdf page 34
 
 readdir: 0
    law 012
@@ -303,6 +308,7 @@ readdir: 0
    lac i1
    dac 8
    lac 8 i
+"** 07-13-19.pdf page 35
    dac fsopt i
    isz fsopt
    lac 8 i
@@ -364,6 +370,7 @@ octal: 0
    jmp 1b
    lac octal i
    dac c
+"** 07-13-19.pdf page 36
 1:
    ecla llss 3
    tad o60
@@ -425,6 +432,7 @@ putc: 0
    spa
    jmp 1f
    lac 2f i
+"** 07-13-19.pdf page 37
    xor 2f+1
    jmp 3f
 1:
@@ -486,6 +494,7 @@ ddfilp: .=.+1
 ddfiles: .=.+1
 statbuf: .=.+13
 c: .=.+1
+"** 07-13-19.pdf page 38
 i1: .=.+1
 i2: .=.+1
 i3: .=.+1
@@ -498,4 +507,3 @@ fsopt: .=.+1
 fsobuf: .=.+64
 dbuf: .=.+100
 fbuf:
-   
