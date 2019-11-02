@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 23
    " dmabs
 
    lac o17
@@ -60,6 +61,7 @@ dump2:
 dump3:
    -1
    tad bufp
+"** 07-13-19.pdf page 24
    dac 8
    -64
    dac c1
@@ -121,6 +123,7 @@ dump4:
 done:
    lac tracmd
    jms put
+"** 07-13-19.pdf page 25
    cla
    jms put
    lac oldsum
@@ -182,6 +185,7 @@ boot:
 2:
    jms get1-boot+org
    dac cmd-boot+org
+"** 07-13-19.pdf page 26
    jms get1-boot+org
    cma
    dac cnt-boot+org
@@ -231,7 +235,7 @@ mes:
 comand: 0
 tracmd: 0
    d1: 1
-.17777: 017777
+o17777: 017777
 o77: 077
 o200: 0200
 o300: 0300
@@ -243,6 +247,7 @@ punout: <pp>;<to>;<ut>;040040
 o17: 017
 
 fi: 0
+"** 07-13-19.pdf page 27
 fo: 0
 count: 0
 oldsum: 0

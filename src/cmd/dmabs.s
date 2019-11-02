@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 23
    " dmabs
 
 	" takes a list of files on command line and punches out each
@@ -74,6 +75,7 @@ dump2:		" (label not used)
 dump3:				" block loop
    -1				" reset i8 to buffer
    tad bufp
+"** 07-13-19.pdf page 24
    dac 8
    -64				" get count
    dac c1
@@ -135,6 +137,7 @@ dump4:				" end of block
 done:				" here at end of input file
    lac tracmd			" get transfer command (jmp)
    jms put			" write to tape
+"** 07-13-19.pdf page 25
    cla				" write a zero word
    jms put
    lac oldsum			" get checksum
@@ -196,6 +199,7 @@ boot:
 2:
    jms get1-boot+org		" get command word from tape
    dac cmd-boot+org
+"** 07-13-19.pdf page 26
    jms get1-boot+org		" get count from tape
    cma
    dac cnt-boot+org		" store complemented (incremented below)
@@ -257,6 +261,7 @@ punout: <pp>;<to>;<ut>;040040
 o17: 017
 
 fi: 0
+"** 07-13-19.pdf page 27
 fo: 0
 count: 0
 oldsum: 0
