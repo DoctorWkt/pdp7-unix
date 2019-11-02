@@ -1,3 +1,4 @@
+"** 06-5-12.pdf page 25
 " check
 
 lac d1
@@ -60,6 +61,7 @@ iloop:
    lac iflags
    and o40
    sza
+"** 06-5-12.pdf page 26
    jmp iloop
    law idskps
    dac t1
@@ -121,6 +123,7 @@ dupcheck: 0
    lac d1
 2: alss 0
    dac bit
+"** 06-5-12.pdf page 27
    lac i t6
    and bit
    sza
@@ -170,7 +173,7 @@ print: 0
 
 part2:
    lac icnt
-   jmp print
+   jms print
    lac d1
    sys write; m3; m3s
    lac licnt
@@ -182,6 +185,7 @@ part2:
    lac d1
    sys write; m5; m5s
    lac blcnt
+"** 06-5-12.pdf page 28
    jms print
    lac d1
    sys write; m6; m6s
@@ -243,6 +247,7 @@ part3:
    cla
    llss 4
    tad alsscom
+"** 06-5-12.pdf page 29
    dac 2f
    lac d1
 2: alss 0
@@ -304,6 +309,7 @@ t1: 0
 t2: 0
 t3: 0
 t4: 0
+"** 06-5-12.pdf page 30
 t5: 0
 t6: 0
 
