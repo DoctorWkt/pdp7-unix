@@ -3,7 +3,7 @@
 
 t = 0
 
-start:
+start:			"[------ stuff for gravity - scan markup]
 	law 13
 	sys sysloc
 	dac .pbson
@@ -40,9 +40,9 @@ start:
 	dzm .pbsint
 	dzm forflg
 	dzm bacflg
-	dzm dspflg
+	dzm dspflg	"[line connecting this instruction to... - scan markup]
 	dzm locflg
-	dzm locpar
+	dzm locpar	"[... this instruction - scan markup]
 	lac d1
 	dac par
 	jms dispname
@@ -68,13 +68,13 @@ start:
 loop:
 	law dspl-1
 	dac clistp
-	jms contrl
+	jms contrl	"[arrow from below points to this instruction - scan markup]
 	lac par
 	jms absxy
 	jms shipxy
 	lac goflg
 	spa
-	jmp loop3
+	jmp loop3	"[long dash after loop3 - scan markup]
 	fld; fpzero
 	fst; ax
 	fst; ay
@@ -107,8 +107,8 @@ loop2:
 	sma
 	jms updshp
 loop3:
-	fld; horizv
-	lac scale
+	fld; horizv	"[a box enclosing all code from loop3 to loop4 - scan markup]
+	lac scale	"[arrow drawn from box up to location above - scan markup]
 	cma
 	tad vscale
 	tad aexp
@@ -116,12 +116,12 @@ loop3:
 	jms inscr
 		jmp loop4
 	tad o141577
-	dac i clistp
-	lac o164372
-	dac clistp i
-	cla
-	jms dsplanet
-loop4:
+	dac i clistp	"[crossed out with an arrow pointint to "dac dspvel" - scan markup]
+	lac o164372	"[crossed out - scan markup]
+	dac clistp i	"[crossed out - scan markup]
+	cla		"[crossed out - scan markup]
+	jms dsplanet	"[crossed out - scan markup]
+loop4:			"[inside a drawn box - scan markup]
 	sys time "put delay here.....
 "** 12-92-119.pdf page 3
 	dzm dispcl
