@@ -9,24 +9,24 @@
    tad d1
    dac .pbp1
 restart:
-   fld; arg1
-   fst; g
-   fld; arg2
-   fst; fact
-   fld; fp01
-   fst; d
-   jms capture
-   -100
-   dac j
-   fld; fp0
-   fst; z
-   fst; oldx
-   fst; oldy
-   lac o400000
-   dac i 11
-   dac i 11
-   lac setx
-   dac i 10
+   fld; arg1		"[   g = arg1						- scan markup]
+   fst; g		"[   fact = arg2					- scan markup]
+   fld; arg2		"[   d = 1.0						- scan markup]
+   fst; fact		"[   z = 0						- scan markup]
+   fld; fp01		"[   oldx = 0						- scan markup]
+   fst; d		"[   oldy = 0						- scan markup]
+   jms capture		"[loop:							- scan markup]
+   -100			"[   b = z - 110.					- scan markup]
+   dac j		"[      ----------					- scan markup]
+   fld; fp0		"[       radians					- scan markup]
+   fst; z		"[   z = z + g						- scan markup]
+   fst; oldx		"[   g = -g * fact					- scan markup]
+   fst; oldy		"[   fact = 1 / fact					- scan markup]
+   lac o400000		"[   xx = 500. * d * sin(b + pi/2)			- scan markup]
+   dac i 11		"[   ni()						- scan markup]
+   dac i 11		"[   yy = 500. * d * sin(b)				- scan markup]
+   lac setx		"[   ni()						- scan markup]
+   dac i 10		"[   goto loop	" an arrow points up to loop: above	- scan markup]
    lac sety
    dac i 10
 
