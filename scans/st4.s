@@ -6,27 +6,27 @@ displa: 0
 	sad cplan
 	skp
 	jmp 2f
-	lac locflg
+	lac locflg	"[arrow points here from the text "how to set?" - scan markup]
 	sma
 	jmp 1f
-	fld; cphi
-	fmp; absy
-	fst; ftmp1
-	fld; sphi
-	fmp; absx
-	fad; ftmp1
-	fdv; dpar
-	fst; stheta
-	fld; sphi
-	fmp; absy
-	fng
-	fst; ftmp1
-	fld; cphi
-	fmp; absx
-	fad; ftmp1
-	fdv; dpar
-	fst; ctheta
-	jmp 2f
+	fld; cphi	"[-\                     - scan markup]
+	fmp; absy	"[  |			 - scan markup]
+	fst; ftmp1	"[  |			 - scan markup]
+	fld; sphi	"[  |			 - scan markup]
+	fmp; absx	"[  |			 - scan markup]
+	fad; ftmp1	"[  |			 - scan markup]
+	fdv; dpar	"[  |			 - scan markup]
+	fst; stheta	"[  \  lock calculation	 - scan markup]
+	fld; sphi	"[  /			 - scan markup]
+	fmp; absy	"[  |			 - scan markup]
+	fng		"[  |			 - scan markup]
+	fst; ftmp1	"[  |			 - scan markup]
+	fld; cphi	"[  |			 - scan markup]
+	fmp; absx	"[  |			 - scan markup]
+	fad; ftmp1	"[  |			 - scan markup]
+	fdv; dpar	"[  |			 - scan markup]
+	fst; ctheta	"[  |			 - scan markup]
+	jmp 2f		"[-/			 - scan markup]
 1:
 	fld; sphi
 	fst; stheta
