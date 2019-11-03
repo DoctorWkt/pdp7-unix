@@ -92,9 +92,9 @@ dsprestart:
    dac .dsptm
    jmp piret
 
-1: sna ral
+1: sma ral
    jmp .+3
-   dpcf
+   raef
    jmp piret
    sma
    jmp 1f
