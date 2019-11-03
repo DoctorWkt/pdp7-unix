@@ -317,7 +317,7 @@ cskp:
       lac 9f+t+3
       jms dskwr
    4:
-"** 01-s1.pdf page 38
+"** 01-s1.pdf page 39
       lac 9f+t+2
       jmp iread i
 3:
