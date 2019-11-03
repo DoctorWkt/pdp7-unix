@@ -164,7 +164,9 @@ surf: 0
 	jmp i surf
 
 drcirc: 0
-	lac grvflg
+	lac grvflg	" looks like lac crvflg in scan, but
+			" crvflg is never defined, but grvflg is defined
+			" therefore change this to grvflg
 	spa
 	jmp i drcirc
 	lac fcplan
