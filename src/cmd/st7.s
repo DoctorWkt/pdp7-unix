@@ -152,7 +152,7 @@ dssca:
 	dsety 255
 	vecy 767
 	dsetx 127
-	dsety 639
-	vecx 767
+	dsety 639   "[--- - scan markup]
+	vecx 767    "[an arrow starts between vecx and dspl, it points to the right - scan markup]
 dspl:
 	0400000
