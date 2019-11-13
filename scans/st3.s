@@ -26,7 +26,7 @@ updshp: 0
 	sma
 	jmp .+3
 2:
-	lac accflg
+	lac accflg	"[arrow pointing here from the text "how to set?" - scan markup]
 	sma
 	jmp .+3
 	fad; maxa
