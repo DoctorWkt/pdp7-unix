@@ -1,4 +1,5 @@
 "** 09-1-35.pdf page 1
+	"[handwritten in the top center of scan - fop.s ]
 jms = 0100000
 "
 q:0
@@ -86,49 +87,49 @@ fdv = jms q
   lac hms
   sna
   sys save
-  ral
-  dac 2f
+  ral		"[box drawn around instruction - scan markup]
+  dac 2f	"[separate box around the three dac instructions - scan markup]
   dac 3f
   dac 4f
   -1
-  tad hexp
-  cma
-  tad aexp
-  dac aexp
-  lac ans
-  lmq
-  lac ams
-  sna cll
+  tad hexp	"[-\							- scan markup]
+  cma		"[  | delta aep???					- scan markup]
+  tad aexp	"[  |							- scan markup]
+  dac aexp	"[-/                             / Ams \		- scan markup]
+  lac ans	"[hand written to the right: Rem | --- |    Hls???	- scan markup]
+  lmq		"[                               \ Hms /   -----	- scan markup]
+  lac ams	"[circle around ams            ----------   Hms		- scan markup]
+  sna cll	"[                                 Hms			- scan markup]
   jmp 8f
   div
 2:0
   szl
   sys save
-  dac ce10
-  lacq
-  dac 5f
-  lac ce10
-  frdiv
-3:0
+  dac ce10	"[arrow pointing from ce10 to "REm"            +-----+-----+	- scan markup]
+  lacq          "[                   handwritten to the right: |  A  |+ B  |	- scan markup]
+  dac 5f	"[circle around 5f                             +-----+-----+	- scan markup]
+  lac ce10	"[                                             |  C  |+ D  |	- scan markup]
+  frdiv		"[                                             +-----+-----+	- scan markup]
+3:0		"[line from 3:0 to a circled "Hms"				- scan markup]
   szl
   sys save
   lacq
-  dac ce10
+  dac ce10	"[line from ce10 to text "Q1"	- scan markup]
   lac hls
   and o377777
-  frdiv
-4:0
-  szl
+  frdiv		"[                            X		- scan markup]
+4:0		"[handwritten to the right: -----	- scan markup]
+  szv		"[                           A+B	- scan markup]
   sys save
   lacq
-  dac 2b
+  dac 2b	"[circle around 2b with arrow pointing to the right
   spa cla
 "** 09-1-35.pdf page 3
-  -1
+  -1		"[vertical line to the right of instructions... - scan markup]
   tad 2b
-  cll
+  cll		"[underlined    ...vertical line ends here - scan markup]
   mul
-5:0
+5:0		"[line from 5:0 to "Q" - scan markup]
   dzm 2b
   spa
   isz 2b
@@ -139,11 +140,11 @@ fdv = jms q
   isz 3b
   skp
   isz 2b
-  lac ce10
+  lac ce10	"[lac ce10 circled - scan markup]
   lmq
   lac 3b
   sna
-  jmp 6f
+  jmp 6f	"[arrow pointing down starts to the right of 6f - scan markup]
   cma
   tad d1
   stl
@@ -151,7 +152,7 @@ fdv = jms q
   lmq
   szl
   isz 2b
-6:lac 2b
+6:lac 2b	"[arrow above points to between this instruction and the next one - scan markup]
   sma
   tad d1
   tad 5b
@@ -724,7 +725,7 @@ sqrt = jms q
    xor o200000
    xor o400000
    dac 1f
-   lac ams
+   lac ams	"[a centered dot drawn after ams - scan markup]
    frdiv; 1:..
    szl
    clq
