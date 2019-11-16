@@ -116,7 +116,7 @@
    lac u.base
    jms iget
    lac ii
-   dzm d.i
+   dac d.i
    jms copy; name; d.name; 4
    lac i.uniq
    dac d.uniq
@@ -134,7 +134,7 @@
    lac d1
    dac mode
    jms access
-   dac d.i
+   dzm d.i
    jms dput
    lac u.base
    jms iget
@@ -166,6 +166,7 @@
    dac mode
    jms access
    jms copy; 1:0; d.name; 4
+   jms dput
    jmp okexit
 
 .time:
