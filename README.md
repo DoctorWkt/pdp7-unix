@@ -148,7 +148,7 @@ tm
 
 ## Source Tree
 
-The code in the original scans are (c) Novell who own the rights to the Unix
+The code in the original scans are (c) Micro Focus who own the rights to the Unix
 source code. Everything that didn't come from the scanned files is GPLv3.
 
 * /build     is an area to build the kernel & filesystem and run them
