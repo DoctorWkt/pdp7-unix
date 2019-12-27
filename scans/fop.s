@@ -119,7 +119,7 @@ fdv = jms q
   and o377777
   frdiv		"[                            X		- scan markup]
 4:0		"[handwritten to the right: -----	- scan markup]
-  szv		"[                           A+B	- scan markup]
+  szl		"[                           A+B	- scan markup]
   sys save
   lacq
   dac 2b	"[circle around 2b with arrow pointing to the right
