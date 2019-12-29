@@ -15,14 +15,14 @@
    jmp error
 
    dscs
-   -3072; dslw
-   lac bufp; dslm
+   -3072; dslw			// word count: 3K
+   lac bufp; dslm		// transfer from buf
    lac track; alss 8; xor o300000; dsld
    lac o3000; dsls
    dssf; jmp .-1
    dsrs; spa; jmp error
-   -1024; dslw
-   lac d3072; dslm
+   -1024; dslw			// word count: 1K
+   lac d3072; dslm		// transfer from 3K mark (06000)
    lac track; alss 8; xor o300110; dsld
    lac o3000; dsls
    dssf; jmp .-1

@@ -675,7 +675,7 @@ sub usage {
 
 ### MAIN PROGRAM
 
-my ( $format, $output, $kernelfile ) = ( "simh", "image.fs" );
+my ( $format, $output, $kernelfile, $chartable ) = ( "simh", "image.fs" );
 
 GetOptions(
     'debug|d'    => \$debug,
@@ -685,6 +685,7 @@ GetOptions(
     'format|f=s' => \$format,
     'output|o=s' => \$output,
     'kernel|k=s' => \$kernelfile,
+    'chars|c=s'  => \$chartable,
 ) or usage();
 
 usage() if ( @ARGV < 1 );
@@ -696,10 +697,21 @@ dprint("\n");
 
 # If we were given a kernel image, write that to track 80
 # which is block number 6400.
+# (maksys.s can write to tracks 80-89)
+my $bootblock = 6400;
 if ($kernelfile) {
     dprint("Adding kernel $kernelfile to track 80\n");
     my @buf= read_file($kernelfile);
-    write_file(6400, @buf);
+    write_file($bootblock, @buf);
+}
+# If we were given a character table, write that
+# so it gets loaded at the 3K mark
+# maksys.s writes the contents of memory at 3K to the boot track!
+if ($chartable) {
+    dprint("Adding character table $chartable to track 80\n");
+    my @buf= read_file($chartable);
+    # XXX truncate to 1K, or at least complain??
+    write_file($bootblock + 3072/WORDSPERBLK, @buf);
 }
 dump_image( $format, $output );
 exit(0);
