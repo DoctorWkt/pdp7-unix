@@ -78,32 +78,29 @@ coldboot.rim: $(COLDBOOT)
 	$(AS) -n -f list -o a.lst $(COLDBOOT)
 
 # Filesystem image
-image.fs: cmd others a.out chars.out
-	$(MKFS) -k a.out -c chars.out proto
+image.fs: cmd others a.out chrtbl.out
+	$(MKFS) -k a.out -c chrtbl.out proto
 	$(FSCK) image.fs
-
-# character table: assemble output of cas.s
-chars.out: cas.out chars.s
-	$(AS) --no-label-warnings -f ptr -o chars.out chars.s cas.out
-
-# XXX TEMP: missing a bit of source?
-chars.s:
-	echo 'b:' > chars.s
-
-cas.out: bin/cas cas.in
-	$(A7OUT) bin/cas cas.out cas.in
-
-cas.in:	$(CMDSRC)/cas.cas $(CMDSRC)/scope.cas
-	cat $(CMDSRC)/cas.cas $(CMDSRC)/scope.cas > cas.in
 
 # Alternate filesystem image: . and .. but no dd
 alt/image.fs: altcmd altothers
 	$(MKFS) -1 -2 -3 -o alt/image.fs -k alt/a.out alt/proto
 	$(FSCK) -3 alt/image.fs
 
+# character table: assemble output of cas.s
+chrtbl.out: cas.out ../src/other/chrtbl.s
+	$(AS) -f list --no-label-warnings -o chrtbl.out ../src/other/chrtbl.s cas.out
+
+# run cas.s under a7out: needs local file!
+cas.out: bin/cas ../src/sys/cas.in
+	rm -f cas.in
+	ln -s ../src/sys/cas.in .
+	$(A7OUT) bin/cas cas.out cas.in
+	rm -f cas.in
+
 clean:
 	rm -f boot.rim image.fs a.lst n.out a.out
-	rm -f cas cas.in chars.s chars.out
+	rm -f cas cas.in cas.out chrtbl.out
 	rm -f alt/image.fs alt/a.out alt/a.lst
 	rm -rf $(BINDIR) $(TESTDIR) 
 	rm -rf $(BINARIES)
