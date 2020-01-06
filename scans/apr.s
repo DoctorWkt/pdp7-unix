@@ -593,7 +593,7 @@ transcd: 0
    jms transch
    isz c2
    jmp 1b
-   jmp transch i
+   jmp transcd i
 
 transch: 0
    lmq
