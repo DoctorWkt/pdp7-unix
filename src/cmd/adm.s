@@ -1,3 +1,4 @@
+"** 05-1-4.pdf page 2
 " adm
 
    lac 017777 i
@@ -60,6 +61,7 @@ floop1:
    dac fi
 
    -1
+"** 05-1-4.pdf page 3
    tad name
    dac 8
    -4
@@ -121,6 +123,7 @@ eof:
    dac buf+3 " final check sum
    jms putcard
    jmp floop
+"** 05-1-4.pdf page 4
 
 getword: 0
    lac ipt
@@ -182,6 +185,7 @@ putcard: 0
 
    jmp floop
 
+"** 05-1-4.pdf page 5
 ferror:
    lac name
    dac 1f
@@ -243,6 +247,7 @@ disflg: 0
 flush: 0
    lac noc
    sna
+"** 05-1-4.pdf page 6
    jmp flush i
    law 0104
    jms message; tbuf
@@ -304,6 +309,7 @@ putw: 0
 1: 0
 
 putc: 0
+"** 05-1-4.pdf page 7
    and o177
    dac opt i
    -0141
@@ -364,6 +370,7 @@ connect: 0
    and ilock
    sna
    jmp 1b
+"** 05-1-4.pdf page 8
    law 041
    dac echoch
    law 0102
@@ -425,6 +432,7 @@ retry:
    jms transch
    isz c2
    jmp 1b
+"** 05-1-4.pdf page 9
 
 " put out etx character
 2:
@@ -486,6 +494,7 @@ retry:
    lac opch
    sad o122
    jmp i message
+"** 05-1-4.pdf page 10
    lac disflg
    sna
    jmp discon
@@ -547,6 +556,7 @@ d14: 14
 o400000: 0400000
 o577777: 0577777
 o200500: 0200500
+"** 05-1-4.pdf page 11
 o122: 0122
 o3: 3
 o2: 2
