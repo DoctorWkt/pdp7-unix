@@ -181,7 +181,7 @@ loop:
 	dac ball1+vx
 2:
 	lac toptest
-	tad ball1+vy
+	tad ball1+y
 	spa
 	jmp 2f
 	jms pockettb
