@@ -14,10 +14,11 @@ v means following moves are visible.
 r means end, output label=x-b+number.
 
 All other commands are character pairs denoting y,x coordinates in a
-12x14 character raster.  Draw a line to that coordinate.  Vertical
-coordinates are a-l, and horizontal are a-m.  aa is upper left and mn
-is lower right.  All characters end with a "x mn r" sequence to move
-to the beginning of the next character.
+14x16 character raster.  Draw a line to that coordinate.  Vertical
+coordinates are a-p, and horizontal are a-n.  aa is upper left and pn
+is lower right.  Characters reside on the base line from ma to mn
+(characters like p and q descend below this line).  All characters end
+with a "x mn r" sequence to move to the beginning of the next character.
 
 
 CAS OUTPUT
@@ -27,7 +28,29 @@ The output for each character is:
 
 The label x:
 
-18-bit octal words. Each word is three 6-bit incremental moves.
+18-bit octal words.  Each word is three 6-bit incremental moves.
+Each incremental move consists of three fields: a 2 bit distance field,
+a 1 bit visibility field, a 3 bit direction field.
+
+If the visibility field is a 0 nothing is drawn, if it is a 1 a line is
+drawn.  The distance field + 1 denotes how many pixels to move in a certain
+direction.  The 2 bit direction field is limited to values in the range 0..3,
+but by adding 1, the actual distances denoted are in the range 1..4.
+The 3 bit direction field with values in the range 0..7 is to be interpreted
+according to this diagram and table:
+
+            y
+            ^			value	direction
+        7   0   1       	-----	---------
+            |           	0	up
+            |           	1	up right
+            |           	2	right
+	6---+---2>x		3	down right
+            |           	4	down
+            |           	5	down left
+            |           	6	left
+        5   4   3               7	up left
+
 
 label=x-b+number.  Number is 01, six bits saying how many moves, and
 10 zeroes.
@@ -49,9 +72,30 @@ Input:
    mn
    r
 
-This character is labelled "lbk" (left bracket).  Move invisibly to
+This character is labeled "lbk" (left bracket).  Move invisibly to
 "ai" near upper right.  Draw line left to "af".  Draw down to "mf".
-Draw right to "mj".  Invisibly move to "mn" beoynd lower right.  End.
+Draw right to "mj".  Invisibly move to "mn" beyond lower right.  End.
+
+This can be interpreted in a grid starting a location ma (row m, column a)
+denoted by a 0, and each succeeding move indicated by an increasing number:
+
+ abcdefghijklmn
+a.....2..1.....
+b..............
+c..............
+d..............
+e..............
+f..............
+g..............
+h..............
+i..............
+j..............
+k..............
+l..............
+m0....3...4...5
+n..............
+o..............
+p..............
 
 Output:
 
@@ -69,3 +113,56 @@ means draw down four steps.  72 means draw left four steps.  62 means
 move left four steps.
 
 0236000 means there are 15 moves, or 6-bit bytes.
+
+0236000 in binary is 010011110000000000, and shifting this value
+10 bits to the right gives 01001111, where only the 6 least significant
+bits indicate the number of moves, i.e. 001111 or 15 in decimal.
+
+The following explanation separates out each move onto its own line.
+Further it decodes each move into binary, and separates out and interprets
+the three distance, visibility and direction fields.  Finally each line
+ends with a comment indicating which input command generated the output move:
+
+move	move	move	dist	vis	direc	dist	vis	direc	input
+number  octal   binary	binary	binary	binary	decimal	text	text	command
+------  -----	------	------	------	------	-------	----	----	-------
+1       001	000001	00	0	001	1	false	up right ai
+2       001	000001  00	0	001	1	false	up right ai
+3       001	000001  00	0	001	1	false	up right ai
+4       001	000001  00	0	001	1	false	up right ai
+5       001	000001  00	0	001	1	false	up right ai
+6       001	000001  00	0	001	1	false	up right ai
+7       001	000001  00	0	001	1	false	up right ai
+8       001	000001  00	0	001	1	false	up right ai
+9       060	110000  11	0	000	4	false	up	 ai
+a       056	101110  10	1	110	3	true	left	 v af
+b       074	111100  11	1	100	4	true	down	 mf
+c       074	111100  11	1	100	4	true	down	 mf
+d       074	111100  11	1	100	4	true	down	 mf
+e       072	111010  11	1	010	4	true	right	 mj
+f       062	110010  11	0	010	4	false	right	 x mn
+
+This can be interpreted on a grid by starting at ma (row n, column a)
+denoted by a 0 and following the moves denoted by their corresponding
+move number.  Note that after the final move, f, the location being
+outside of the character box corresponds to the location ma of the
+next character to the right.  To the right is the same character where
+x:s denote drawn pixels and . denote undrawn pixels.
+
+ abcdefghijklmn           abcdefghijklmn
+a.....a..9.....          a.....xxxx.....
+b..............          b.....x........
+c..............          c.....x........
+d..............          d.....x........
+e.....b..8.....          e.....x........
+f.......7......          f.....x........
+g......6.......          g.....x........
+h.....5........          h.....x........
+i....4c........          i.....x........
+j...3..........          j.....x........
+k..2...........          k.....x........
+l.1............          l.....x........
+m0....d...e...f          m.....xxxxx....
+n..............          n..............
+o..............          o..............
+p..............          p..............
