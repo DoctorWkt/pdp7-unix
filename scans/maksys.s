@@ -8,9 +8,9 @@
    spa; jmp error; dac track
    tad dm10; sma; jmp error
 
-   sysopen; a.out; 0
+   sys open; a.out; 0
    spa; jmp error
-   sys read; bufp; buf; 3072
+   sys read; bufp: buf; 3072
    sad .-1
    jmp error
 
@@ -18,7 +18,7 @@
    -3072; dslw
    lac bufp; dslm
    lac track; alss 8; xor o300000; dsld
-   lac o30000; dsls
+   lac o3000; dsls
    dssf; jmp .-1
    dsrs; spa; jmp error
    -1024; dslw
@@ -35,10 +35,10 @@ error:
 1: 077077;012
 
 dm10: -10
-dm5: 5
+d5: 5
 om60: -060
 o300000: 0300000
-o300100: 0300110
+o300110: 0300110
 d8: 8
 d3072: 3072
 o3000: 03000
@@ -49,4 +49,3 @@ a.out:
 track: .=.+1
 
 buf:
-
