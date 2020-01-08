@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 2
 " db
 	"** pages 2-21  of 07-13-19.pdf
 	" Usage: db [ corefile [ namelist ] ]
@@ -62,6 +63,7 @@ wcorep: corename; 1
    "
    lac o52012			" prompt: "*\n"
    jms wchar
+"** 07-13-19.pdf page 3
    law dotdot
    dac nsearch
    jms nlsearch
@@ -123,6 +125,7 @@ cmd:
    jmp saddress
    sad o75			" '='?
    jmp address
+"** 07-13-19.pdf page 4
    sad o57			" '/'?
    jmp octal
    sad o72			" ':'?
@@ -184,6 +187,7 @@ saddress:
    lac 9f
    dac curdot
    jmp mloop
+"** 07-13-19.pdf page 5
 9:0
    "
 symbol:
@@ -245,6 +249,7 @@ print:
    spa
    jmp error
    lac rcore
+"** 07-13-19.pdf page 6
    sys read; inbuf; 64
    spa
    jmp error
@@ -306,6 +311,7 @@ prdec:     "temp
 proct:0
    jms octw
    6
+"** 07-13-19.pdf page 7
    jmp i proct
    "
 patch:
@@ -367,6 +373,7 @@ getexp:0
 xloop:
    jms rch
    lmq
+"** 07-13-19.pdf page 8
    sad o044
    skp
    jmp 1f
@@ -428,6 +435,7 @@ xloop:
    lac o40
    sad rator
    skp
+"** 07-13-19.pdf page 9
    jmp error
    lacq
    dac rator
@@ -489,6 +497,7 @@ spcai:
       lac d1
       dac reloc
       jmp i getspec
+"** 07-13-19.pdf page 10
    "
 getsym:0
    lmq
@@ -550,6 +559,7 @@ skipt:
    spa
    jmp 2f			" lc letter
 1:
+"** 07-13-19.pdf page 11
    lac nchar1
    tad om101
    spa
@@ -611,6 +621,7 @@ num1:
    jmp i getnum
    tad om10
    sma
+"** 07-13-19.pdf page 12
    jmp i getnum
    lac nchar1
    dzm nchar1
@@ -672,6 +683,7 @@ prsym:0				" print symbolic instruction
    dac word
    dzm relflg
    dzm relocflg
+"** 07-13-19.pdf page 13
    dzm nsearch
    and o760000
    sad o760000
@@ -733,6 +745,7 @@ pr1:
    tad d1
    dac addr
    lac o55
+"** 07-13-19.pdf page 14
    jms wchar
    jmp 2f
 1:
@@ -794,6 +807,7 @@ peae:				" print EAE instruction
    jmp i prsym
 1:
    law eaes
+"** 07-13-19.pdf page 15
    dac addr
    jmp nfnd
    "
@@ -855,6 +869,7 @@ pcal:
    law syss
    jms wrname
    lac o40
+"** 07-13-19.pdf page 16
    jms wchar
    lac addr
    jms wrname
@@ -916,6 +931,7 @@ nloop:
    lacq
    tad d3
    dac np
+"** 07-13-19.pdf page 17
    lac i np
    sna
    jmp nloop
@@ -977,6 +993,7 @@ testn:
    skp
    jmp nloop
    isz minp
+"** 07-13-19.pdf page 18
    isz inbuf
    isz value
    jmp 1b
@@ -1038,6 +1055,7 @@ nlerr:
    "
 rch:0
    lac nchar1
+"** 07-13-19.pdf page 19
    dzm nchar1
    sza
    jmp i rch
@@ -1099,6 +1117,7 @@ d12:12
 d8:8
 d3:3
 o177:0177
+"** 07-13-19.pdf page 20
 o136: 0136
 o45: 045
 sysflag: 0
@@ -1160,6 +1179,7 @@ nchar1:0
 nchar:0
 o177000:0177000
 o56040:056040				" ". "
+"** 07-13-19.pdf page 21
 nsearch:0
 word:0
 relflg:0
