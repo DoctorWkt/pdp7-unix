@@ -1,4 +1,7 @@
 language: c
-sudo: false
-script: make clean;make alt; make clean; make 
+sudo: yes
 
+before_install:
+  - sudo apt-get install libdatetime-perl
+
+script: make clean;make alt; make clean; make 
