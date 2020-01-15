@@ -89,7 +89,7 @@ alt/image.fs: altcmd altothers
 
 # character table: assemble output of cas.s
 chrtbl.out: cas.out ../src/other/chrtbl.s
-	$(AS) -f list --no-label-warnings -o chrtbl.out ../src/other/chrtbl.s cas.out
+	$(AS) -f ptr --no-label-warnings -o chrtbl.out ../src/other/chrtbl.s cas.out
 
 # run cas.s under a7out: needs local file!
 cas.out: bin/cas ../src/sys/cas.in

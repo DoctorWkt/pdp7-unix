@@ -1,10 +1,6 @@
 " PLB 2020-01-05
 " start of a file to assemble output of cas.s
 
-" where data will be loaded, but immaterial
-" since cas output subtracts "b" from all addresses?
-. = 06000
-
 " base. maybe AFTER table??
 b:
 
