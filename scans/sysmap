@@ -1,29 +1,30 @@
 "** 01-s1.pdf page 57 -- system assembly map
-.        004671 r
-.ac      004012 r
+.	 004671 r
+.ac	 004102 r
 .chown	 000426 r
+.close	 000725 r
 .capt	 000404 r
-.creat   000665 r
+.creat	 000665 r
 .chdir	 000622 r
-.chmod   000414 r
+.chmod	 000414 r
 .dskb	 004105 r
 .dspb	 005547 r
 .dsptm	 004104	r
 .dske	 004106 r
 .exit	 001170 r
 .fork	 001116 r
-.getuid  000433 r
+.getuid	 000433 r
 .halt	 001343 r
 .int1	 004100 r
 .insys	 004077 r
 .int2	 004101 r
 .intrp	 000257 r
-.link    000474 r
+.link	 000474 r
 .lpba	 005550 r
 .open	 000633 r
 .rmes	 001204 r
 .rele	 000410	r
-.rename	 000547	r
+.rename	 000574 r
 .read	 000731	r
 .smes	 001232	r
 .savblk	 004103	r
@@ -45,7 +46,7 @@ badcal	 001153	r
 betwen	 001654	r
 c1	 004270 r
 chkint	 000320 r
-chkink1	 001546 r
+chkint1	 001546 r
 char 	 005522	r
 cnop	 003453	r
 coldentr 004520 r
@@ -60,7 +61,7 @@ d.name	 005761 r
 d.uniq	 005765 r
 d.i	 005760 r
 "** 01-s1.pdf page 58
-d0       004127 r
+d0	 004127 r
 d10	 004141 r
 d1	 004130 r
 d2	 004131 r
@@ -69,7 +70,7 @@ d3	 004132 r
 d4	 004133 r
 d5	 004134 r
 d6	 004135 r
-d65	 004155 r
+d65	 004152 r
 d7999	 004166 r
 d7	 004136	r
 d8	 004137 r
@@ -95,7 +96,7 @@ dskrd	 002127 r
 dsktrans 002231 r
 dsploc	 004455 r
 dslot	 002474 r
-dspino	 004456 r
+dsplno	 004456 r
 dspbufp3 004116 r
 dspbufp	 005506 r
 dspresta 003523	r
@@ -105,6 +106,11 @@ dskwr	 002157 r
 dspput	 002551 r
 dspleft	 002573 r
 dspbuf	 004457 r
+dskswap	 002300 r
+dspinit	 002617 r
+dspnl	 002605 r
+edskbsp	 005504 r
+edspbuf	 004115 r
 error	 001542	r
 exitrw	 001041 r
 f.badd	 005771	r
@@ -116,8 +122,8 @@ fget	 002371	r
 finac	 003401	r
 fnode	 005770 r
 "** 01-s1.pdf page 59
-forall	 002434 r
-fput	 003413	r
+forall	 002423 r
+fput	 002413 r
 free	 001615 r
 getchar	 001756 r
 getw	 004635 r
@@ -170,11 +176,11 @@ o100000	 004177 r
 o140000	 004200 r
 o14	 004142 r
 o15	 004143 r
-0155	 004157 r
+o155	 004157 r
 o2000	 004164 r
 o200001	 004262 r
 o20001	 004172 r
-020	 004145 r
+o20	 004145 r
 o212	 004161 r
 o200000	 004201	r
 "** 01-s1.pdf page 60
@@ -183,6 +189,7 @@ o33	 004146 r
 o300000	 004203 r
 o4000	 004165 r
 o40000	 004173 r
+o40001	 004174 r
 o40	 004147 r
 o400000	 004204 r
 o500000	 004205 r
@@ -191,7 +198,7 @@ o577777	 004206 r
 o600000	 004207 r
 o640000	 004210 r
 o777	 004163	r
-o77	 004157 r
+o77	 004151 r
 o70000	 004175 r
 o77777	 004176 r
 o777760	 004213 r
@@ -252,8 +259,8 @@ u.limit	 005664 r
 u.cdir	 005657 r
 u.count	 005663 r
 u.base	 005662 r
-u.rq	 005644 r
-ulsit	 005562	r
+u.rg	 005644 r
+ulist	 005572	r
 uniqpid	 005524	r
 uquant	 005505 r
 userdata 005642 r
