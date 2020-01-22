@@ -30,12 +30,12 @@ orig:
    lacq
    dac u.mq			" save user MQ in user area
    lac 8
-   dac u.rq			" save user auto-index location 8 in uarea
+   dac u.rg			" save user auto-index location 8 in uarea
    lac 9
-   dac u.rq+1			" save auto-index location 9 in user area
-   jms copy; 10; u.rq+2; 6	" save auto-index locations 10-15 (using 8/9!)
+   dac u.rg+1			" save auto-index location 9 in user area
+   jms copy; 10; u.rg+2; 6	" save auto-index locations 10-15 (using 8/9!)
    lac 1b			" load user PC
-   dac u.rq+8			" save in user area
+   dac u.rg+8			" save in user area
    -1				" load -1
    dac .savblk			" set "save" flag (cleared by disk I/O?)
    dac .insys			" set "in system" flag
@@ -44,7 +44,7 @@ orig:
       jms swap			"  no: quantum expired: swap process out
    ion				" interrupts on
    -1
-   tad u.rq+8			" get address of system call
+   tad u.rg+8			" get address of system call
    jms laci			" load system call instruction
    jms betwen; o20001; swn	" range check (expects CAL I!)
       jmp badcal		" bad system call
@@ -71,15 +71,15 @@ sysexit:			" common system call exit code
    jms chkint			" pending user interrupt?
       skp			"  no, return to user
    jmp .save			"   yes: dump core
-   jms copy; u.rq+2; 10; 6	" restore auto-index locations 10-15 (use 8/9)
-   lac u.rq+1			" restore auto-index location 9
+   jms copy; u.rg+2; 10; 6	" restore auto-index locations 10-15 (use 8/9)
+   lac u.rg+1			" restore auto-index location 9
    dac 9
-   lac u.rq			" restore auto-index location 8
+   lac u.rg			" restore auto-index location 8
    dac 8
    lac u.mq			" restore MQ register
    lmq
    lac u.ac			" restore AC register
-   jmp u.rq+8 i			" return to user
+   jmp u.rg+8 i			" return to user
 
 	" scheduler / swapper / idle loop
 swap: 0

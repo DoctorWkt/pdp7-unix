@@ -209,7 +209,7 @@ ulist:
 userdata:			" "ustruct" (swappable)
    u.ac: 0			" user AC
    u.mq: 0			" user MQ
-   u.rq: .=.+9			" user 010-017, user PC
+   u.rg: .=.+9			" user 010-017, user PC
    u.uid: -1			" user id
    u.pid: 1			" process id
    u.cdir: 3			" current directory (i-num?)

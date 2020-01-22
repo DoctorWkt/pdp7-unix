@@ -264,8 +264,8 @@ movdsp: 0
 
 	" fetch user argument from word after "sys" call, return in AC
 arg: 0
-   lac u.rq+8 i			" fetch word after return PC
-   isz u.rq+8			" bump PC
+   lac u.rg+8 i			" fetch word after return PC
+   isz u.rg+8			" bump PC
    jmp arg i
 
 	" fetch user pathname argument from pointer word after "sys" call
