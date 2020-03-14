@@ -37,12 +37,11 @@ pdp7-unix requires [Perl5](https://www.perl.org/) to build.
 
 To compile it:
 
-`make pdp7`
+`make`
 
 ## Running pdp7-unix
 
-You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh).  
-On 64-bit systems, you may need to set the C compiler's optimisation level to -O1.
+You will need [simh](http://simh.trailing-edge.com/) 4.0 to run pdp7-unix.  You can get the source code [here](https://github.com/simh/simh). On 64-bit systems, you may need to set the C compiler's optimisation level to -O1.
 
 ### Running from source
 
@@ -58,13 +57,13 @@ A typical pdp7-unix session on simh looks like:
 
 <pre>
 pdp7 unixv0.simh
-
-PDP-7 simulator V4.0-0 Current        git commit id: aff3346e
+k
+PDP-7 simulator V4.0-0 Current        git commit id: b848cb12
 CPU	idle disabled
 	8KW, EAE
 /Users/tom/projects/pdp7-unix/build/unixv0.simh-13> att rb image.fs
 RB: buffering file in memory
-/Users/tom/projects/pdp7-unix/build/unixv0.simh-18> att -U g2in 12345
+/Users/tom/projects/pdp7-unix/build/unixv0.simh-17> att -U g2in 12345
 Listening on port 12345
 PDP-7 simulator configuration
 
@@ -83,11 +82,10 @@ G2IN	devno=43-44
 
 login: ken
 password: ken
-@ ln dd ken .
 @ ls
+..
 dd
-system
-sop.s
+maksys.s
 s1.s
 s2.s
 s3.s
@@ -96,52 +94,58 @@ s5.s
 s6.s
 s7.s
 s8.s
-maksys.s
-trysys.s
+sop.s
+system
 sys.rc
-.
+trysys.s
 @ ls system
-dd      
-ttyin   
+..
+adm
+apr
+as
+b
+cas
+cat
+check
+chmod
+chown
+chrm
+cp
+date
+db
+dd
+display
+ds
+dskres
+dsksav
+dsw
+dttt
+ed
+init
 keyboard
-pptin   
-ttyout  
-display 
-pptout  
-apr     
-as      
-bc      
-cas     
-cat     
-check   
-chmod   
-chown   
-chrm    
-cp      
-date    
-db      
-ds      
-dskres  
-dsksav  
-dsw     
-ed      
-init    
-ln      
-ls      
-lsd     
-lsl     
-nm      
-od      
-p       
-pd      
-mv      
+link
+list
+ln
+ls
+moo
+mv
+nm
+od
+p
 password
-roff    
-rn      
-rm      
-sh      
-stat    
-tm      
+pptin
+pptout
+rm
+rn
+roff
+salv
+sh
+stat
+tm
+ttyin
+ttyout
+ttt
+un
 @ 
 </pre>
 
