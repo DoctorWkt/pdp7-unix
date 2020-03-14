@@ -8,8 +8,8 @@ https://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/
 
 The files should be unaltered versions of the scanned pages.
 
-Novell owns the rights to the Unix source code, so these files are probably
-(c) 1970 Novell. They are certainly not under the GPLv3 license.
+Micro Focus owns the rights to the Unix source code, so these files are probably
+(c) 1970 Micro Focus. They are certainly not under the GPLv3 license.
 
 For modified versions of these files, look in src/cmds and src/sys.
 
