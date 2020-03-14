@@ -31,6 +31,10 @@ A second notebook with missing sources has been
 discovered and scanned.  New files are being added to the scans
 directory as they are typed in!
 
+### January 2010
+
+Unixv0 is running on a real PDP-7 at the Living Computer Museum. [YouTube link](https://www.youtube.com/watch?v=pvaPaWyiuLA)
+
 ## Building pdp7-unix
 
 pdp7-unix requires [Perl5](https://www.perl.org/) to build.
