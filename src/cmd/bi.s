@@ -1,3 +1,4 @@
+"** 06-5-12.pdf page 12
 " bi
 
 start:
@@ -60,6 +61,7 @@ binop:
    tad .+3
    dac .+1
    jmp .. i
+"** 06-5-12.pdf page 13
    jmp . i
    basg; bor; band; beq; bne; ble; blt; bge; bgt; brsh; blsh
    badd; bmin; bmod; bmul; bdiv
@@ -121,6 +123,7 @@ blt:
 bge:
    lac t1 i
    cma
+"** 06-5-12.pdf page 14
    tad t2 i
    spa cla
    lac d1
@@ -182,6 +185,7 @@ bdiv:
 
 consop:
    lac sp
+"** 06-5-12.pdf page 15
    tad d1
    dac sp i
    isz sp
@@ -243,6 +247,7 @@ call:
    lac 8 i
    dac t1
    lac t1 i
+"** 06-5-12.pdf page 16
    dac 9 i
    isz 8
    -1
@@ -303,6 +308,7 @@ goto:
    tad t1 i
    dac pc
    jmp fetch
+"** 06-5-12.pdf page 17
    
 retrn:
    -2
@@ -365,6 +371,7 @@ unaop:
    uadr; umin; uind; unot
 
 uadr:
+"** 06-5-12.pdf page 18
    lac t1
    dac t3 i
    jmp fetch
@@ -427,6 +434,7 @@ addr: 0
 
 pc = 017
 
+"** 06-5-12.pdf page 19
 sp: stack
 dp: stack
 ap: stack
