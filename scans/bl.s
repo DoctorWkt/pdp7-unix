@@ -1,3 +1,4 @@
+"** 06-5-12.pdf page 3
 " bl
 
 jmp start
@@ -60,6 +61,7 @@ getc: 0
    lac cibufp
    sad eibufp
    jmp 1f
+"** 06-5-12.pdf page 4
    lac cibufp i
    and o777
    dac iflg
@@ -121,6 +123,7 @@ stop:
 flush: 0
    lac oflg
    sza
+"** 06-5-12.pdf page 5
    isz cobufp
    lac cobufp
    cma
@@ -182,6 +185,7 @@ initio: 0
 .fin: 0
 .fout: 1
 eibufp: 0
+"** 06-5-12.pdf page 6
 cibufp: 0
 iflg: 0
 eobufp: 0
