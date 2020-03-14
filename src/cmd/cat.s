@@ -1,3 +1,4 @@
+"** 06-5-12.pdf page 21
 " cat: cat arg1 [arg2 ...]
 
    " Load the pointer pointer in 017777 to see if we have any arguments
@@ -63,6 +64,7 @@ done:
    and d1
    sna cla
      jmp 1f
+"** 06-5-12.pdf page 22
    jms putc			" Store the character in the buffer
    jmp done			" and loop back
 1:
@@ -126,6 +128,7 @@ putc: 0
    sad d128
      skp
    jmp putc i			" No, so return (more room still in the buffer)
+"** 06-5-12.pdf page 23
    lac fo			" Load fd1 (i.e stdout)
    sys write; iopt+1; 64	" and write out the 64 words in the buffer
    lac iopt

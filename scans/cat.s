@@ -1,3 +1,4 @@
+"** 06-5-12.pdf page 21
 " cat
 
    lac 017777 i
@@ -60,6 +61,7 @@ done:
    and d1
    sna cla
    jmp 1f
+"** 06-5-12.pdf page 22
    jms putc
    jmp done
 1:
@@ -121,6 +123,7 @@ putc: 0
    sad d128
    skp
    jmp putc i
+"** 06-5-12.pdf page 23
    lac fo
    sys write; iopt+1; 64
    lac iopt
