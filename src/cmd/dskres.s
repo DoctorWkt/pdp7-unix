@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 41
 " dskres
 
 	" Copies the entire file system (except system image and

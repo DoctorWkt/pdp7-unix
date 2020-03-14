@@ -1,3 +1,4 @@
+"** 07-13-19.pdf page 42
 " dskio
 
 	" Reads 10 blocks from side 0 at block address AC into buffer dskbuf
@@ -94,6 +95,7 @@ dskio: 0
    dsls
    dssf			" wait for ERROR/DONE
    jmp .-1
+"** 07-13-19.pdf page 43
    dsrs			" read disk status into AC, bit 0 indicates errors
    sma			" if bit 0 of AC is set, AC is negative.
 			" if AC is negative, continue below and do another
