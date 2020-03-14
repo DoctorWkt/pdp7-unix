@@ -213,7 +213,7 @@ olddp: 0
 dspbuf: 0
 dspbp: 0
 instr: 0
-obs: 0
+pbs: 0
 inslitr: n 5
 insasg: b 1
 o17: 017
