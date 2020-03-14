@@ -14,3 +14,5 @@ build/alt/a.out
 build/alt/image.fs
 **/.DS_Store
 /a.out
+/build/cas.out
+/build/chrtbl.out
