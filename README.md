@@ -11,6 +11,16 @@ The scans of PDP-7 Unix are in the [Unix Archive](http://www.tuhs.org/)
 
 ## Current Status
 
+### January 2020
+
+Unixv0 is running on a real PDP-7 at the Living Computer Museum. [Youtube](https://www.youtube.com/watch?v=pvaPaWyiuLA).
+
+### October 2019
+
+A second notebook with missing sources has been
+discovered and scanned.  New files are being added to the scans
+directory as they are typed in!
+
 ### March 2016 
 
 We've written an assembler, a user-mode simulator and
@@ -25,15 +35,6 @@ system fully up on a PDP-7 system, fix any bugs and document everything.
 We have a [real PDP-7](http://physics.uoregon.edu/outreach/movies/pdplives/)
 and [SimH](http://simh.trailing-edge.com/) as target platforms.
 
-### October 2019
-
-A second notebook with missing sources has been
-discovered and scanned.  New files are being added to the scans
-directory as they are typed in!
-
-### January 2010
-
-Unixv0 is running on a real PDP-7 at the Living Computer Museum. [YouTube link](https://www.youtube.com/watch?v=pvaPaWyiuLA)
 
 ## Building pdp7-unix
 
