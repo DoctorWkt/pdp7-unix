@@ -67,7 +67,7 @@ loop:
    jmp 1b
 
    lac ddfilp
-   tad i1
+   tad d1
    dac i1
    lac i1 i
    dac .+3
@@ -111,7 +111,7 @@ loop:
    dzm fflg
    law fbuf
    dac i2
-   r1
+   -1
    tad nfiles
    cma
    dac c2
@@ -126,7 +126,7 @@ loop:
    -1
    tad i1
    dac i3
-   iac i3 i
+   lac i3 i
    dac c3
    law fbuf
    dac i3
