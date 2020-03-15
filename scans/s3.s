@@ -70,7 +70,7 @@ lookfor: 0
    isz u.rq+8
    dzm u.intflg
    jmp sysexit
-t= t+1
+t = t+1
 
 badcal:
    clon
@@ -258,6 +258,10 @@ rkbdi:
    sad o134
    skp
    jmp 2f
+   lacq
+   xor o40
+   lmq
+   jmp 2f
 1:
    lacq
    xor o20
@@ -290,7 +294,6 @@ wdspo:
    jms sleep; sfiles+6
    jms swap
    jmp wdspo
-
 
 rppti:
    lac d4

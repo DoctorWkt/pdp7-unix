@@ -84,7 +84,7 @@ lookfor: 0
    isz u.rg+8			" give skip return
    dzm u.intflg			" clear int flag
    jmp sysexit			" return in child process
-t= t+1
+t = t+1
 
 badcal:				" bad (unimplemented) system call
    clon				" clear any pending clock interrupt?
@@ -290,6 +290,10 @@ rkbdi:
    and o137
    sad o134
    skp				" \| map to Ll ???
+   jmp 2f
+   lacq
+   xor o40
+   lmq
    jmp 2f
 1:
    lacq
