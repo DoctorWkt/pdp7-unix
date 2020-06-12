@@ -6,12 +6,20 @@ on:
   pull_request:
     branches: [ master ]
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-      fail-fast: false
+  build-ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: get libdatetime-perl
+      run: sudo apt-get install libdatetime-perl
+
+    - name: build 
+      run: make clean;make alt; make clean; make
+
+  build-macos:
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
