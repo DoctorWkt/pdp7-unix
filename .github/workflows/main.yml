@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: get libdatetime-perl
+      run: sudo apt-get install libdatetime-perl
+
+    - name: build 
+      run: make clean;make alt; make clean; make
