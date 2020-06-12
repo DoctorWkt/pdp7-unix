@@ -29,15 +29,3 @@ jobs:
 
     - name: build 
       run: make clean;make alt; make clean; make
-
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: get DateTime
-      run: cpan -i DateTime
-
-    - name: build 
-      run: make clean;make alt; make clean; make
