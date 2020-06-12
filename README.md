@@ -1,3 +1,5 @@
+![CI](https://github.com/DoctorWkt/pdp7-unix/workflows/CI/badge.svg)
+
 # pdp7-unix
 
 
@@ -181,7 +183,3 @@ We have a
 for those people actively involved in the restoration effort. Send e-mail
 to Warren Toomey (DoctorWkt) if you are keen to help out.
 
-## Travis Status
-
-<a href="https://travis-ci.org/DoctorWkt/pdp7-unix">
-<img src="https://api.travis-ci.org/DoctorWkt/pdp7-unix.png"></a>
