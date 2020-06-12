@@ -24,8 +24,5 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: get libdatetime-perl
-      run: sudo apt-get install libdatetime-perl
-
     - name: build 
       run: make clean;make alt; make clean; make
