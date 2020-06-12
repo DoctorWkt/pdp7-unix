@@ -24,5 +24,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: cpan -i DateTime
+      run: sudo apt-get install libdatetime-perl
+
     - name: build 
       run: make clean;make alt; make clean; make
