@@ -514,7 +514,11 @@ sub parse_expression {
 	    my $value = $1;
 	    printf "\tfound constant: $value\n" if ($debug);
 	    if ( $value =~ m{^0} ) {
-		$syllable = oct($value);
+		# PLB 2020-10-05: behave like as.s
+		$syllable = 0;
+		for my $digit (split(//, $value)) {
+		    $syllable = $syllable * 010 + ord($digit) - ord('0');
+		}
 	    }
 	    else {
 		$syllable = $value + 0;
