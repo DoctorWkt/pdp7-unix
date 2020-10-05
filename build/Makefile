@@ -138,6 +138,7 @@ cmd:	dirs \
 	$(BINDIR)/roff \
 	$(BINDIR)/salv \
 	$(BINDIR)/sh \
+	$(BINDIR)/st \
 	$(BINDIR)/stat \
 	$(BINDIR)/tm \
 	$(BINDIR)/ttt \
@@ -253,6 +254,10 @@ $(BINDIR)/tm: $(CMDSRC)/tm.s
 TTT=$(CMDSRC)/ttt1.s $(CMDSRC)/ttt2.s
 $(BINDIR)/ttt: $(TTT)
 	$(AS) $(ASARGS) -o $(BINDIR)/ttt $(TTT)
+
+ST=$(CMDSRC)/st1.s $(CMDSRC)/st2.s $(CMDSRC)/st3.s $(CMDSRC)/st4.s $(CMDSRC)/fop.s $(CMDSRC)/st5.s $(CMDSRC)/st6.s $(CMDSRC)/st7.s
+$(BINDIR)/st: $(ST)
+	$(AS) $(ASARGS) -o $(BINDIR)/st $(ST)
 
 $(BINDIR)/un: $(CMDSRC)/un.s
 	$(AS) $(ASARGS) -o $(BINDIR)/un $(CMDSRC)/un.s
