@@ -17,8 +17,8 @@ c8; c9; colon; semcln; less; equal; great; quest
 at; ca; cb; cc; cd; ce; cf; cg
 ch; ci; cj; ck; cl; cm; cn; co
 cp; cq; cr; cs; ct; cu; cv; cw
-cx; cy cz; lbk; bsla; rbk; cmflx; under
+cx; cy; cz; lbk; bsla; rbk; cmflx; under
 accr; la; lb; lc; ld; le; lf; lg
 lh; li; lj; lk; ll; lm; ln; lo
 lp; lq; lr; ls; lt; lu; lv; lw
-lx; ly lz; lbr; or; rbr; tild; null
+lx; ly; lz; lbr; or; rbr; tild; null
