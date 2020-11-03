@@ -9,7 +9,7 @@ MKFS=../tools/mkfs7
 A7OUT=../tools/a7out 
 FSCK=../tools/fsck7
 CCARGS=-Wno-multichar -Wno-implicit
-PDP7=pdp7
+PDP7?=pdp7
 
 # source dirs
 SYSSRC=../src/sys
