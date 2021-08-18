@@ -1,8 +1,8 @@
 "** 13-120-147.pdf page 26
 9:.=.+t
 
-end = -1
-
+end = -1			" end of string (two 0777 bytes)
+				" recognition / generation opcodes:
 no = 0000000
 rx = 0040000; gx = rx
 rc = 0100000
@@ -16,7 +16,7 @@ rm = 0440000
 rs = 0500000
 rv = 0540000
 
-
+				" literal words
 ljmp:jmp
 l.llss:llss
 l.lrs:lrs
@@ -27,12 +27,12 @@ l.rw:rw
 l.gk:gk
 l.gcx:gc x
 
-x = 020000
-st = 0100
-fi = 0200
-opmask:0740000
-exitmask: x
-
+x = 020000			" exit bit (on all recog/gen instrs)
+st = 0100			" store(?) bit on recog op (ro) instrs
+fi = 0200			" final(?) bit on recog op (ro) instrs
+opmask:0740000			" opcode mask
+exitmask: x			" exit bit mask
+				" number lits:
 m1:0-1
 d0:o0:0
 d1:o1:1
@@ -43,13 +43,13 @@ d5:o5:5
 d6:o6:6
 d7:o7:7
 d8:o10:8
-asciisp:040
-asciinl:012
-nl:012777
-onenl:nl
-bugr:.+1;<rn>;<rx>;<rc>;<rt>;<rf>;<rw>;<ra>;<rb>
+asciisp:040			" ascii space
+asciinl:012			" ascii newline
+nl:012777			" newline + EOS
+onenl:nl			" pointer to newline+EOS
+bugr:.+1;<rn>;<rx>;<rc>;<rt>;<rf>;<rw>;<ra>;<rb>	" ptr to rec. op names
   <ro>;<rm>;<rs>;<rv>
-bugg:.+1;<gn>;<gx>;<gz>;<gc>;<gf>;<gk>;<gp>;<gq>
+bugg:.+1;<gn>;<gx>;<gz>;<gc>;<gf>;<gk>;<gp>;<gq>	" ptr to gen. op names
 
 o17:017
 o60:060
@@ -66,6 +66,7 @@ o17777:017777
 o757777:0757777
 o600600:0600600
 
+				" variables
 junk:0
 junk1:0
 
@@ -100,27 +101,27 @@ sbbot:sbbuf
 
 fflag:0
 gflag:0
-ignore:.+1;0400000;0;0;0;0;0;0;4
+ignore:.+1;0400000;0;0;0;0;0;0;4	" ignore mask for NUL and DEL
 frame:rstack
 nframe:rstack+6
 env = ignore
-d.ii = d2
-d.env = d3
+d.ii = d2			" frame offset for instruction pointer
+d.env = d3			" frame offset for env
 d.blkmod = d3
-d.j = d4
-d.k = d5
-dffrmsz:6
-framsiz:4
-refrsz = d6
-gefrsz = d4
-ii: start
-k:0
+d.j = d4			" frame offset for saved j
+d.k = d5			" frame offset for saved k
+dffrmsz:6			" current frame size
+framsiz:4			" NOT USED
+refrsz = d6			" recognition frame size
+gefrsz = d4			" generation frame size
+ii: start			" instruction pointer
+k:0				" saved data (ktab) pointer
 
-rsiz = 500
-rmax: rsiz
-rbot:rstack
-rtop:rstack+rsiz
+rsiz = 500			" stack size
+rmax: rsiz			" stack size as variable
+rbot:rstack			" pointer to first stack entry
+rtop:rstack+rsiz		" pointer to last stack entry
 
-owrite:0
-obot:obuf
-osiz=64
+owrite:0			" index into obuf
+obot:obuf			" pointer to first word of output buffer
+osiz=64				" output buffer size
