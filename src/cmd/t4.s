@@ -1,7 +1,7 @@
 "** 13-120-147.pdf page 19
 "     put symbuf symbol into table
 
-table:
+table:				" BUILTIN
   lac equwrite			" get equtab write index
   dac equ			" save as last found
   jms between; add d0; add equmax
@@ -37,10 +37,10 @@ add symbot
 
 "     find occurrence of symbuf symbol in equtab
 
-prev:
+prev:				" BUILTIN
   lac equ			" last entry found/created
   jmp find+1			" start search
-find:
+find:				" BUILTIN
   lac equwrite			" get end index to equ table
   dac 9f+t			" save
   lac o777			" get EOS
@@ -66,8 +66,7 @@ find:
   jmp goon			" success!
 t=t+1 "next equtab location to test
 
-				" put character in AC into symbuf (sbbuf)
-sbput:0
+sbput:0				" put character in AC into symbuf (sbbuf)
   lmq				" save character in MQ
   lac sbwrite			" get sbbut write index
   add sbbot			" add to start of sbbuf
