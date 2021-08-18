@@ -86,7 +86,7 @@ getname:			" BUILTIN
   add equbot			" get equtab addr (addr of pointer to string)
   dac 9f+t			" save in temp
   lac 1f			" get "gf" instruction
-  jms twoktab; lac 9f+t i
+  jms twoktab; lac 9f+t i	" make 2-work ktab entry (does not return)
 
 1:gf .+1 x			" jump to native code & exit
   lac ii			" get instruction pointer
@@ -102,10 +102,10 @@ t=t+1   "equtable entry
 "pointer to first as result
 		" takes first word (addr for gk instr) in AC
 		" and indirect load instr after "jms twoktab"
-		" called (as final action) by generate builtins?
+		" Called (as final action) by builtins (symoct,octal,getname)
 		" DOES NOT RETURN!!!
 twoktab:0
-  jms kput			" save in ktab
+  jms kput			" save AC in ktab
   lac l.gk
   add k				" make gk intruction, pointing to new entry
 dac nframe i			" push onto nframe

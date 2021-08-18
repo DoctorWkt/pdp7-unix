@@ -3,11 +3,9 @@
 
 		" push stack frame: called in both recognition and generation
 		" (despite above comment).
-		" jump instruction following "jms advance" is saved,
-		"	and executed by retreat.
 		" recognition frame size is 6, generation frame size is 4.
 		" 0: pointer to previous frame
-		" 1: PDP-7 instr after "jms advance" (on retreat)
+		" 1: jmp instr from after "jms advance" (for retreat/return)
 		" 2: saved ii (inst ptr)
 		" 3: saved ignore/env
 		" 4: saved j  (always overwritten by nframe in recog. mode)
@@ -175,7 +173,7 @@ rbranch:
   reno
   rerx
   rerc
-  regc
+  regc				" opcode is "rt"!
   rerf
   rerw
   rera
@@ -206,35 +204,36 @@ backup:				" here on failure from "rx", eof, char builtins
   lac jsav
   dac j
 nuts:				" here on failure from find/prev builtins
+				" (could possibly be used as a "fail" builtin?)
   law				" get 0760000
 
 "** 13-120-147.pdf page 10
   dac fflag			" set failure flag
 
 reno:				" recognition no(op) instruction
-goon:				" "go on" on success from recognition builtins, ops
+goon:				" "go on" on success from recog. builtins, ops
   lac ii i			" fetch current instruction
   isz ii			" advance instruction pointer
-  and exitmask			" was exit (indirect) bit set?
+  and exitmask			" was exit (indirect) bit set on prev instr?
   sza
  jmp retreat			" yes, retreat/return
-  jmp rinterp			" no, go on (w/o exit check)
+  jmp rinterp			" no, go on
 
 
-rerw:				" recognition rw instruction (nframe0 looks for one!)
-  jms aget			" get address from instruction
-  add frame			" add to frame pointer
-  dac nframe			" use to establish nframe
+rerw:				" recognition rw instr (nframe0 looks for one!)
+  jms aget			" get address portion of instruction
+  add frame			" use as frame size
+  dac nframe			" set nframe pointer
   jmp goon
 
-rerc:				" recognition rc (call?) instruction
+rerc:				" recognition rc (call tmg code) instruction
   jms advance; jmp goon		" push new frame, continue on retreat
   jms aget			" get address from instruction
   dac ii			" use as new instruction pointer
   jmp rinterp			" go on (w/o exit check)
 
 
-gegf:				" generation gf inst (invoke builtin func)
+gegf:				" gen. "gf" intr (invoke builtin func)
 rerf:				" recognition rf inst (invoke builtin func)
   jms aget			" get address from instruction
   add ljmp			" make into abs jmp to native code
@@ -265,14 +264,14 @@ aget:0				" fetch address portion of current instruction
   and o17777
   jmp aget i
 
-regc:				" recognition "rc" instruction [SIC]
+regc:				" recognition "rt" instruction [sic]
   lac ii i			" fetch instruction word
-  and o757777			" get w/o exit bit
+  and o757777			" clear exit bit
   xor exitmask			" set (toggle) exit bit
-  dac nframe i			" save @nframe
+  dac nframe i			" push @nframe
 
 "** 13-120-147.pdf page 11
-  isz nframe			" advance nframe poiinter
+  isz nframe			" advance nframe pointer
   jmp goon			" succeed
 
 	" push result in AC at "k" (kbuf)
@@ -324,7 +323,7 @@ s0put:0
 "     here is the generaion interpreter
 "     the k table cant move while its active
 
-geno:				" generate noop instruction
+geno:				" gen. noop instruction
 ggoon:				" "go on" from gen. builtins, ops
   lac ii i			" fetch prev instr
   isz ii			" increment
@@ -359,39 +358,43 @@ gbranch:
   gegp
   gegq
 
-geuu:				" generate ununimplemented instruction
+geuu:				" gen. ununimplemented instruction
   jms halt
 
-	" pdp-11 analog is .txs?
-gegx:				" generate "gx" instruction
+	" pdp-11 analog is .txs? output string
+gegx:				" gen. "gx" instruction
   lac ii i			" fetch instruction
   and o417777			" extract character address
   jms obuild			" copy to output
   jmp ggoon			" continue (checking for exit)
 
-	" pdp-11 analog is .tq?
-gegq:				" generate "gq" instruction
+	" pdp-11 analog may be .tq: load translation parameter ($1, $2)??
+	" manual says:
+	"	A translation rule may have parameters, and if it
+	"	does, their number is declared by a parenthesized
+	"	integer prefixed to its body.
+gegq:				" gen. "gq" instruction
   jms advance; jmp ggoon	" push state
   lac env
-  add d.ii			" get addr of saved inst ptr in env
+  add d.ii			" get addr of env->ii
   dac junk
-  jms aget			" get address portion of instruction
-  add junk i			" add to env. inst ptr
+  jms aget			" get address portion of gq instruction
+  add junk i			" add value at *env->ii
   dac junk
-  lac junk i			" fetch word indexed off of env inst ptr
-  dac ii			" save as new instruction pointer
+  lac junk i			" fetch *(*env->ii + aget())
+  dac ii			" save param list ptr as instruction pointer?
   lac env
-  add d.env			" get addr of saved env ptr in env
+  add d.env			" get addr env->env
   dac junk
-  lac junk i			" fetch saved env ptr
-  dac env			" restore env ptr
+  lac junk i			" fetch env->env
+  dac env			" restore env ptr (pop env)
   jmp ginterp			" go on (w/o exit check)
 
 	" pdp-11 analog is .tp?
 	" execute rule called for by 1 2 ...
 	" found relative to instruction counter in the k environment
 
-gegp:				" generate "gp" instruction
+gegp:				" gen. "gp" instruction
   jms advance; jmp ggoon	" push current state
   lac env			" get saved env pointer
   add d.ii			" get pointer to saved instruction pointer
@@ -410,7 +413,7 @@ cma				" one's complement negation + one's c. add!!
 	" instruction counter is in ktable
 	" set the k environment for understanding 1, 2 ...
 	" to designate this frame
-gegk:				" generate "gk" instruction
+gegk:				" gen. "gk" instruction
   lac ii i			" load instruction (value ignored)
   jms aget			" get address portion of instruction
   add kbot			" add to ktab base
@@ -422,7 +425,7 @@ gegk:				" generate "gk" instruction
   dac env			" save as env pointer
   jmp ginterp			" go on (w/o exit check)
 
-gegc:				" generate "gc" (call tmg coded subroutine)
+gegc:				" gen. "gc" inst (call tmg coded subroutine)
   jms advance; jmp ggoon	" push current state
   jms aget			" get address from instruction
   dac ii			" use as new instruction pointer
@@ -447,8 +450,7 @@ bug:0
   dac 1f+2			" save back into output string
   lac 1f			" get pointer to output string
   jms obuild			" output
-  lac ii i			" get word referenced by instruction!!
-				" (some have const/offset arg)
+  lac ii i			" get instruction
   jms putoct			" output in octal
   las				" get console switches
   and d4			" is bit 15 set?

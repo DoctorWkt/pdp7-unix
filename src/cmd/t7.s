@@ -21,11 +21,11 @@ ljmp:jmp
 l.llss:llss
 l.lrs:lrs
 l.lls:lls
-l.ra:ra
-l.rb:rb
-l.rw:rw
-l.gk:gk
-l.gcx:gc x
+l.ra:ra				" used for comparison
+l.rb:rb				" used for comparison
+l.rw:rw				" used for comparison
+l.gk:gk				" used to create instr in twoktab
+l.gcx:gc x			" NOT USED?
 
 x = 020000			" exit bit (on all recog/gen instrs)
 st = 0100			" store(?) bit on recog op (ro) instrs
@@ -50,6 +50,10 @@ onenl:nl			" pointer to newline+EOS
 bugr:.+1;<rn>;<rx>;<rc>;<rt>;<rf>;<rw>;<ra>;<rb>	" ptr to rec. op names
   <ro>;<rm>;<rs>;<rv>
 bugg:.+1;<gn>;<gx>;<gz>;<gc>;<gf>;<gk>;<gp>;<gq>	" ptr to gen. op names
+				" NOTE! ginterp ignores high bit of
+				" opcode (to allow as char indicator
+				" bit for gx instruction) so table
+				" should include two more entries???
 
 o17:017
 o60:060

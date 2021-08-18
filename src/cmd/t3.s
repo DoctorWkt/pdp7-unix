@@ -192,7 +192,7 @@ octal:				" BUILTIN
   lac ii i			" fetch instruction word
   dac 2f			" save as geoctal argument??
   lac 1f			" fetch "gf geoctal x" instr
-  jms twoktab			" make two word ktab entry and succeed
+  jms twoktab			" make two word ktab entry and goon
   lac 2f i
 
 1:gf geoctal x

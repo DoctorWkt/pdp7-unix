@@ -65,11 +65,11 @@ bundle:				" BUILTIN: bundle results
 "** 13-120-147.pdf page 22
   dac 9f+t
   sna				" got any?
-  jmp goon			" nope.
-  jms nframe0
-  dac nframe
-  lac 9f+t
-  dac nframe i
+  jmp goon			" nope.  success.
+  jms nframe0			" look for original nframe
+  dac nframe			" restore
+  lac 9f+t			" get bundle result ptr (in ktab if multi-word)
+  dac nframe i			" push @nframe
   isz nframe
   jmp goon
 t=t+1
