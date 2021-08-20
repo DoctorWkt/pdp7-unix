@@ -403,16 +403,16 @@ gegp:				" gen. "gp" instruction
   dac env			" save as env pointer
   jms aget			" get address portion of instruction
 cma				" one's complement negation + one's c. add!!
-  add junk i			" back up instruction pointer by inst. addr.
+  add junk i			" back up env instruction pointer by -aget()
   dac ii
   jmp ginterp			" go on (w/o exit check)
 
-	" NOTE only place that sets "env" w/o reading first
 	" pdp-11 comment @ gk:
 	" delivered compound translation
 	" instruction counter is in ktable
 	" set the k environment for understanding 1, 2 ...
 	" to designate this frame
+	" PDP-7 NOTE only place that sets "env" w/o reading first
 gegk:				" gen. "gk" instruction
   lac ii i			" load instruction (value ignored)
   jms aget			" get address portion of instruction

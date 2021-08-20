@@ -110,8 +110,8 @@ frame:rstack
 nframe:rstack+6
 env = ignore
 d.ii = d2			" frame offset for instruction pointer
-d.env = d3			" frame offset for env
-d.blkmod = d3
+d.env = d3			" frame offset for env/ignore
+d.blkmod = d3			" SYMBOL NOT USED
 d.j = d4			" frame offset for saved j
 d.k = d5			" frame offset for saved k
 dffrmsz:6			" current frame size
