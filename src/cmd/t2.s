@@ -1,96 +1,112 @@
 "** 13-120-147.pdf page 7
 "     recognition stack frame advance
 
+		" push stack frame: called in both recognition and generation
+		" (despite above comment).
+		" recognition frame size is 6, generation frame size is 4.
+		" 0: pointer to previous frame
+		" 1: jmp instr from after "jms advance" (for retreat/return)
+		" 2: saved ii (inst ptr)
+		" 3: saved ignore/env
+		" 4: saved j  (always overwritten by nframe in recog. mode)
+		" 5: saved k
+
 advance:0
-  lac frame
-  dac 8
-  lac advance i
-  dac 8 i
-  lac ii
-  dac 8 i
-  lac ignore
-  dac 8 i
-  lac j
-  dac 8 i
-  lac k
-  dac 8 i
-  lac frame
-  dac nframe i
+  lac frame			" get frame pointer
+  dac 8				" save in auto-increment register 8
+  lac advance i			" get (retreat) instruction after "jms advance"
+  dac 8 i			" save at offset 1
+  lac ii			" instruction pointer
+  dac 8 i			" save at offset 2
+  lac ignore			" ignore mask pointer (env in recog. mode?)
+  dac 8 i			" save at offset 3
+  lac j				" input char pointer
+  dac 8 i			" save at offset 4
+  lac k				" result pointer
+  dac 8 i			" save at offset 5
+  lac frame			" save current frame pointer
+  dac nframe i			" at nframe offset zero
   lac nframe
-  dac frame
-  add dffrmsz
-  dac nframe
-  dac nframe
-  jms between; add rbot; add rtop
+  dac frame			" set frame pointer to nframe (new frame)
+  add dffrmsz			" add current frame size
+  dac nframe			" set new new frame pointer
+  dac nframe			" AGAIN??!!
+  jms between; add rbot; add rtop	" check for overflow
   jms halt
-  isz advance
-  jmp advance i
+  isz advance			" skip instruction after jms
+  jmp advance i			" return
+
+	" Here on failure/backup (w/ fflag set to 760000)
+	" AND at (successful) end of rule
+	" (exit/indirect bit set on last instr).
+	" Always restores j/k on failure:
+	"  (no such thing as "failure" in generation mode(?))
 
 retreat:
   dzm junk
-  lac gflag
+  lac gflag			" in generation mode?
   sza
-  jmp 1f
-  jms bundlep
-  dac junk
+  jmp 1f			" yes, skip bundling
+  jms bundlep			" no, bundle
+  dac junk			" save pointer (may be zero if no result)
 1:lac frame
-  dac nframe
-  lac frame i
-  dac frame
-  dac 8
-  lac 8 i
+  dac nframe			" reset nframe to current frame pointer
+  lac frame i			" fetch prev. frame pointer from current frame
+  dac frame			" pop current frame
+  dac 8				" save in (pre) auto-increment register 8
+  lac 8 i			" restore saved instruction
   dac 3f   "retrun address
   lac 8 i
-  dac ii
+  dac ii			" restore saved instruction pointer
   lac 8 i
-  dac ignore
-  lac fflag
-  sna
-  jmp 2f
+  dac ignore			" restore saved ignore ("env" in gen mode???)
+  lac fflag			" get failure flag
+  sna				" any bits set?
+  jmp 2f			" no, skip
   lac 8 i   "restore j and k on failure
   dac j
   lac 8 i
   dac k
-2:lac junk
-  sna
-  jmp 3f
+2:lac junk			" get bundle/result(s)
+  sna				" got anything?
+  jmp 3f			" no
   dac nframe i   "stass reslts
   isz nframe
-3:jmp
+3:jmp				" (jump following original "jms advance" call)
 
 " bundle up results and return single pointer to them in ac
 " return 0 if no results
 
 "** 13-120-147.pdf page 8
 bundlep:0
-  lac fflag
-  sza
+  lac fflag			" check failure flag
+  sza				" clear?
   jmp 2f   "no results on failure
-  jms nframe0
-  dac 9f+t
-  cma
-  tad nframe
-  cma
-  dac 9f+t+1
-  sma
-  jmp 2f
-  sad m1
+  jms nframe0			" yes: get initial nframe pointer
+  dac 9f+t			" save
+  cma				" get negative, minus one
+  tad nframe			" add current value
+  cma				" get nframe0 - nframe! (-N or zero)
+  dac 9f+t+1			" save
+  sma				" negative result?
+  jmp 2f			" no, no change
+  sad m1			" -1 (one result)
   jmp 3f   "only one result, no bundling necessary
-  lac 9f+t
-  tad m1
-  dac 8
+  lac 9f+t			" get initial nframe
+  tad m1			" decrement
+  dac 8				" save in (pre-)auto-increment reg. 8
 
-1:lac 8 i
-  jms kput
-  isz  9f+t+1
-  jmp 1b
+1:lac 8 i			" fetch result
+  jms kput			" save in ktab
+  isz  9f+t+1			" increment negative count until zero
+  jmp 1b			" more left, continue
   lac k   "make up result pointer
-  add l.gk
+  add l.gk			" return as gk instruction
   jmp bundlep i
 
-2:cla
+2:cla				" here with no results, return zero
   jmp bundlep i
-3:lac 9f+t i
+3:lac 9f+t i			" here with one result, fetch it
   jmp bundlep i
 t=t+1   "where to find results
 t=t+1   "negative of result count
@@ -98,54 +114,58 @@ t=t+1   "negative of result count
 "     the main interpreter loop
 " locate original value of nframe for present stack level.
 nframe0:0
-  jms s1get; add d.ii
+  jms s1get; add d.ii		" fetch instr. at saved intruction pointer
   dac junk
-  lac junk i
+  lac junk i			" fetch word referenced by instruction
   dac junk
-  lac junk i
-  and opmask
-  sad l.rw
-  jmp 1f
-  lac refrsz
+  lac junk i			" fetch word referenced by that word!!
+  and opmask			" get instruction portion
+  sad l.rw			" is it an "rw" instruction?
+  jmp 1f			" yes.
+  lac refrsz			" no, use recog frame size as offset
   jmp 2f
-1:lac junk i
-  and o17777
-2:add frame
-  jmp nframe0 i
+1:lac junk i			" get contents of word ref'ed by rw instr
+  and o17777			" get rw instr address portion (offset)
+2:add frame			" make nframe pointer
+  jmp nframe0 i			" return
 
+	" halt on various error conditions:
+	" various table overflows
+	" console switch 15 set (trace and halt)
+	" invalid recognize/generate opcodes
 halt:0
   lac 1f
-  jms obuild
+  jms obuild			" output "\n?"
   lac halt
-  jms putoct
+  jms putoct			" output return address in octal
   lac onenl
-  jms obuild
-  xct rstack+1
-1:.+1;012077;end
+  jms obuild			" output newline
+  xct rstack+1			" execute retreat jump from initial advance?!
+1:.+1;012077;end		" "\n?"; end=-1 -- two 0777 EOSes
 
 "** 13-120-147.pdf page 9
-rinterp:
+rinterp:			" recognition mode interpreter
   las   "trace check
   and d5
   sna
   jmp .+3
   lac bugr
-  jms bug
+  jms bug			" trace
 
-  lac fflag
-  ral
-  lac ii i
-  and opmask
-  sad l.ra
-  jmp rera
-  sad l.rb
-  jmp rerb
-  szl
-  jmp retreat
-  lrs 14
-  and o17
-  add rbranch
-  dac .+1
+  lac fflag			" fetch failure flag
+  ral				" rotate top bit into LINK
+  lac ii i			" fetch current instruction
+  and opmask			" get opcode
+  sad l.ra			" "ra" (conditional branch on LINK set/fail)?
+  jmp rera			"  yes
+  sad l.rb			" "rb" (conditional branch on LINK clear/succ)?
+  jmp rerb			"  yes
+  szl				" LINK set (failure)?
+  jmp retreat			"  yes: retreat!!
+  lrs 14			" no: shift opcode bits down
+  and o17			" isolate opcode bits
+  add rbranch			" create indirect jmp thru rbranch tabe
+  dac .+1			" save as next
   jmp
 
 rbranch:
@@ -153,7 +173,7 @@ rbranch:
   reno
   rerx
   rerc
-  regc
+  regc				" opcode is "rt"!
   rerf
   rerw
   rera
@@ -167,104 +187,112 @@ rbranch:
   reuu
   reuu
 
-reuu:
-  jms halt
+reuu:				" recognition unused operation
+  jms halt			" halt
 
-rerb:
-  cml
-rera:
-  dzm fflag
-  snl
-  jmp goon
-  jms aget
-  dac ii
-  jmp rinterp
+rerb:				" recognition "rb" instruction
+  cml				" complement LINK bit
+rera:				" recognition "ra" instruction
+  dzm fflag			" clear failure flag
+  snl				" LINK bit set?
+  jmp goon			"  no: continue (w/ exit check)
+  jms aget			" yes: fetch address part
+  dac ii			" save as new instruction pointer
+  jmp rinterp			" go on (w/o exit check)
 
-backup:
+backup:				" here on failure from "rx", eof, char builtins
   lac jsav
   dac j
-nuts:
-  law
+nuts:				" here on failure from find/prev builtins
+				" (could possibly be used as a "fail" builtin?)
+  law				" get 0760000
 
 "** 13-120-147.pdf page 10
-  dac fflag
+  dac fflag			" set failure flag
 
-reno:
-goon:
-  lac ii i
-  isz ii
-  and exitmask
+reno:				" recognition no(op) instruction
+goon:				" "go on" on success from recog. builtins, ops
+  lac ii i			" fetch current instruction
+  isz ii			" advance instruction pointer
+  and exitmask			" was exit (indirect) bit set on prev instr?
   sza
- jmp retreat
-  jmp rinterp
+ jmp retreat			" yes, retreat/return
+  jmp rinterp			" no, go on
 
 
-rerw:
-  jms aget
-  add frame
-  dac nframe
+rerw:				" recognition rw instr (nframe0 looks for one!)
+  jms aget			" get address portion of instruction
+  add frame			" use as frame size
+  dac nframe			" set nframe pointer
   jmp goon
 
-rerc:
-  jms advance; jmp goon
-  jms aget
-  dac ii
-  jmp rinterp
+rerc:				" recognition rc (call tmg code) instruction
+  jms advance; jmp goon		" push new frame, continue on retreat
+  jms aget			" get address from instruction
+  dac ii			" use as new instruction pointer
+  jmp rinterp			" go on (w/o exit check)
 
 
-gegf:
-rerf:
-  jms aget
-  add ljmp
+gegf:				" gen. "gf" intr (invoke builtin func)
+rerf:				" recognition rf inst (invoke builtin func)
+  jms aget			" get address from instruction
+  add ljmp			" make into abs jmp to native code
   dac .+1
-  jmp
+  jmp				" go to native code
 
-rerx:
+rerx:				" recognition rx instruction (compare lit str)
   lac j
-  dac jsav
-  jms aget
+  dac jsav			" save j (input char pointer) in jsav
+  jms aget			" get address from instruction
 1:dac 9f+t
-  jms lchar
-  sad o777
-  jmp goon
-  dac 9f+t+1
-  jms getj
-sad 9f+t+1
-  jmp 2f
-  jmp backup
-2:lac 9f+t
+  jms lchar			" get lit character
+  sad o777			" EOS?
+  jmp goon			" yes, continue (success)
+  dac 9f+t+1			" no, save char
+  jms getj			" get next input char
+sad 9f+t+1			" as expected?
+  jmp 2f			" yes
+  jmp backup			" no: restore j and fail.
+2:lac 9f+t			" continue matching (increment lit ptr)
   add o400000
   jmp 1b
 t=t+1   "address of next comparison char
 t=t+1   "character itself
 
-aget:0
+aget:0				" fetch address portion of current instruction
   lac ii i
   and o17777
   jmp aget i
 
-regc:
-  lac ii i
-  and o757777
-  xor exitmask
-  dac nframe i
+	" Places copy of instruction with exit bit set on stack.
+	" Interpreted as a "gc" instruction (see note at gegc).
+regc:				" recognition "rt" instruction [sic]
+  lac ii i			" fetch instruction word
+  and o757777			" clear exit bit
+  xor exitmask			" set (toggle) exit bit
+  dac nframe i			" push @nframe
 
 "** 13-120-147.pdf page 11
-  isz nframe
-  jmp goon
+  isz nframe			" advance nframe pointer
+  jmp goon			" succeed
 
+	" push result in AC at "k" (kbuf)
+	" called from bundlep and twice from twoktab (two word ktab entry)
+	" returns w/ AC unmodified, k contains index of new entry
 kput:0
   isz k
   dac junk1
   lac k
   jms between; add d0; add kmax
-  jms halt
+  jms halt			" halt on ktab overflow
   add kbot
   dac junk
   lac junk1
   dac junk i
   jmp kput i
 
+	" fetch word from current frame using "add offset" following jms.
+	" Only used by parsedo, to restore k.
 s0get:0
   lac frame
   xct s0get i
@@ -273,6 +301,8 @@ s0get:0
   isz s0get
   jmp s0get i
 
+	" fetch word via ptr in current frame using "add offset" following jms.
+	" Only used by nframe0, w/ "ii" instruction pointer
 s1get:0
   lac frame i
   xct s1get i
@@ -281,6 +311,8 @@ s1get:0
   isz s1get
   jmp s1get i
 
+	" set word in current frame using "add offset" following jms.
+	" Only used by "gk" instruction to set "ii"
 s0put:0
   lmq
   lac frame
@@ -293,119 +325,145 @@ s0put:0
 "     here is the generaion interpreter
 "     the k table cant move while its active
 
-geno:
-ggoon:
-  lac ii i
-  isz ii
-  and exitmask
+geno:				" gen. noop instruction
+ggoon:				" "go on" from gen. builtins, ops
+  lac ii i			" fetch prev instr
+  isz ii			" increment
+  and exitmask			" isolate exit bit
   sza
-  jmp retreat
+  jmp retreat			" exit bit set, return.
 ginterp:
   las   "trace check
   and d6
   sna
   jmp .+3
   lac bugg
-  jms bug
+  jms bug			" trace
 
-  lac ii i
-  lrss 14
-  and o7
+  lac ii i			" fetch current instruction
+  lrss 14			" shift down to opcode
+  and o7			" get low 3 of opcode
 
 "** 13-120-147.pdf page 12
-  add gbranch
-  dac .+1
+  add gbranch			" make indirect branch thru gbranch table
+  dac .+1			" save as next instruction
   jmp
 
 gbranch:
   jmp .+1 i
   geno
  gegx
-  geuu
+  geuu				" was once "gz" (in bugg tab)
   gegc
   gegf
   gegk
   gegp
   gegq
 
-geuu:
+geuu:				" gen. ununimplemented instruction
   jms halt
 
-gegx:
-  lac ii i
-  and o417777
-  jms obuild
-  jmp ggoon
+	" pdp-11 analog is .txs? output string
+gegx:				" gen. "gx" instruction
+  lac ii i			" fetch instruction
+  and o417777			" extract character address
+  jms obuild			" copy to output
+  jmp ggoon			" continue (checking for exit)
 
-gegq:
-  jms advance; jmp ggoon
+	" pdp-11 analog may be .tq: load translation parameter ($1, $2)??
+	" manual says:
+	"	A translation rule may have parameters, and if it
+	"	does, their number is declared by a parenthesized
+	"	integer prefixed to its body.
+gegq:				" gen. "gq" instruction
+  jms advance; jmp ggoon	" push state
   lac env
-  add d.ii
+  add d.ii			" get addr of env->ii
   dac junk
-  jms aget
-  add junk i
+  jms aget			" get address portion of gq instruction
+  add junk i			" add value at *env->ii
   dac junk
-  lac junk i
-  dac ii
+  lac junk i			" fetch *(*env->ii + aget())
+  dac ii			" save param list ptr as instruction pointer?
   lac env
-  add d.env
+  add d.env			" get addr env->env
   dac junk
-  lac junk i
-  dac env
-  jmp ginterp
+  lac junk i			" fetch env->env
+  dac env			" restore env ptr (pop env)
+  jmp ginterp			" go on (w/o exit check)
 
-gegp:
-  jms advance; jmp ggoon
-  lac env
-  add d.ii
-  dac junk
-  lac frame i
-  dac env
-  jms aget
-cma
-  add junk i
-  dac ii
-  jmp ginterp
+	" pdp-11 analog is .tp?
+	" execute rule called for by 1 2 ...
+	" found relative to instruction counter in the k environment
 
-gegk:
-  lac ii i
-  jms aget
-  add kbot
+gegp:				" gen. "gp" instruction
+  jms advance; jmp ggoon	" push current state
+  lac env			" get saved env pointer
+  add d.ii			" get pointer to saved instruction pointer
+  dac junk			" save in temp
+  lac frame i			" get prev frame pointer
+  dac env			" save as env pointer
+  jms aget			" get address portion of instruction
+cma				" one's complement negation + one's c. add!!
+  add junk i			" back up env instruction pointer by -aget()
   dac ii
-  jms s0put; add d.ii
-  lac frame
+  jmp ginterp			" go on (w/o exit check)
+
+	" pdp-11 comment @ gk:
+	" delivered compound translation
+	" instruction counter is in ktable
+	" set the k environment for understanding 1, 2 ...
+	" to designate this frame
+	" PDP-7 NOTES: only place that sets "env" w/o reading first;
+	" twoktab stores gk instructions in ktab.
+gegk:				" gen. "gk" instruction
+  lac ii i			" load instruction (value ignored)
+  jms aget			" get address portion of instruction
+  add kbot			" add to ktab base
+  dac ii			" store as new instruction pointer
+  jms s0put; add d.ii		" set frame saved instruction pointer too
+  lac frame			" get frame pointer
 
 "** 13-120-147.pdf page 13
-  dac env
-  jmp ginterp
+  dac env			" save as env pointer
+  jmp ginterp			" go on (w/o exit check)
 
-gegc:
-  jms advance; jmp ggoon
-  jms aget
-  dac ii
-  jmp ginterp
+	" NOTE: recognition opcode "rt" (code at label regc!)  places
+	" a copy of itself, with exit bit set on stack, since rt and
+	" gc use the same opcode, the stacked instruction comes here
+	" (addr points to "gen" code), so it calls the referenced code.
+gegc:				" gen. "gc" inst (call tmg coded subroutine)
+  jms advance; jmp ggoon	" push current state
+  jms aget			" get address from instruction
+  dac ii			" use as new instruction pointer
+  jmp ginterp			" go on (w/o exit check)
 
+	" trace routine (not a bug!)
+	" invoked from rinterp if switch 15 or 17 set (mask 05)
+	" invoked from ginterp if switch 15 or 16 set (mask 06)
+	" calls halt if switch 15 set (mask 04)
 bug:0
-  dac 1f+2
-  lac onenl
+  dac 1f+2			" save pointer to instruction names
+  lac onenl			" output newline
   jms obuild
-  lac ii
+  lac ii			" output instruction address in octal
   jms putoct
-  lac ii i
-  lrs 14
-  and o17
-  add 1f+2
-  dac 1f+2
-  lac 1f+2 i
-  dac 1f+2
-  lac 1f
-  jms obuild
-  lac ii i
-  jms putoct
-  las
-  and d4
-  sza
-  jms halt
-  jmp bug i
+  lac ii i			" get instruction
+  lrs 14	
+  and o17			" get high four bits (opcode) 
+  add 1f+2			" add to instruction name list pointer
+  dac 1f+2			" save (into output string!)
+  lac 1f+2 i			" fetch two character instruction name
+  dac 1f+2			" save back into output string
+  lac 1f			" get pointer to output string
+  jms obuild			" output
+  lac ii i			" get instruction
+  jms putoct			" output in octal
+  las				" get console switches
+  and d4			" is bit 15 set?
+  sza				" no.
+  jms halt			" yes: halt (output return address, then quit)
+  jmp bug i			" no: continue.
 
-1:0400000 .+1; 040; 0; 040777
+1:0400000 .+1; 040; 0; 040777	" char ptr to <SPACE> XX <SPACE> <EOS>
+				" where XX will be instr name

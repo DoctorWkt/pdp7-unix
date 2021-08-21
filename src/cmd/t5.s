@@ -1,75 +1,75 @@
 "** 13-120-147.pdf page 21
-char:
+char:				" BUILTIN: match one char from bitset or fail.
   lac j
   dac jsav
  isz ii
   jms ctest
- jmp backup
+ jmp backup			" not in bitset: restore j from jsav, fail
   jmp goon
 
-string:
+string:				" BUILTIN: match zero or more chars from bitset
   isz ii
   jms ctest
-  jmp goon
+  jmp goon			" not in bitset, quit (but do not fail)
   jmp string+1
 
 ctest:0
   jms jget
-  jms class; add ii i
-  jmp ctest i
-  jms sbput
-  lac j
+  jms class; add ii i		" bitset check w/ table ptr *ii
+  jmp ctest i			" char not in bitset, return w/o skip
+  jms sbput			" matched: add to symbuf
+  lac j				" increment j (char ptr)
   add o400000
   dac j
-  isz ctest
+  isz ctest			" give skip return
   jmp ctest i
 
-mark:
-  jms jget
+mark:				" BUILTIN: clear symbuf
+  jms jget			" consume ignored characters
   dzm sbwrite
   jmp goon
 
-parsedo:
+parsedo:			" BUILTIN: invoke rule
   isz ii
-  jms advance; jmp 3f
-  jms advance; jmp 1f
-  jms aget
+  jms advance; jmp 3f		" on retreat restore k
+  jms advance; jmp 1f		" on retreat switch to generation
+  jms aget			" get new instruction pointer
   dac ii
   jmp rinterp
 
-1:lac frame
+1:lac frame			" on retreat (second advance call)
   add refrsz
-  dac ii
-  sad nframe
-  jmp retreat
-  dac gflag
+  dac ii			" set instruction pointer to "nframe"
+  sad nframe			" was anything pushed onto nframe??
+  jmp retreat			" no: retreat again.
+  dac gflag			" yes: set gflag (don't bundle on retreat)
   lac gefrsz
-  dac dffrmsz
-  jms advance; jmp 2f
-  jmp ginterp
+  dac dffrmsz			" change (advance) frame size to generate size
+  jms advance; jmp 2f		" on retreat switch back to recognition mode
+  jmp ginterp			" interpret generate instructions!
 
-2:lac refrsz
-  dac dffrmsz
+2:lac refrsz			" on retreat from generate mode
+  dac dffrmsz			" switch back to recognition sized frames
   add frame
-  dac nframe
-  dzm gflag
-  jmp retreat
+  dac nframe			" reset nframe pointer
+  dzm gflag			" clear gflag (resume bundling on retreat)
+  jmp retreat			" retreat (again)!!
 
-3:jms s0get; add d.k
-  dac k
+3:jms s0get; add d.k		" on retreat (first advance call)
+  dac k				" restore k from current frame
   jmp goon
 
-bundle:
-  jms bundlep
+bundle:				" BUILTIN: bundle results
+  jms bundlep			" get bundle of results (if more than one)
 
 "** 13-120-147.pdf page 22
   dac 9f+t
-  sna
-  jmp goon
-  jms nframe0
-  dac nframe
-  lac 9f+t
-  dac nframe i
+  sna				" got any?
+  jmp goon			" nope.  success.
+  jms nframe0			" look for original nframe
+  dac nframe			" restore
+  lac 9f+t			" get bundle result ptr (in ktab if multi-word)
+  dac nframe i			" push @nframe
   isz nframe
   jmp goon
 t=t+1

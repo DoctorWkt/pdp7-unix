@@ -1,4 +1,10 @@
 "** 13-120-147.pdf page 5
+	" TMG
+	" console switches:
+	"	bit 0: do not save/dump core!!
+	"	bit 15: trace first recognition or generate instruction & halt
+	"	bit 16: trace all generation instructions
+	"	bit 17: trace all recognition instructions
 t=0
 main:
   lac 017777 i
@@ -23,16 +29,16 @@ main:
   jms advance; jmp 1f
   jmp rinterp
 
-0:lac 2f
-  jms obuild
-1:lac owrite
-  spa
-  jmp 0b
-  jms oflush
-  las
-  spa
-  sys exit
-  sys save
+0:lac 2f		" get EOS
+  jms obuild		" add to obuf
+1:lac owrite		" here on retreat
+  spa			" anything in obuf?
+  jmp 0b		" no, put EOS
+  jms oflush		" flush buffered output
+  las			" get switches
+  spa			" high bit set?
+  sys exit		" yes: exit
+  sys save		" no, dump core!!!!
 2:o777
 
 
@@ -40,22 +46,23 @@ main:
 
 "puts out and octal strin g from symtab entry
 
-symoct:
+symoct:				" BUILTIN: (output last symtab ent in octal?)
   lac equ
   add equbot
-  dac 9f+t
-  lac 1f
-  jms twoktab; lac 9f+t i
-1:gf  .+1 x
-  lac ii
-  dac 8
-  lac 8 i
-  add symbot
-  dac 9f+t
+  dac 9f+t			" save temp pointer
+  lac 1f			" fetch "gf" (execute native code) inst below
+  jms twoktab; lac 9f+t i	" second word is contents of word *temp
+				" first word of "two word ktab" entry:
+1:gf  .+1 x			" invoke native code (below), and exit
+  lac ii			" fetch instruction pointer
+  dac 8				" save in auto-increment register 8
+  lac 8 i			" fetch word after *ii
+  add symbot			" use as offset into symtab
+  dac 9f+t			" save in temp
 
-2:lac 9f+t i
-  jms putoct
-  lac onenl
+2:lac 9f+t i			" fetch symtab word *temp
+  jms putoct			" output octal
+  lac onenl			" output newline
   jms obuild
   lac 9f+t i
   and o600600
