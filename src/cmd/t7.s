@@ -43,8 +43,8 @@ d5:o5:5
 d6:o6:6
 d7:o7:7
 d8:o10:8
-asciisp:040			" ascii space
-asciinl:012			" ascii newline
+asciisp:040			" ascii space (NOT USED)
+asciinl:012			" ascii newline (NOT USED)
 nl:012777			" newline + EOS
 onenl:nl			" pointer to newline+EOS
 bugr:.+1;<rn>;<rx>;<rc>;<rt>;<rf>;<rw>;<ra>;<rb>	" ptr to rec. op names
@@ -52,8 +52,9 @@ bugr:.+1;<rn>;<rx>;<rc>;<rt>;<rf>;<rw>;<ra>;<rb>	" ptr to rec. op names
 bugg:.+1;<gn>;<gx>;<gz>;<gc>;<gf>;<gk>;<gp>;<gq>	" ptr to gen. op names
 				" NOTE! ginterp ignores high bit of
 				" opcode (to allow as char indicator
-				" bit for gx instruction) so table
-				" should include two more entries???
+				" bit for gx instruction), but bug
+				" routine does not, so table should
+				" include two more entries???
 
 o17:017
 o60:060
@@ -105,20 +106,22 @@ sbbot:sbbuf
 
 fflag:0
 gflag:0
-ignore:.+1;0400000;0;0;0;0;0;0;4	" ignore mask for NUL and DEL
-frame:rstack
-nframe:rstack+6
+ignore:.+1;0400000;0;0;0;0;0;0;4	" pointer to ignored character set
+				" default ignore set (NUL and DEL)
+				" set stored using first (high) 16 of each wd.
+frame:rstack			" frame pointer
+nframe:rstack+6			" next frame pointer
 env = ignore
 d.ii = d2			" frame offset for instruction pointer
 d.env = d3			" frame offset for env/ignore
 d.blkmod = d3			" SYMBOL NOT USED
 d.j = d4			" frame offset for saved j
 d.k = d5			" frame offset for saved k
-dffrmsz:6			" current frame size
-framsiz:4			" NOT USED
+dffrmsz:6			" current frame size (one of [rg]efrsz)
+framsiz:4			" LOCATION NOT USED
 refrsz = d6			" recognition frame size
 gefrsz = d4			" generation frame size
-ii: start			" instruction pointer
+ii: start			" interpreter instruction pointer
 k:0				" saved data (ktab) pointer
 
 rsiz = 500			" stack size

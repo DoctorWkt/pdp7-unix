@@ -194,7 +194,7 @@ rerb:				" recognition "rb" instruction
   cml				" complement LINK bit
 rera:				" recognition "ra" instruction
   dzm fflag			" clear failure flag
-  snl				" link bit set?
+  snl				" LINK bit set?
   jmp goon			"  no: continue (w/ exit check)
   jms aget			" yes: fetch address part
   dac ii			" save as new instruction pointer
@@ -264,6 +264,8 @@ aget:0				" fetch address portion of current instruction
   and o17777
   jmp aget i
 
+	" Places copy of instruction with exit bit set on stack.
+	" Interpreted as a "gc" instruction (see note at gegc).
 regc:				" recognition "rt" instruction [sic]
   lac ii i			" fetch instruction word
   and o757777			" clear exit bit
@@ -412,7 +414,8 @@ cma				" one's complement negation + one's c. add!!
 	" instruction counter is in ktable
 	" set the k environment for understanding 1, 2 ...
 	" to designate this frame
-	" PDP-7 NOTE only place that sets "env" w/o reading first
+	" PDP-7 NOTES: only place that sets "env" w/o reading first;
+	" twoktab stores gk instructions in ktab.
 gegk:				" gen. "gk" instruction
   lac ii i			" load instruction (value ignored)
   jms aget			" get address portion of instruction
@@ -425,6 +428,10 @@ gegk:				" gen. "gk" instruction
   dac env			" save as env pointer
   jmp ginterp			" go on (w/o exit check)
 
+	" NOTE: recognition opcode "rt" (code at label regc!)  places
+	" a copy of itself, with exit bit set on stack, since rt and
+	" gc use the same opcode, the stacked instruction comes here
+	" (addr points to "gen" code), so it calls the referenced code.
 gegc:				" gen. "gc" inst (call tmg coded subroutine)
   jms advance; jmp ggoon	" push current state
   jms aget			" get address from instruction
