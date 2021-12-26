@@ -1,16 +1,16 @@
 
 # detect OS
 UNAME=$(shell uname)
-ifeq ($(UNAME), Linux)
+ifeq ($(UNAME), "Linux")
 	UNAME=LINUX
 else 
-ifeq ($(UNAME), Darwin)
+ifeq ($(UNAME), "Darwin")
 	UNAME=DARWIN
 else 
-ifeq ($(UNAME), FreeBSD)
+ifeq ($(UNAME), "FreeBSD")
 	UNAME=FREEBSD
 else 
-ifeq ($(UNAME), OpenBSD)
+ifeq ($(UNAME), "OpenBSD")
 	UNAME=OPENBSD
 endif
 endif
