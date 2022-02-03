@@ -76,6 +76,7 @@ dd           drwr- -1 4
       maksys.s   frwr- 12 ../src/sys/maksys.s
       trysys.s   frwr- 12 ../src/sys/trysys.s
       sys.rc     frwr- 12 fs/sys.rc
+      moostat    frwr- 12 fs/moostat
       $
     dmr        drwr- 14
       system   l----  3
