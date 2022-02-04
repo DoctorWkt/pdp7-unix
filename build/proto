@@ -50,6 +50,7 @@ dd           drwr- -1 4
         nm       frwr- -1 bin/nm
         od       frwr- -1 bin/od
         p        frwr- -1 bin/p
+        psych    frwr- -1 bin/psych
         rm       frwr- -1 bin/rm
         rn       frwr- -1 bin/rn
         roff     frwr- -1 bin/roff

@@ -133,6 +133,7 @@ cmd:	dirs \
 	$(BINDIR)/moo \
 	$(BINDIR)/nm \
 	$(BINDIR)/p \
+	$(BINDIR)/psych \
 	$(BINDIR)/rm \
 	$(BINDIR)/rn \
 	$(BINDIR)/roff \
@@ -226,6 +227,10 @@ $(BINDIR)/nm: $(CMDSRC)/nm.s
 P=$(CMDSRC)/p1.s $(CMDSRC)/p2.s $(CMDSRC)/p3.s $(CMDSRC)/p4.s $(CMDSRC)/p5.s
 $(BINDIR)/p: $(P)
 	$(AS) $(ASARGS) -o $(BINDIR)/p $(P)
+
+PSYCH=$(CMDSRC)/psych.s $(CMDSRC)/fop.s
+$(BINDIR)/psych: $(PSYCH)
+	$(AS) $(ASARGS) -o $(BINDIR)/psych $(PSYCH)
 
 $(BINDIR)/rm: $(CMDSRC)/rm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/rm $(CMDSRC)/rm.s
