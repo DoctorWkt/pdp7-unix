@@ -22,7 +22,7 @@ restart:
    fst; z		"[   z = z + g						- scan markup]
    fst; oldx		"[   g = -g * fact					- scan markup]
    fst; oldy		"[   fact = 1 / fact					- scan markup]
-   lac o400000		"[   xx = 500. * d * sin(b + pi/2)			- scan markup]
+   lac o400000		"[   exex = 500. * d * sin(b + pi/2)			- scan markup]
    dac i 11		"[   ni()						- scan markup]
    dac i 11		"[   yy = 500. * d * sin(b)				- scan markup]
    lac setx		"[   ni()						- scan markup]
@@ -51,7 +51,7 @@ loop:
    sin
    fmp; d
    fmp; fp500
-   fst; xx
+   fst; exex
    jms in
    jmp done
    fld; b
@@ -67,7 +67,7 @@ loop:
    dac i 11
    fld; oldx
    fng
-   fad; xx
+   fad; exex
    fix
    spa
    xor o775777
@@ -81,7 +81,7 @@ loop:
    xor o775777
    tad vecy
    dac i 10
-   fld; xx
+   fld; exex
    fst; oldx
    fld; yy
    fst; oldy
@@ -261,7 +261,7 @@ release: 0
 
 char: 0
 stick: 0
-xx: 0; 0; 0
+exex: 0; 0; 0
 oldx: 0; 0; 0
 yy: 0; 0; 0
 oldy: 0;0 0; 0
@@ -277,6 +277,7 @@ o177777: 0177777
 o12000: 012000
 o61000: 061000
 om60: -060
+d1: 1
 d13: 13
 d500: 500
 o141000: 0141000

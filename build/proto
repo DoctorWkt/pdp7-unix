@@ -50,6 +50,7 @@ dd           drwr- -1 4
         nm       frwr- -1 bin/nm
         od       frwr- -1 bin/od
         p        frwr- -1 bin/p
+        psych    frwr- -1 bin/psych
         rm       frwr- -1 bin/rm
         rn       frwr- -1 bin/rn
         roff     frwr- -1 bin/roff
@@ -76,6 +77,7 @@ dd           drwr- -1 4
       maksys.s   frwr- 12 ../src/sys/maksys.s
       trysys.s   frwr- 12 ../src/sys/trysys.s
       sys.rc     frwr- 12 fs/sys.rc
+      moostat    frwr- 12 fs/moostat
       $
     dmr        drwr- 14
       system   l----  3
