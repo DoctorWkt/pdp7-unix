@@ -114,7 +114,7 @@ loop3:			" }
 	tad aexp
 	dac aexp
 	jms inscr
-		jmp loop4 " if ((AC = inscr(horizv / 2**(vscale-scale-1)))) {
+		jmp loop4	" if ((AC = inscr(horizv / 2**(vscale-scale-1)))) {
 	tad o141577
 	dac i clistp	"[crossed out with an arrow pointint to "dac dspvel" - scan markup]
 	lac o164372	"[crossed out - scan markup]

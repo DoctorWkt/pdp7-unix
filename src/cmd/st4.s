@@ -11,21 +11,21 @@ displa: 0
 	jmp 1f		" if (locflg) {
 	fld; cphi	"[-\                     - scan markup]
 	fmp; absy	"[  |			 - scan markup]
-	fst; ftmp1	"[  |			 - scan markup]	" ftmp1 = cphi * absy
+	fst; ftmp1	"[  |			 - scan markup] ftmp1 = cphi * absy
 	fld; sphi	"[  |			 - scan markup]
 	fmp; absx	"[  |			 - scan markup]
 	fad; ftmp1	"[  |			 - scan markup]
 	fdv; dpar	"[  |			 - scan markup]
-	fst; stheta	"[  \  lock calculation	 - scan markup]	" stheta = (sphi * absx + ftmp1) / dpar
+	fst; stheta	"[  \  lock calculation	 - scan markup] stheta = (sphi * absx + ftmp1) / dpar
 	fld; sphi	"[  /			 - scan markup]
 	fmp; absy	"[  |			 - scan markup]
 	fng		"[  |			 - scan markup]
-	fst; ftmp1	"[  |			 - scan markup] " ftmp1 = - (sphi * absy)
+	fst; ftmp1	"[  |			 - scan markup] ftmp1 = - (sphi * absy)
 	fld; cphi	"[  |			 - scan markup]
 	fmp; absx	"[  |			 - scan markup]
 	fad; ftmp1	"[  |			 - scan markup]
 	fdv; dpar	"[  |			 - scan markup]
-	fst; ctheta	"[  |			 - scan markup] " ctheta = (cphi * absx + ftmp1) / dpar
+	fst; ctheta	"[  |			 - scan markup] ctheta = (cphi * absx + ftmp1) / dpar
 	jmp 2f		"[-/			 - scan markup]
 1:			" } else {
 	fld; sphi
@@ -171,7 +171,7 @@ drcirc: 0		" draw circle
 	tad prsq
 	dac .+2
 	fld; ..
-	sqrt		" sqrt(prsq[fcplan])
+	sqrt
 	lac aexp
 	cma
 	tad scale
@@ -225,7 +225,7 @@ drcirc: 0		" draw circle
 	fix
 	tad dm20
 	spa
-	cla		" if (AC + 20 < 0) AC = 0
+	cla		" if (AC - 20 < 0) AC = 0
 	tad d20		" AC += 20
 	dac narcs	" narcs = AC
 	flt		" }
