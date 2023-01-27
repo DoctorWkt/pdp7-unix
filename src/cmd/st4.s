@@ -214,15 +214,15 @@ drcirc: 0		" draw circle
 	fad; wx
 	fst; wx		" wx -= spx
 	fld; dtmp1
-	sfmp; pid10
+	sfmp; pid10	" FAC = dtmp1 * pid10
 	fcp; f400
 	spa
-	jmp 1f		" if (dtmp1 * pid10 >= 400) {
+	jmp 1f		" if (FAC > 400) {
 	lac d400
 	dac narcs	" narcs = 400
 	jmp 2f		" } else {
 1:
-	fix
+	fix		" AC = (int) FAC
 	tad dm20
 	spa
 	cla		" if (AC - 20 < 0) AC = 0
