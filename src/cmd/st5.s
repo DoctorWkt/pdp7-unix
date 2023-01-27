@@ -1,11 +1,11 @@
 "** 12-92-119.pdf page 19
 " space travel 5
 
-dsplanet: 0
-	tad points
+dsplanet: 0		" display planet center
+	tad points	" add points address to ac (planet index)
 	dac 9f+t
 	lac i 9f+t
-	dac i clistp
+	dac i clistp	" set planet brightness
 	lac o246256
 	dac i clistp
 	lac o253052
@@ -14,8 +14,8 @@ dsplanet: 0
 	dac i clistp
 	jmp dsplanet i
 
-dispname: 0
-	tad names
+dispname: 0		" display planet name
+	tad names	" add names address to ac (planet index)
 	dac 9f+t
 	lac i 9f+t
 	tad dm1
@@ -50,26 +50,26 @@ dispname: 0
 
 t = t+2
 
-dspsca: 0
-	lac scale
+dspsca: 0		" display scale
+	lac scale	" AC = scale
 	sma
-	jmp 1f
+	jmp 1f		" if (scale < 0) {
 	lac o55 "-
-	dac dssca
+	dac dssca	" dssca[0] = '-'
 	-1
 	tad scale
-	cma
+	cma		" AC = -AC
 	jmp 2f
-1:
+1:			" } else {
 "** 12-92-119.pdf page 20
 	lac o53 "+
-	dac dssca
+	dac dssca	" dssca[0] = '+'
 	lac scale
-2:
+2:			" }
 	cll; idiv; 10
 	tad o60
-	dac dssca+2
+	dac dssca+2	" dssca[2] = (AC % 10) + '0'
 	lacq
 	tad o60
-	dac dssca+1
+	dac dssca+1	" dssca[1] = (AC / 10) + '0'
 	jmp i dspsca
