@@ -69,7 +69,7 @@ umbriel: <um>;<br>;<ie>;<l
 uranus: <ur>;<an>;<us>;0
 venus: <ve>;<nu>;<s
 
-points: .+1
+points: .+1		" planet center point brightness
 br3
 br2
 br0
@@ -109,13 +109,13 @@ fppar:  .+1
 48;51;54;57;60;63;66;69
 72;75;78;81;84;87;90;93
 
-ppar: .+1
+ppar: .+1		" planet orbits (indices)
 0;0;036;015;01;016;031;031
 015;015;031;031;015;0;0;0
 031;036;0;022;036;016;031;0
 031;0;031;031;022;036;0;0
 
-prsq: .+1
+prsq: .+1		" planet radius squared relative to earth (radius 1)
 016;0272245;075341
 1;0200000;0
 -07;0244122;0506362
@@ -150,7 +150,7 @@ prsq: .+1
 05;0206115;0
 0;0362406;0
 
-accl: .+1
+accl: .+1		" mass of each planet times gravitational constant
 0;0204365;0
 -023;0320324;0
 -036;0227207;0
@@ -184,7 +184,7 @@ accl: .+1
 -017;0275653;0
 -023;0252667;0
 
-px: .+1
+px: .+1			" planet x position relative to orbit (unit=earth radius)
 "** 12-92-119.pdf page 24
 0;000000;0
 015;0620356;0
@@ -219,7 +219,7 @@ px: .+1
 023;0650051;0
 016;0233751;0
 
-py: .+1
+py: .+1			" planet y position relative to orbit (unit=earth radius)
 000;0000000;0
 017;0664054;0
 002;0662035;0

@@ -79,7 +79,7 @@ cloop:
    jmp 1f
    dac 0f
    lac fo
-   sys write; obuf; 0;..
+   sys write; obuf; 0:..
 1:
    lac fo
    sys close
@@ -228,6 +228,16 @@ putword: 0
    dac opt
    jmp putword i
    jmp putword i
+
+ferror:
+   lac buf
+   dac 1f
+   lac d1
+   sys write; 1:..; 4
+   lac d1
+   sys write; 1f; 1
+   jmp loop
+1: 077012
 
 d1: 1
 d2048: 2048
