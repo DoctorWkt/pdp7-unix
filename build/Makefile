@@ -112,6 +112,7 @@ dirs:
 # PLEASE KEEP IN ALPHABETICAL ORDER!
 cmd:	dirs \
 	$(BINDIR)/adm \
+	$(BINDIR)/ald \
 	$(BINDIR)/apr \
 	$(BINDIR)/as \
 	$(BINDIR)/cas \
@@ -151,6 +152,9 @@ altcmd: dirs cmd \
 
 $(BINDIR)/adm: $(CMDSRC)/adm.s
 	$(AS) $(ASARGS) -o $(BINDIR)/adm $(CMDSRC)/adm.s
+
+$(BINDIR)/ald: $(CMDSRC)/ald.s
+	$(AS) $(ASARGS) -o $(BINDIR)/ald $(CMDSRC)/ald.s
 
 $(BINDIR)/apr: $(CMDSRC)/apr.s
 	$(AS) $(ASARGS) -o $(BINDIR)/apr $(CMDSRC)/apr.s
